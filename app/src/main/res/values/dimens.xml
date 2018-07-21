@@ -1,0 +1,41 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!-- General -->
+    <dimen name="padding_24">24dp</dimen>
+    <dimen name="padding_16">16dp</dimen>
+    <dimen name="padding_12">12dp</dimen>
+    <dimen name="padding_8">8dp</dimen>
+    <dimen name="padding_4">4dp</dimen>
+    <dimen name="app_bar_height">180dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="default_tag_text_size">14sp</dimen>
+
+    <!-- Shot Image -->
+    <dimen name="shot_image_toolbar_padding">8dp</dimen>
+    <dimen name="shot_image_toolbar_height">40dp</dimen><!-- toolbar height - 8d*2 -->
+
+
+    <!-- user fragment collapsing toolbar -->
+    <dimen name="avatar_big_margin_top">40dp</dimen>
+    <dimen name="avatar_mini_padding_top_bottom">10dp</dimen>
+    <dimen name="user_name_expand_top_margin">144dp</dimen><!-- 40 + 96 +8-->
+    <dimen name="user_name_expand_left_margin">68dp</dimen><!-- 36 + 16 + 16-->
+
+    <!-- Avatar -->
+    <dimen name="avatar_size">92dp</dimen>
+    <dimen name="avatar_bounds">96dp</dimen>
+    <dimen name="avatar_padding">4dp</dimen> <!-- (avatar_bounds - avatar_size) / 2 -->
+    <dimen name="avatar_margin">12dp</dimen> <!-- padding_normal - avatar_padding -->
+    <dimen name="avatar_ripple_radius">48dp</dimen> <!-- avatar_size / 2 -->
+    <dimen name="avatar_mini">36dp</dimen> <!-- avatar_size / 2 -->
+
+    <!-- Z-axis elevations -->
+    <dimen name="touch_raise">6dp</dimen>
+
+
+
+</resources>

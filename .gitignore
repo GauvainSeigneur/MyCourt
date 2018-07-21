@@ -74,4 +74,5 @@ Thumbs.db
 .DS_Store
 
 # MyCourt specific class
-DribbbleClient.class
+DribbbleClient
+DribbbleClient.java
