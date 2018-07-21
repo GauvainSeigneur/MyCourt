@@ -2,7 +2,9 @@
 A mobile application which uses Dribbble API V2. It focuses on Prospect, Players and pros. 
 It is based on MVP pattern, Dependency injection, RXJava, Retrofit, Architecture components. 
 
-![alt text](art/home.png "Home Screen")
+<img src="art/home.png" width="30%"></img>
+<img src="art/draft.png" width="30%"></img>
+<img src="art/account.png" width="30%"></img>
 
 ## Features
 * Fetch your shots in a recyclerView (endless scroll)
