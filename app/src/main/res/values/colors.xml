@@ -29,6 +29,8 @@
     <color name="colorPrimaryTitle">#E6FFFFFF</color><!-- 90% opacity-->
     <color name="colorSecondaryTitle">#BFFFFFFF</color><!-- 75% opacity-->
     <color name="colorTextBody">#A6FFFFFF</color><!-- 65% opacity-->
+    <color name="colorDraftHint">#A6FFFFFF</color><!-- 65% opacity-->
+    <color name="colorDraftContent">#E6FFFFFF</color><!-- 65% opacity-->
 
     <!--social colors -->
     <color name="colorFacebook">#3B5998</color>

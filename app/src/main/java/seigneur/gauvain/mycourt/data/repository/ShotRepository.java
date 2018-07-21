@@ -31,7 +31,10 @@ public class ShotRepository {
     }
 
     //send an update to Dribbble
-    public Single<Shot> updateShot(String id, String description, boolean isLowProfile, String title) {
+    public Single<Shot> updateShot(String id,
+                                   String description,
+                                   boolean isLowProfile,
+                                   String title) {
         return mDribbbleService.updateShot(id, description, isLowProfile,title)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());

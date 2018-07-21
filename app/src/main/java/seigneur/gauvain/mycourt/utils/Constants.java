@@ -32,11 +32,12 @@ public class Constants {
     public static final int EDIT_MODE_UPDATE_SHOT = 502;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({EDIT_PUBLISHED, EDIT_DRAFTED, EDIT_ABORTED})
+    @IntDef({EDIT_PUBLISHED,DRAFT_PUBLISHED, EDIT_DRAFTED, EDIT_ABORTED})
     public @interface EditResult {}
     public static final int EDIT_PUBLISHED = 601;
-    public static final int EDIT_DRAFTED = 602;
-    public static final int EDIT_ABORTED = 603;
+    public static final int DRAFT_PUBLISHED = 602;
+    public static final int EDIT_DRAFTED = 603;
+    public static final int EDIT_ABORTED = 604;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SOURCE_DRAFT, SOURCE_SHOT, SOURCE_FAB})

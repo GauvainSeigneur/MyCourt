@@ -68,6 +68,7 @@ public class SplashActivity extends BaseActivity implements SplashView {
     public void goToHome() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+        finish();
     }
 
     @Override

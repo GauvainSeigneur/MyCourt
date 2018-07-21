@@ -90,6 +90,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     private ArrayList<String> tagList;
     private String shotTitle;
     private String shotDescription;
+    private Shot shotToPublish;
 
 
     @Inject
@@ -179,11 +180,11 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     }
 
     @Override
-    public void onPublishClicked(Shot shot) {
+    public void onPublishClicked() {
         if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT) {
-            publishShot(shot);
+            //publishShot(shot);
         } else if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
-            updateShot(shot);
+            updateShot();
         }
     }
 
@@ -224,7 +225,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
            mTags = tags;
     }
 
-    private void publishShot(Shot shot) {
+    private void publishShot() {
 
     }
 
@@ -330,7 +331,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                     if (mSource==Constants.SOURCE_DRAFT) {
                         updateInfoDraft(uriImageSaved.toString());
                     } else {
-                        saveInfoDraft(uriImageSaved.toString());
+                       saveInfoDraft(uriImageSaved.toString());
                     }
                 })
                 .doOnError(t -> {
@@ -348,16 +349,10 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     }
 
     private void updateInfoDraft(@Nullable String imageUri) {
-        compositeDisposable.add(mShotDraftRepository.updateShotDraft(createShotDraft(mShotDraft.getId(),imageUri))
+        compositeDisposable.add(mShotDraftRepository.updateShotDraft(
+                createShotDraft(mShotDraft.getId(),imageUri))
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(id -> {
-                    if (mEditShotView!=null)
-                        mEditShotView.notifyPostSaved();
-                })
-                .doOnError(t->{
-
-                })
                 .subscribe()
         );
     }
@@ -373,7 +368,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                                 mEditShotView.notifyPostSaved();
                         })
                         .doOnError(t->{
-
+                            Timber.d("error: "+t);
                         })
                         .subscribe()
         );
@@ -450,38 +445,39 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      * PUBLISH OPERATION
      * MANAGE UPDATE AND POST IN ONE OBSERVABLE
      *************************************************************************/
-    private void publish(Shot shot) {
+    private void publish() {
         //todo - one observable which make two ope :
         //1 - create a shot object with the right info
         //2 - POST or PUT according to edition mode
-        Shot shotFrorPublish= new Shot();
         //set info acording to what we have like this : shot.setLow_profile(false);
         //and then : try to publish
         if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT) {
-            publishShot(shot);
+            publishShot();
         } else if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
-            updateShot(shot);
+            updateShot();
         }
     }
     /*************************************************************************
-     * Create shot object for update and publishing
-     *************************************************************************/
-
-
-    /*************************************************************************
      * UPDATE
      *************************************************************************/
-    private void updateShot(Shot shot) {
+    private void updateShot() {
         compositeDisposable.add(
                 mShotRepository.updateShot(
-                        shot.getId(),
-                        shot.description,
-                        shot.isLow_profile(),
-                        shot.title)
+                        getShotId(),
+                        getShotDescription(),
+                        getProfile(),
+                        shotTitle)
                         .doOnSuccess(new Consumer<Shot>() {
                             @Override
                             public void accept(Shot shot) throws Exception {
                                 Timber.d("success: "+shot.getTitle());
+                                if (mSource==Constants.SOURCE_DRAFT) {
+                                    deleteDraftAfterPublishing();
+                                    //todo must finish with a code to send to Main ctviity to dleete the draft
+                                } else {
+                                    if (mEditShotView!=null)
+                                        mEditShotView.stopActivity();
+                                }
                             }
                         })
                         .doOnError(new Consumer<Throwable>() {
@@ -492,8 +488,25 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                         })
                         .subscribe()
         );
-
     }
+
+    private void deleteDraftAfterPublishing() {
+        compositeDisposable.add(
+                mShotDraftRepository.deleteDraft(mShotDraft.getId())
+                        .subscribeOn(Schedulers.computation())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnError(t->{
+                            //todo notify user that we can't delete the item
+                        })
+                        .doOnComplete(()->{
+                            if (mEditShotView!=null)
+                                mEditShotView.stopActivity();
+                        })
+                        .subscribe()
+        );
+    }
+
+
     /*************************************************************************
      * POST SHOT
      *************************************************************************/

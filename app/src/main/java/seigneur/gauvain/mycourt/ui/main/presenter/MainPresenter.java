@@ -15,4 +15,12 @@ public interface MainPresenter extends BasePresenter {
     void onReturnShotPublished();
 
     void onCheckInternetConnection();
+
+    void onReturnFromDraftPublishing();
+
+    /**
+     *  Sometimes, after a long pause, the data are deleted by Android, so we cannot perform
+     *  any api operation. so check if user is null on resume and get it again from DB
+     */
+    void checkIfTokenIsNull();
 }

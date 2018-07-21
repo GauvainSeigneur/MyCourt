@@ -112,6 +112,11 @@
         <item name="lineHeightHint">24sp</item>
     </style>
 
+    <style name="TextInputLayout.DraftTheme" parent="Widget.Design.TextInputLayout">
+        <item name="colorControlNormal">@color/colorWhite</item>
+        <item name="colorControlActivated">@color/colorWhite</item>
+    </style>
+
     <!-- Widgets-->
     <style name="Widget.MyCourt" parent="android:Widget" />
 

@@ -31,4 +31,6 @@ public interface EditShotView {
 
     void showMessageEmptyTitle();
 
+    void stopActivity();
+
 }

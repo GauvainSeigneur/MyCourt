@@ -39,6 +39,9 @@ public class ShotDraftRepository {
     public Completable updateShotDraft(ShotDraft shotDraft) {
         return Completable.fromRunnable(() -> postDao.updateDraft(shotDraft));
     }
+    public Completable deleteDraft(int id) {
+        return Completable.fromRunnable(() -> postDao.deletDraftByID(id));
+    }
 
     public Completable storeShotDraft(ShotDraft shotDraft) {
         return Completable.fromRunnable(() -> postDao.insertPost(shotDraft));

@@ -17,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -52,6 +53,7 @@ import seigneur.gauvain.mycourt.utils.ImagePicker;
 import seigneur.gauvain.mycourt.ui.shotEdition.presenter.EditShotPresenter;
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView;
 import seigneur.gauvain.mycourt.utils.ImageUtils;
+import seigneur.gauvain.mycourt.utils.TextUtils;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import timber.log.Timber;
 
@@ -142,6 +144,11 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     @OnClick(R.id.fab_draft)
     public void draftShot() {
         mEditShotPresenter.onDraftShotClicked(this);
+    }
+
+    @OnClick(R.id.fab_publish)
+    public void publishShot() {
+        mEditShotPresenter.onPublishClicked();
     }
 
     @OnClick(R.id.cropped_img_preview)
@@ -268,6 +275,10 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
         showHideConfirmMenu();
     }
 
+    @Override
+    public void stopActivity() {
+        finish();
+    }
     /********************************************************************
      * ACTIVITY PRIVATE METHODS
      *******************************************************************/
@@ -391,9 +402,9 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
 
         mTagEditor.setText(getTagList(shot, shotDraft));
         mShotTitleEditor.setText(getTitle(shot, shotDraft));
-        //String htmlFormatDescription = Html.fromHtml(shot.getDescription()).toString();
-        //mShotDescriptionEditor.setText(TextUtils.noTrailingwhiteLines(htmlFormatDescription));
-
+        String description = getDescription(shot, shotDraft);
+        if (description!=null)
+            mShotDescriptionEditor.setText(TextUtils.noTrailingwhiteLines(description));
     }
 
     //get title from data sent by presenter
@@ -428,6 +439,22 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
                 listString.append(s+", ");
             }
         return listString;
+    }
+
+    public String getDescription(Shot shot, ShotDraft shotDraft){
+        String htmlFormatDescription;
+        if (shot!=null) {
+            if (shot.getDescription()!=null) {
+                htmlFormatDescription= Html.fromHtml(shot.getDescription()).toString();
+                return htmlFormatDescription;
+            } else {
+                return null;
+            }
+        }
+        else if(shotDraft!=null)
+            return shotDraft.getDescription();
+        else
+            return null;
     }
 
     public void showMessageEmptyTitle() {
@@ -481,8 +508,6 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
 
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             mEditShotPresenter.onDescriptionChanged(s.toString());
-
-
         }
 
         public void afterTextChanged(Editable s) {
