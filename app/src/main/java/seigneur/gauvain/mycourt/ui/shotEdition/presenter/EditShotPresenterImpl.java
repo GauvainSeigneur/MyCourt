@@ -438,6 +438,26 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         return tagList;
     }
 
+    public String[] getTagArray() {
+        if (getTagList()!=null && !getTagList().isEmpty()) {
+            //Object[] objectList = getTagList().toArray();
+            //String[] stringArray =  Arrays.copyOf(objectList,objectList.length,String[].class);
+            //Timber.d("taglist not null:"+ stringArray.toString());
+            String[] array = new String[getTagList().size()];
+            for (int i = 0; i < getTagList().size(); i++) {
+                array[i] = getTagList().get(i);
+                Timber.d(array[i]);
+            }
+            Timber.d(array.toString());
+            return array;
+        }
+        else {
+            Timber.d("taglist null");
+            return null;
+        }
+
+    }
+
     public String getShotDescription() {
         return shotDescription;
     }
@@ -466,6 +486,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                         getShotId(),
                         getShotDescription(),
                         getProfile(),
+                        getTagArray(),
                         shotTitle)
                         .doOnSuccess(new Consumer<Shot>() {
                             @Override

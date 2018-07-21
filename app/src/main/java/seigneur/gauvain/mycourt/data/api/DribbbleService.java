@@ -46,7 +46,7 @@ public interface DribbbleService {
             @Field("description") String description,
             @Field("low_profile") boolean isLowProfile,
             //@Field("scheduled_for") Date publishDate, //todo : to manage it for phase 2
-            //@Field("tags") ArrayList tags, //todo - to reactivate
+            @Field("tags") String[] tags,
             // @Field("teamID") int teamID //todo : to mange it for phase 2
             @Field("title") String title
     );
