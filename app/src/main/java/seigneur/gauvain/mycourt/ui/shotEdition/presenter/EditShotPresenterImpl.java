@@ -1,50 +1,36 @@
 package seigneur.gauvain.mycourt.ui.shotEdition.presenter;
 
-import android.Manifest;
+
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.concurrent.Callable;
 import javax.inject.Inject;
-
-import io.reactivex.Completable;
-import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.Single;
-import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.HttpException;
-import seigneur.gauvain.mycourt.R;
+import retrofit2.Response;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.ShotRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.di.scope.PerActivity;
-import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotActivity;
 import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotView;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
@@ -85,12 +71,16 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     private String imagePickedformat = null;
     private Uri imageCroppedUri = null;
     private Uri imageSavedUri = null;
+    private boolean isImageChanged=false;
+    //Manage data
     private int mSource;
     private String mTags;
     private ArrayList<String> tagList;
     private String shotTitle;
     private String shotDescription;
     private Shot shotToPublish;
+
+
 
 
     @Inject
@@ -130,10 +120,12 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     public void onImageCropped(int requestCode, int resultCode, Intent data) {
         if (requestCode== UCrop.REQUEST_CROP) {
             imageCroppedUri = UCrop.getOutput(data); //get Image Uri after being cropped
+            isImageChanged=true;
             if (mEditShotView!=null) {
                 mEditShotView.displayShotImagePreview(imageCroppedUri);
             }
         } else if (resultCode == UCrop.RESULT_ERROR) {
+            isImageChanged=false;
             final Throwable cropError = UCrop.getError(data);
             Timber.d(cropError);
         }
@@ -183,6 +175,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     public void onPublishClicked() {
         if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT) {
             //publishShot(shot);
+            postShot(getImageCroppedUri(),getImageFormat(),shotTitle);
         } else if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
             updateShot();
         }
@@ -225,28 +218,22 @@ public class EditShotPresenterImpl implements EditShotPresenter {
            mTags = tags;
     }
 
-    private void publishShot() {
-
-    }
-
     private void registerOrUpdateDraft(Context context,boolean isRegisteringImage) {
         if (mSource==Constants.SOURCE_DRAFT) {
             if (isRegisteringImage)
                 storeDraftImage(imagePickedformat,imageCroppedUri,context);
             else
-                updateInfoDraft(mShotDraft.getImageUrl());
+                updateInfoDraft(mShotDraft.getImageUrl(), mShotDraft.getImageFormat());
         } else if (mSource==Constants.SOURCE_SHOT) {
-            saveInfoDraft(mShot.getImageUrl());
+            saveInfoDraft(mShot.getImageUrl(), null);
         } else if (mSource==Constants.SOURCE_FAB) {
             if (isRegisteringImage)
                 storeDraftImage(imagePickedformat,imageCroppedUri,context);
             else
-                saveInfoDraft(null);
+                saveInfoDraft(null, null);
         }
 
     }
-
-
     /**************************************************************************
      * get data source on opening activity
      *************************************************************************/
@@ -321,6 +308,98 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     }
 
     /*************************************************************************
+     * UPDATE
+     *************************************************************************/
+    private void updateShot() {
+        compositeDisposable.add(
+                mShotRepository.updateShot(
+                        getShotId(),
+                        getShotDescription(),
+                        getProfile(),
+                        getTagArray(),
+                        shotTitle)
+                        .doOnSuccess(new Consumer<Shot>() {
+                            @Override
+                            public void accept(Shot shot) throws Exception {
+                                Timber.d("success: "+shot.getTitle());
+                                if (mSource==Constants.SOURCE_DRAFT) {
+                                    deleteDraftAfterPublishing();
+                                    //todo must finish with a code to send to Main ctviity to dleete the draft
+                                } else {
+                                    if (mEditShotView!=null)
+                                        mEditShotView.stopActivity();
+                                }
+                            }
+                        })
+                        .doOnError(new Consumer<Throwable>() {
+                            @Override
+                            public void accept(Throwable error) throws Exception {
+                                handleRetrofitError(error);
+                            }
+                        })
+                        .subscribe()
+        );
+    }
+
+    private void deleteDraftAfterPublishing() {
+        compositeDisposable.add(
+                mShotDraftRepository.deleteDraft(mShotDraft.getId())
+                        .subscribeOn(Schedulers.computation())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnError(t->{
+                            //todo notify user that we can't delete the item
+                        })
+                        .doOnComplete(()->{
+                            if (mEditShotView!=null)
+                                mEditShotView.stopActivity();
+                        })
+                        .subscribe()
+        );
+    }
+
+    /*************************************************************************
+     * POST SHOT
+     *************************************************************************/
+    private void postShot(Uri fileUri, String imageFormat, String titleString) {
+        File file = new File(fileUri.getPath());
+        // creates RequestBody instance from file
+        RequestBody requestFile = RequestBody.create(MediaType.parse("image/"+imageFormat), file);
+        //RequestBody requestFile = RequestBody.create(MediaType.parse(getContentResolver().getType(fileUri)), file);
+        Timber.tag("posSHOT").d(fileUri.toString());
+        Timber.tag("posSHOT").d(imageFormat);
+        Timber.tag("posSHOT").d(requestFile.toString());
+        //todo : offer possibility user to rename the file when he sends it to Dribbble
+        MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+        // MultipartBody.Part body = MultipartBody.Part.createFormData("file", "lol", requestFile);
+        // adds another part within the multipart request
+        RequestBody title = RequestBody.create(MultipartBody.FORM, titleString);
+
+        compositeDisposable.add(mShotRepository.postShot(body,title)
+                /*.doOnNext(new Consumer<Response>() {
+                    @Override
+                    public void accept(Response response) throws Exception {
+                        if (response.code()==403)
+                            Timber.d("");
+                    }
+                })
+                .doOnError(new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+
+                    }
+                })*/
+                .subscribe(
+                        response -> {
+                            Timber.d("post shot success");
+                        },
+                        throwable -> {
+                            Timber.d("post shot failed" + throwable);
+                        }
+                )
+        );
+    }
+
+    /*************************************************************************
      * STORING DRAFTS IN DB
      *************************************************************************/
     private void storeDraftImage(String imageCroppedFormat, Uri croppedFileUri, Context context) {
@@ -329,9 +408,9 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                 .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t))
                 .doOnSuccess(uriImageSaved-> {
                     if (mSource==Constants.SOURCE_DRAFT) {
-                        updateInfoDraft(uriImageSaved.toString());
+                        updateInfoDraft(uriImageSaved.toString(),imageCroppedFormat);
                     } else {
-                       saveInfoDraft(uriImageSaved.toString());
+                       saveInfoDraft(uriImageSaved.toString(),imageCroppedFormat);
                     }
                 })
                 .doOnError(t -> {
@@ -348,18 +427,9 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         );
     }
 
-    private void updateInfoDraft(@Nullable String imageUri) {
-        compositeDisposable.add(mShotDraftRepository.updateShotDraft(
-                createShotDraft(mShotDraft.getId(),imageUri))
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe()
-        );
-    }
-
-    private void saveInfoDraft(@Nullable String imageUri) {
+    private void saveInfoDraft(@Nullable String imageUri,@Nullable String imageFormat) {
         compositeDisposable.add(
-                mShotDraftRepository.storeShotDraft(createShotDraft(0,imageUri)
+                mShotDraftRepository.storeShotDraft(createShotDraft(0,imageUri,imageFormat)
                 )
                         .subscribeOn(Schedulers.computation())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -374,13 +444,23 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         );
     }
 
+    private void updateInfoDraft(@Nullable String imageUri,@Nullable String imageFormat) {
+        compositeDisposable.add(mShotDraftRepository.updateShotDraft(
+                createShotDraft(mShotDraft.getId(),imageUri,imageFormat))
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe()
+        );
+    }
+
     /*************************************************************************
      * Create shotDraft object to save or update in database
      *************************************************************************/
-    private ShotDraft createShotDraft(int primarykey, @Nullable String imageUri) {
+    private ShotDraft createShotDraft(int primarykey, @Nullable String imageUri, @Nullable String imageFormat) {
         return new  ShotDraft(
                 primarykey,
                 imageUri,
+                imageFormat,
                 getShotId(),
                 shotTitle,
                 getShotDescription(),
@@ -394,8 +474,25 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         );
     }
 
+    /*************************************************************************
+     * Get data to create shot, draft, publish update, etc.
+     *************************************************************************/
     public int getEditMode() {
         return mEditionMode;
+    }
+
+    private Uri getImageCroppedUri() {
+        if(!isImageChanged && mShotDraft!=null && mShotDraft.getImageUrl()!=null)
+                return Uri.parse(mShotDraft.getImageUrl());
+            else
+                return imageCroppedUri;
+    }
+
+    private String getImageFormat() {
+        if(!isImageChanged && mShotDraft!=null && mShotDraft.getImageFormat()!=null)
+            return mShotDraft.getImageFormat();
+        else
+            return imagePickedformat;
     }
 
     private boolean getProfile(){
@@ -455,87 +552,43 @@ public class EditShotPresenterImpl implements EditShotPresenter {
             Timber.d("taglist null");
             return null;
         }
-
     }
 
     public String getShotDescription() {
         return shotDescription;
     }
-    /*************************************************************************
-     * PUBLISH OPERATION
-     * MANAGE UPDATE AND POST IN ONE OBSERVABLE
-     *************************************************************************/
-    private void publish() {
-        //todo - one observable which make two ope :
-        //1 - create a shot object with the right info
-        //2 - POST or PUT according to edition mode
-        //set info acording to what we have like this : shot.setLow_profile(false);
-        //and then : try to publish
-        if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT) {
-            publishShot();
-        } else if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
-            updateShot();
-        }
-    }
-    /*************************************************************************
-     * UPDATE
-     *************************************************************************/
-    private void updateShot() {
-        compositeDisposable.add(
-                mShotRepository.updateShot(
-                        getShotId(),
-                        getShotDescription(),
-                        getProfile(),
-                        getTagArray(),
-                        shotTitle)
-                        .doOnSuccess(new Consumer<Shot>() {
-                            @Override
-                            public void accept(Shot shot) throws Exception {
-                                Timber.d("success: "+shot.getTitle());
-                                if (mSource==Constants.SOURCE_DRAFT) {
-                                    deleteDraftAfterPublishing();
-                                    //todo must finish with a code to send to Main ctviity to dleete the draft
-                                } else {
-                                    if (mEditShotView!=null)
-                                        mEditShotView.stopActivity();
-                                }
-                            }
-                        })
-                        .doOnError(new Consumer<Throwable>() {
-                            @Override
-                            public void accept(Throwable error) throws Exception {
-                                handleRetrofitError(error);
-                            }
-                        })
-                        .subscribe()
-        );
-    }
 
-    private void deleteDraftAfterPublishing() {
-        compositeDisposable.add(
-                mShotDraftRepository.deleteDraft(mShotDraft.getId())
-                        .subscribeOn(Schedulers.computation())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .doOnError(t->{
-                            //todo notify user that we can't delete the item
-                        })
-                        .doOnComplete(()->{
-                            if (mEditShotView!=null)
-                                mEditShotView.stopActivity();
-                        })
-                        .subscribe()
-        );
-    }
-
-
-    /*************************************************************************
-     * POST SHOT
-     *************************************************************************/
-    private void postShot(Shot shot) {
-        File file = new File(imageCroppedUri.getPath());
+    /*private void testPostShot(Uri fileUri, String titleString) {
+        File file = new File(fileUri.getPath());
         // creates RequestBody instance from file
         RequestBody requestFile = RequestBody.create(MediaType.parse("image/"+imagePickedformat), file);
-    }
+        //RequestBody requestFile = RequestBody.create(MediaType.parse(getContentResolver().getType(fileUri)), file);
+        Timber.tag("babar").d(imagePickedformat);
+        // MultipartBody.Part is used to send also the actual filename
+        //todo : offer possibility user to rename the file when he sends it to Dribbble
+        MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+       // MultipartBody.Part body = MultipartBody.Part.createFormData("file", "lol", requestFile);
+
+
+        // adds another part within the multipart request
+        RequestBody title = RequestBody.create(MultipartBody.FORM, titleString);
+        // executes the request
+        Call<ResponseBody> call = DribbbleService.postShot(body, title);
+        Timber.tag("callMade").d(call.request().body().toString()
+        );
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Timber.d(response.toString());
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
+    }*/
 
     /*************************************************************************
      * MANAGE NETWORK OPERATION EXCEPTION

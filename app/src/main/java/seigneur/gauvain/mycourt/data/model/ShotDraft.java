@@ -19,6 +19,7 @@ public class ShotDraft {
     //Dribbble API
     public String shotId;
     public String imageUri;
+    public String imageFormat;
     public String title;
     public String description;
     public boolean isLowProfile;
@@ -41,6 +42,7 @@ public class ShotDraft {
     public ShotDraft(
                      int id,
                      @Nullable String imageUri,
+                     @Nullable String imageFormat,
                      String shotId,
                      String title,
                      String description,
@@ -54,6 +56,7 @@ public class ShotDraft {
         this.id=id;
         this.shotId=shotId;
         this.imageUri=imageUri;
+        this.imageFormat=imageFormat;
         this.title=title;
         this.description=description;
         this.isLowProfile=isLowProfile;
@@ -75,6 +78,10 @@ public class ShotDraft {
 
     public String getImageUrl() {
         return imageUri;
+    }
+
+    public String getImageFormat() {
+        return imageFormat;
     }
 
     public String getTitle() {

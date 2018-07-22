@@ -1,12 +1,16 @@
 package seigneur.gauvain.mycourt.data.api;
 
 import java.util.List;
+
+import io.reactivex.Completable;
 import io.reactivex.Flowable;
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -58,6 +62,15 @@ public interface DribbbleService {
             @Part MultipartBody.Part image,
             @Part("title") RequestBody title
            // @Part("description") RequestBody description,
+            //@Part("low_profile") RequestBody isLowProfile
+    );
+
+    @Multipart
+    @POST("shots")
+    Observable<Shot> postShotTwo(
+            @Part MultipartBody.Part image,
+            @Part("title") RequestBody title
+            // @Part("description") RequestBody description,
             //@Part("low_profile") RequestBody isLowProfile
     );
 
