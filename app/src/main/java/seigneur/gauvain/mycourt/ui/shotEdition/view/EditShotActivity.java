@@ -15,6 +15,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
@@ -34,6 +35,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import javax.inject.Inject;
 
@@ -422,7 +424,9 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
         if (shot!=null)
             return Uri.parse(shot.getImageUrl());
         else if(shotDraft!=null && shotDraft.getImageUrl()!=null)
-            return Uri.parse(shotDraft.getImageUrl());
+            return FileProvider.getUriForFile(this,
+                    this.getString(R.string.file_provider_authorities),
+                    new File(shotDraft.getImageUrl()));
         else
             return null;
     }
