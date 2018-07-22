@@ -15,10 +15,9 @@ It is based on MVP pattern, Dependency injection, RXJava, Retrofit, Architecture
 * Save in drafts your current work
 
 ## State
-Alpha phase.
+Not stable yet.
 
 ## Todo
-* Find alpha testers
 * Convert to Kotlin
 * Future : Manage pros, Manage attachments
 
