@@ -48,7 +48,7 @@ import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotActivity;
 import seigneur.gauvain.mycourt.ui.shotDetail.presenter.ShotDetailPresenter;
 import seigneur.gauvain.mycourt.utils.ImageUtils;
 import seigneur.gauvain.mycourt.utils.MyColorUtils;
-import seigneur.gauvain.mycourt.utils.TextUtils;
+import seigneur.gauvain.mycourt.utils.MyTextUtils;
 import static seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp;
 
 public class ShotDetailActivity extends BaseActivity implements ShotDetailView {
@@ -252,7 +252,7 @@ public class ShotDetailActivity extends BaseActivity implements ShotDetailView {
     private String shotDescription(Shot shot) {
         if (shot.getDescription()!=null) {
             String htmlFormatDescription = Html.fromHtml(shot.getDescription()).toString();
-            return TextUtils.noTrailingwhiteLines(htmlFormatDescription).toString();
+            return MyTextUtils.noTrailingwhiteLines(htmlFormatDescription).toString();
         } else {
             return "no description defined";
         }

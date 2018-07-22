@@ -3,13 +3,16 @@ package seigneur.gauvain.mycourt.utils;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
+import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
@@ -21,8 +24,6 @@ import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
 import java.util.Calendar;
 
-import io.reactivex.Observable;
-import io.reactivex.Single;
 import seigneur.gauvain.mycourt.R;
 import timber.log.Timber;
 
@@ -63,10 +64,10 @@ public class ImageUtils {
     }
 
     /**
-     * Return Uri of Image after being saved in gallery
+     * Return file path of Image after being saved in gallery
      * Must use Single or Observable to get the Uri returned
      */
-    public static Uri saveImageAndGetItsFinalUri(String ImageCroppedFormat, Uri croppedFileUri, Context context) throws Exception {
+    public static String saveImageAndGetItsFinalUri(String ImageCroppedFormat, Uri croppedFileUri, Context context) throws Exception {
         Timber.d(croppedFileUri.getLastPathSegment());
         //1: define path and create folder "MyCourt" inside Gallery
         String appDirectoryName = "MyCourt";
@@ -88,45 +89,9 @@ public class ImageUtils {
         Toast.makeText(context, R.string.notification_image_saved, Toast.LENGTH_SHORT).show();
         //showNotification(saveFile);
         //6: get the new URI of the file after it has been copied to save it in Room
-        Uri fileUri = FileProvider.getUriForFile(context, context.getString(R.string.file_provider_authorities), saveFile);
-        return fileUri;
-        //return setUriOfImageCroppedSaved(fileUri);
-        //close activity
-        //context.finish();
+        //Uri fileUri = FileProvider.getUriForFile(context, context.getString(R.string.file_provider_authorities), saveFile);
+        return saveFile.getAbsolutePath();//fileUri;
     }
-
-    /**
-     * Simple void to store image in Gallery (must no used)
-     * Must use completable
-     */
-    public static void copyFileToGallery(String ImageCroppedFormat,Uri croppedFileUri, Context context) throws Exception {
-        Timber.d(croppedFileUri.getLastPathSegment());
-        //1: define path and create folder "MyCourt" inside Gallery
-        String appDirectoryName = "MyCourt";
-        File myCourtDraftFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath(), appDirectoryName);
-        myCourtDraftFolder.mkdirs();
-        //2: give to image a name
-        String filename = String.format("%d_%s", Calendar.getInstance().getTimeInMillis(), croppedFileUri.getLastPathSegment())+"."+ImageCroppedFormat;
-        //3: create a file with the path of myCourtDraftFolder and the given name
-        File saveFile = new File(myCourtDraftFolder.getAbsolutePath(), filename);
-        //4: Copy file and close process
-        FileInputStream inStream = new FileInputStream(new File(croppedFileUri.getPath()));
-        FileOutputStream outStream = new FileOutputStream(saveFile);
-        FileChannel inChannel = inStream.getChannel();
-        FileChannel outChannel = outStream.getChannel();
-        inChannel.transferTo(0, inChannel.size(), outChannel);
-        inStream.close();
-        outStream.close();
-        //5 : show to user some information
-        Toast.makeText(context, R.string.notification_image_saved, Toast.LENGTH_SHORT).show();
-        //showNotification(saveFile);
-        //6: get the new URI of the file after it has been copied to save it in Room
-        Uri fileUri = FileProvider.getUriForFile(context, context.getString(R.string.file_provider_authorities), saveFile);
-        setUriOfImageCroppedSaved(fileUri);
-        //close activity
-        //context.finish();
-    }
-
 
     /**
      * get the uri of the saved cropped image: to be used to save ShotDraft object in Room
@@ -180,5 +145,27 @@ public class ImageUtils {
     }
 
 
-
+    public static String getRealPathFromImageSavedURI(Context context, Uri selectedImageUri) {
+        String selectedImagePath = null;
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = context.getContentResolver().query(selectedImageUri,
+                projection, null, null, null);
+        if (cursor == null) {
+            selectedImagePath = selectedImageUri.getPath();
+        } else {
+            if (!cursor.moveToFirst()) {
+                cursor.moveToFirst();
+                int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                selectedImagePath = cursor.getString(idx);
+            }
+        }
+            /*if (cursor.moveToFirst()) {
+                do {
+                    int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                    selectedImagePath = cursor.getString(idx);
+                } while (cursor.moveToNext());
+            }
+        }*/
+        return selectedImagePath;
+    }
 }

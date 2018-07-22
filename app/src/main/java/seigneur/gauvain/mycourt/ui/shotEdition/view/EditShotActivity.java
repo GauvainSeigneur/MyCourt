@@ -53,7 +53,7 @@ import seigneur.gauvain.mycourt.utils.ImagePicker;
 import seigneur.gauvain.mycourt.ui.shotEdition.presenter.EditShotPresenter;
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView;
 import seigneur.gauvain.mycourt.utils.ImageUtils;
-import seigneur.gauvain.mycourt.utils.TextUtils;
+import seigneur.gauvain.mycourt.utils.MyTextUtils;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import timber.log.Timber;
 
@@ -148,7 +148,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
 
     @OnClick(R.id.fab_publish)
     public void publishShot() {
-        mEditShotPresenter.onPublishClicked();
+        mEditShotPresenter.onPublishClicked(this);
     }
 
     @OnClick(R.id.cropped_img_preview)
@@ -404,7 +404,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
         mShotTitleEditor.setText(getTitle(shot, shotDraft));
         String description = getDescription(shot, shotDraft);
         if (description!=null)
-            mShotDescriptionEditor.setText(TextUtils.noTrailingwhiteLines(description));
+            mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description));
     }
 
     //get title from data sent by presenter

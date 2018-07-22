@@ -3,6 +3,7 @@ package seigneur.gauvain.mycourt.data.repository;
 import android.content.Context;
 import android.net.Uri;
 
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -47,26 +48,11 @@ public class ShotDraftRepository {
         return Completable.fromRunnable(() -> postDao.insertPost(shotDraft));
     }
 
-    public Single<Uri> storeImageAndReturnItsUri(String imageCroppedFormat, Uri croppedFileUri, Context context) {
-        return Single.fromCallable(new Callable<Uri>() {
-            @Override public Uri call() throws Exception {
+    public Single<String> storeImageAndReturnItsUri(String imageCroppedFormat, Uri croppedFileUri, Context context) {
+        return Single.fromCallable(new Callable<String>() {
+            @Override public String call() throws Exception {
                 return ImageUtils.saveImageAndGetItsFinalUri(imageCroppedFormat,croppedFileUri,context);
             }
-        });
-    }
-
-    /**
-     * Must be deleted - just for test
-     */
-    public Completable storeCroppedImage(String ImageCroppedFormat, Uri croppedFileUri, Context context) {
-        // Returns a Completable which when subscribed, executes the callable function,
-        // ignores its normal result and emits onError or onComplete only.
-        return Completable.fromCallable(new Callable<Void>() {
-            @Override public Void call() throws Exception {
-                ImageUtils.copyFileToGallery(ImageCroppedFormat,croppedFileUri,context);
-                return null;
-            }
-
         });
     }
 }

@@ -1,10 +1,18 @@
 package seigneur.gauvain.mycourt.ui.shotEdition.presenter;
 
 
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 import android.widget.Toast;
 
 import com.yalantis.ucrop.UCrop;
@@ -22,9 +30,8 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import retrofit2.HttpException;
-import retrofit2.Response;
+import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
@@ -110,6 +117,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
             if (mEditShotView!=null) {
                 imagePickedFileName = ImagePicker.getImageNameFromResult(context, resultCode);
                 imagePickedUriSource = ImagePicker.getImageUriFromResult(context, resultCode, data);
+                Timber.tag("imagePickedUriSource").d(imagePickedUriSource.toString());
                 imagePickedformat= ImageUtils.getImageExtension(imagePickedUriSource, context);
                 mEditShotView.goToUCropActivity(imagePickedformat, imagePickedUriSource,imagePickedFileName);
             }
@@ -120,6 +128,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     public void onImageCropped(int requestCode, int resultCode, Intent data) {
         if (requestCode== UCrop.REQUEST_CROP) {
             imageCroppedUri = UCrop.getOutput(data); //get Image Uri after being cropped
+            Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
             isImageChanged=true;
             if (mEditShotView!=null) {
                 mEditShotView.displayShotImagePreview(imageCroppedUri);
@@ -172,10 +181,10 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     }
 
     @Override
-    public void onPublishClicked() {
+    public void onPublishClicked(Context context) {
         if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT) {
             //publishShot(shot);
-            postShot(getImageCroppedUri(),getImageFormat(),shotTitle);
+            postShot(context, getImageCroppedUri(),getImageFormat(),shotTitle);
         } else if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
             updateShot();
         }
@@ -220,8 +229,10 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     private void registerOrUpdateDraft(Context context,boolean isRegisteringImage) {
         if (mSource==Constants.SOURCE_DRAFT) {
-            if (isRegisteringImage)
-                storeDraftImage(imagePickedformat,imageCroppedUri,context);
+            if (isRegisteringImage) {
+                Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
+                storeDraftImage(imagePickedformat, imageCroppedUri, context);
+            }
             else
                 updateInfoDraft(mShotDraft.getImageUrl(), mShotDraft.getImageFormat());
         } else if (mSource==Constants.SOURCE_SHOT) {
@@ -230,7 +241,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
             if (isRegisteringImage)
                 storeDraftImage(imagePickedformat,imageCroppedUri,context);
             else
-                saveInfoDraft(null, null);
+                saveInfoDraft( null, null);
         }
 
     }
@@ -360,34 +371,19 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     /*************************************************************************
      * POST SHOT
      *************************************************************************/
-    private void postShot(Uri fileUri, String imageFormat, String titleString) {
+    private void postShot(Context context, Uri fileUri, String imageFormat, String titleString) {
+        String uriOfFile = ImageUtils.getRealPathFromImageSavedURI(context,fileUri);
+        Timber.d(fileUri.toString());
         File file = new File(fileUri.getPath());
         // creates RequestBody instance from file
         RequestBody requestFile = RequestBody.create(MediaType.parse("image/"+imageFormat), file);
         //RequestBody requestFile = RequestBody.create(MediaType.parse(getContentResolver().getType(fileUri)), file);
-        Timber.tag("posSHOT").d(fileUri.toString());
-        Timber.tag("posSHOT").d(imageFormat);
-        Timber.tag("posSHOT").d(requestFile.toString());
         //todo : offer possibility user to rename the file when he sends it to Dribbble
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
         // MultipartBody.Part body = MultipartBody.Part.createFormData("file", "lol", requestFile);
         // adds another part within the multipart request
         RequestBody title = RequestBody.create(MultipartBody.FORM, titleString);
-
         compositeDisposable.add(mShotRepository.postShot(body,title)
-                /*.doOnNext(new Consumer<Response>() {
-                    @Override
-                    public void accept(Response response) throws Exception {
-                        if (response.code()==403)
-                            Timber.d("");
-                    }
-                })
-                .doOnError(new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-
-                    }
-                })*/
                 .subscribe(
                         response -> {
                             Timber.d("post shot success");
@@ -406,11 +402,13 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         compositeDisposable.add(mShotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
                 //.onErrorResumeNext(whenExceptionIsThenIgnore(IllegalArgumentException.class))
                 .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t))
-                .doOnSuccess(uriImageSaved-> {
+                .doOnSuccess(imageSaved-> {
+                    //String filePath = imageSaved.getAbsolutePath();
+                    //Uri imageUri = FileProvider.getUriForFile(context, context.getString(R.string.file_provider_authorities), imageSaved);
                     if (mSource==Constants.SOURCE_DRAFT) {
-                        updateInfoDraft(uriImageSaved.toString(),imageCroppedFormat);
+                        updateInfoDraft(imageSaved,imageCroppedFormat);
                     } else {
-                       saveInfoDraft(uriImageSaved.toString(),imageCroppedFormat);
+                       saveInfoDraft(imageSaved,imageCroppedFormat);
                     }
                 })
                 .doOnError(t -> {
@@ -444,7 +442,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         );
     }
 
-    private void updateInfoDraft(@Nullable String imageUri,@Nullable String imageFormat) {
+    private void updateInfoDraft(@Nullable String imageUri, @Nullable String imageFormat) {
         compositeDisposable.add(mShotDraftRepository.updateShotDraft(
                 createShotDraft(mShotDraft.getId(),imageUri,imageFormat))
                 .subscribeOn(Schedulers.computation())
@@ -621,6 +619,4 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
         });
     }
-
-
 }

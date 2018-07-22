@@ -3,6 +3,7 @@ package seigneur.gauvain.mycourt.ui.shotDraft.view;
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.io.File;
 import java.util.List;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
@@ -51,7 +53,7 @@ public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHol
             Glide
                     .with(context)
                     .asDrawable()
-                    .load(Uri.parse(data.get(position).getImageUrl()))
+                    .load(new File(item.getImageUrl()))
                     .apply(new RequestOptions()
                             .diskCacheStrategy(DiskCacheStrategy.NONE) //disk Strategy to load new image and put another in Cache
                             //.override(80, 80) //dimension in Pixel

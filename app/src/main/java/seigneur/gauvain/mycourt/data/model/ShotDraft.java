@@ -18,7 +18,7 @@ import seigneur.gauvain.mycourt.utils.Constants;
 public class ShotDraft {
     //Dribbble API
     public String shotId;
-    public String imageUri;
+    public String imageUri; //for viewing
     public String imageFormat;
     public String title;
     public String description;

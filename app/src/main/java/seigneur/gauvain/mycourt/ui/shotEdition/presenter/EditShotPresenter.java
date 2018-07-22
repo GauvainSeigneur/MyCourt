@@ -27,7 +27,7 @@ public interface EditShotPresenter extends BasePresenter {
 
     void onTagLimitReached();
 
-    void onPublishClicked();
+    void onPublishClicked(Context context);
 
     void onDraftShotClicked(Context context);
 
