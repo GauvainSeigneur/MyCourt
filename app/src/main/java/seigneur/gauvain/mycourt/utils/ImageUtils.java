@@ -3,16 +3,20 @@ package seigneur.gauvain.mycourt.utils;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
@@ -20,6 +24,7 @@ import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
 import java.util.Calendar;
@@ -144,8 +149,7 @@ public class ImageUtils {
         return bitmap;
     }
 
-
-    public static String getRealPathFromImageSavedURI(Context context, Uri selectedImageUri) {
+    public static String getRealPathFromImage(Context context, Uri selectedImageUri) {
         String selectedImagePath = null;
         String[] projection = { MediaStore.Images.Media.DATA };
         Cursor cursor = context.getContentResolver().query(selectedImageUri,
@@ -159,13 +163,42 @@ public class ImageUtils {
                 selectedImagePath = cursor.getString(idx);
             }
         }
-            /*if (cursor.moveToFirst()) {
-                do {
-                    int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-                    selectedImagePath = cursor.getString(idx);
-                } while (cursor.moveToNext());
-            }
-        }*/
         return selectedImagePath;
     }
+
+    public static Bitmap decodeBitmap(Context context, Uri uri, int sampleSize) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        //options.inSampleSize = sampleSize;
+        AssetFileDescriptor fileDescriptor = null;
+        try {
+            fileDescriptor = context.getContentResolver().openAssetFileDescriptor(uri, "r");
+            Timber.d("ok");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Timber.d("error");
+        }
+
+        Bitmap actuallyUsableBitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor.getFileDescriptor(), null, options);
+        return actuallyUsableBitmap;
+    }
+
+    public static int[] imagePickedWidthHeight(Context context, Uri uri, int sampleSize) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        AssetFileDescriptor fileDescriptor = null;
+        Bitmap bitmap =null;
+        try {
+            fileDescriptor = context.getContentResolver().openAssetFileDescriptor(uri, "r");
+            bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor.getFileDescriptor(), null, options);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        if (bitmap!=null) {
+            Timber.d("image sized - width: "+ bitmap.getWidth() +" height: "+bitmap.getHeight());
+            return new int[] {bitmap.getWidth(),bitmap.getHeight()};
+        }
+        else
+            return new int[] {0,0};
+
+    }
+
 }

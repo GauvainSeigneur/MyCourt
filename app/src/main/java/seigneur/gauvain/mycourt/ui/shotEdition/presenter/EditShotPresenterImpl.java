@@ -6,6 +6,8 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -117,7 +119,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
             if (mEditShotView!=null) {
                 imagePickedFileName = ImagePicker.getImageNameFromResult(context, resultCode);
                 imagePickedUriSource = ImagePicker.getImageUriFromResult(context, resultCode, data);
-                Timber.tag("imagePickedUriSource").d(imagePickedUriSource.toString());
+                 int[] lol= ImageUtils.imagePickedWidthHeight(context, imagePickedUriSource,0);
+                //ImageUtils.getImageWidthAndHeight(context,imagePickedUriSource);
                 imagePickedformat= ImageUtils.getImageExtension(imagePickedUriSource, context);
                 mEditShotView.goToUCropActivity(imagePickedformat, imagePickedUriSource,imagePickedFileName);
             }
@@ -372,7 +375,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      * POST SHOT
      *************************************************************************/
     private void postShot(Context context, Uri fileUri, String imageFormat, String titleString) {
-        String uriOfFile = ImageUtils.getRealPathFromImageSavedURI(context,fileUri);
+        String uriOfFile = ImageUtils.getRealPathFromImage(context,fileUri);
         Timber.d(fileUri.toString());
         File file = new File(fileUri.getPath());
         // creates RequestBody instance from file
