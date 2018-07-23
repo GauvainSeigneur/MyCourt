@@ -29,8 +29,8 @@ public class ShotRepository {
     public ShotRepository(){}
 
     //get list of Shot from Dribbble
-    public Flowable<List<Shot>> getShotsFromAPI(int applyResponseCache,  int page) {
-        return mDribbbleService.getShots(applyResponseCache, page);
+    public Flowable<List<Shot>> getShotsFromAPI(int applyResponseCache,  int page, int perPage) {
+        return mDribbbleService.getShots(applyResponseCache, page, perPage);
     }
 
     //send an update to Dribbble

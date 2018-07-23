@@ -11,8 +11,6 @@ public class Constants {
      */
     public static final String HEADER_CACHE = "android-cache";
     public static final String RESPONSE_CACHE_DELAY = "ResponseCacheDelay";
-    // Dribbble loads everything in a 12-per-page manner
-    public static final int COUNT_PER_PAGE = 12;
     public static final String HEADER_SHOT_ID = "ShotID";
 
     /**
@@ -55,10 +53,10 @@ public class Constants {
     public static final String BEHANCE = "behance";
     public static final String LINKEDIN = "linkedin";
 
-
-    //pagination tests
+    //pagination
     public static final int PAGE_START = 1;
     public static int CURRENT_PAGE = PAGE_START;
+    public static final int PER_PAGE = 30;
 
     //use it like this in activity
     /*@EditionMode

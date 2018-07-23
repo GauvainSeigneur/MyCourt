@@ -11,6 +11,7 @@ import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.repository.ShotRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.di.scope.PerFragment;
+import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import seigneur.gauvain.mycourt.ui.shots.view.ShotsView;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
@@ -110,7 +111,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
             mShotsView.showFirstFecthErrorView(false);
         }
         compositeDisposable.add(
-                mShotRepository.getShotsFromAPI(0, page)
+                mShotRepository.getShotsFromAPI(0, page, Constants.PER_PAGE)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnNext(new Consumer<List<Shot>>() {
@@ -123,8 +124,6 @@ public class ShotsPresenterImpl implements ShotsPresenter {
                                     mShotsView.showFirstFecthErrorView(false);
                                     mShotsView.addShots(shots);
                                     mShotsView.showLoadingFooter(true);
-                                    //adapter.addAll(shots);
-                                    //adapter.addLoadingFooter();
                                 }
 
                             }
@@ -148,40 +147,38 @@ public class ShotsPresenterImpl implements ShotsPresenter {
     private void loadNextPage(int page) {
         Timber.d("load next page: "+page);
         compositeDisposable.add(
-                mShotRepository.getShotsFromAPI(responsCacheDelay,  page)
+                mShotRepository.getShotsFromAPI(responsCacheDelay, page, Constants.PER_PAGE)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnNext(new Consumer<List<Shot>>() {
                             @Override
                             public void accept(List<Shot> shots) throws Exception {
                                 isLoading = false;
-                               //newList = shots;
-                                if (mShotsView!=null) {
-                                    mShotsView.showLoadingFooter(false);
-                                }
-                                if (oldList==null) {
-                                    oldList=shots;
-                                    Timber.d("list added first time");
-                                    //As Dribbble Server does not sent empty list but the last list
-                                    //when  app reach the last available item, I have to check if
-                                    //the first item of the new list equals the first item of the last
-                                    //if TRUE, its means that we have reach the end of the list
-                                } else if (!oldList.get(0).getId().equals(shots.get(0).getId())) {
-                                    //todo :
-                                    //use diffUtils in order to not repeat same item if an item
-                                    //is inserted between two request...
-                                    //use this example : https://medium.com/mindorks/diffutils-improving-performance-of-recyclerview-102b254a9e4a
-                                    Timber.d("list not already added");
-                                    oldList=shots;
+                                Timber.tag("newRequest").d(shots.size()+"");
+                                oldList=shots;
+                                if (shots.size()<Constants.PER_PAGE) {
+                                    Timber.tag("newrequest").d("not the same size");
+                                    isReachedLastPage =true; //stop request on scroll
                                     if (mShotsView!=null) {
                                         mShotsView.addShots(shots);
-                                        //adapter.addAll(shots);
-                                        mShotsView.showLoadingFooter(true);
+                                        mShotsView.showLoadingFooter(false);
                                     }
-                                    isReachedLastPage =false;
                                 } else {
-                                    Timber.d("list already added - we fetched all available shots");
-                                    isReachedLastPage =true; //stop request on scroll
+                                    if (!oldList.get(0).getId().equals(shots.get(0).getId())){
+                                        Timber.tag("newrequest").d("same id");
+                                        isReachedLastPage =true; //continue request on scroll
+                                        if (mShotsView!=null) {
+                                           // mShotsView.addShots(shots);
+                                            mShotsView.showLoadingFooter(false);
+                                        }
+                                    } else {
+                                        Timber.tag("newrequest").d("not same id");
+                                        isReachedLastPage =false; //continue request on scroll
+                                        if (mShotsView!=null) {
+                                            mShotsView.addShots(shots);
+                                            mShotsView.showLoadingFooter(true);
+                                        }
+                                    }
                                 }
                             }
                         })
@@ -205,7 +202,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
     private void loadRefresh(int page) {
         isReachedLastPage = false;
         compositeDisposable.add(
-                mShotRepository.getShotsFromAPI(0, page)
+                mShotRepository.getShotsFromAPI(0, page,Constants.PER_PAGE)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnNext(new Consumer<List<Shot>>() {

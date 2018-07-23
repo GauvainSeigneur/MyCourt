@@ -34,7 +34,8 @@ public interface DribbbleService {
     @GET("user/shots")
     Flowable<List<Shot>> getShots(
             @Header(RESPONSE_CACHE_DELAY) int responseCacheDelay,
-            @Query("?page=") int page
+            @Query("page") int page,
+            @Query("per_page") int pagePage
     );
 
     @GET("user/projects")
