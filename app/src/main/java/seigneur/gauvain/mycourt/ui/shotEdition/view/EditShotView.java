@@ -13,7 +13,9 @@ public interface EditShotView {
 
     void notifyPostSaved();
 
-    void setUpShotEdtionUI(@Nullable Shot shot, @Nullable ShotDraft shotDraft);
+    void setUpShotEdtionUI(@Nullable Shot shot,
+                           @Nullable ShotDraft shotDraft,
+                           int editMode);
 
     void setUpShotCreationUI();
 

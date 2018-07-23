@@ -287,7 +287,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                     Timber.d(shot.title);
                     mShot=shot;
                     if (mEditShotView!=null) {
-                        mEditShotView.setUpShotEdtionUI(shot,null);
+                        mEditShotView.setUpShotEdtionUI(shot,null, getEditMode());
                     }
                 })
                 .doOnError(t -> {
@@ -308,7 +308,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                     mEditionMode=shotDraft.getDraftType();
                     mShotDraft = shotDraft;
                     if (mEditShotView!=null) {
-                        mEditShotView.setUpShotEdtionUI(null,shotDraft);
+                        mEditShotView.setUpShotEdtionUI(null,shotDraft,getEditMode());
                     }
                 })
                 .doOnError(t -> {

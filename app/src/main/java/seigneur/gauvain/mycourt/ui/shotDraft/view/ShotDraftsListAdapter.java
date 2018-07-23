@@ -16,6 +16,7 @@ import com.bumptech.glide.request.RequestOptions;
 import java.io.File;
 import java.util.List;
 import seigneur.gauvain.mycourt.R;
+import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.utils.Constants;
 
@@ -44,6 +45,8 @@ public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHol
     public void onBindViewHolder(final ShotDraftViewHolder holder, final int position) {
         ShotDraft item = data.get(position);
         holder.shotDraftTitle.setText(item.getTitle());
+
+
         if (item.getDraftType()== Constants.EDIT_MODE_NEW_SHOT) {
             holder.shotDraftType.setText("NEW");
         } else {
@@ -53,7 +56,7 @@ public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHol
             Glide
                     .with(context)
                     .asDrawable()
-                    .load(new File(item.getImageUrl()))
+                    .load(getImageUri(item)/*new File(item.getImageUrl())*/)
                     .apply(new RequestOptions()
                             .diskCacheStrategy(DiskCacheStrategy.NONE) //disk Strategy to load new image and put another in Cache
                             //.override(80, 80) //dimension in Pixel
@@ -84,4 +87,17 @@ public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHol
             data.clear();
         }
     }
+
+    private Uri getImageUri(ShotDraft item){
+        if(item.getImageUrl()!=null)
+                if (item.getDraftType()==Constants.EDIT_MODE_NEW_SHOT)
+                    return FileProvider.getUriForFile(context,
+                            context.getString(R.string.file_provider_authorities),
+                            new File(item.getImageUrl()));
+                else
+                    return Uri.parse(item.getImageUrl());
+            else
+                return null;
+    }
+
 }

@@ -245,9 +245,9 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     }
 
     @Override
-    public void setUpShotEdtionUI(Shot shot, ShotDraft shotDraft) {
+    public void setUpShotEdtionUI(Shot shot, ShotDraft shotDraft, int source) {
         mToolbar.setTitle("Edit a shot");
-        setUpShotEditionUI(true, shot, shotDraft);
+        setUpShotEditionUI(true, shot, shotDraft, source);
     }
 
     @Override
@@ -370,7 +370,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
      *******************************************************************/
     private void setUpShotEditionUI(final boolean isTransactionPostponed,
                                     @Nullable Shot shot,
-                                    @Nullable  ShotDraft shotDraft) {
+                                    @Nullable  ShotDraft shotDraft, int source) {
 
         if (isTransactionPostponed)
             postponeEnterTransition();
@@ -382,7 +382,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
         Glide
                 .with(this)
                 .asBitmap()
-                .load(getImageUrl(shot, shotDraft))
+                .load(getImageUrl(shot, shotDraft, source))
                 .apply(new RequestOptions()
                         .error(R.drawable.ic_my_shot_black_24dp)
                 )
@@ -409,6 +409,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
             mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description));
     }
 
+
     //get title from data sent by presenter
     public String getTitle(Shot shot, ShotDraft shotDraft){
         if (shot!=null)
@@ -420,13 +421,16 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     }
 
     //get image uri from data sent by presenter
-    public Uri getImageUrl(Shot shot, ShotDraft shotDraft) {
+    public Uri getImageUrl(Shot shot, ShotDraft shotDraft, int source) {
         if (shot!=null)
             return Uri.parse(shot.getImageUrl());
         else if(shotDraft!=null && shotDraft.getImageUrl()!=null)
+            if (source==Constants.EDIT_MODE_NEW_SHOT)
             return FileProvider.getUriForFile(this,
                     this.getString(R.string.file_provider_authorities),
                     new File(shotDraft.getImageUrl()));
+            else
+                return Uri.parse(shotDraft.getImageUrl());
         else
             return null;
     }
