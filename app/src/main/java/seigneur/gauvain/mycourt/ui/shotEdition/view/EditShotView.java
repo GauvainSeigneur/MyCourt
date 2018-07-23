@@ -29,7 +29,10 @@ public interface EditShotView {
 
     void displayShotImagePreview(Uri uriImageCropped);
 
-    void goToUCropActivity(String imagePickedFormat, Uri ImagePickedUri, String imagePickedFileName);
+    void goToUCropActivity(String imagePickedFormat,
+                           Uri ImagePickedUri,
+                           String imagePickedFileName,
+                           int[] imageSize);
 
     void showMessageEmptyTitle();
 

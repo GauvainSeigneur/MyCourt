@@ -44,6 +44,13 @@ public class Constants {
     public static final int SOURCE_SHOT             = 702; //from a shot
     public static final int SOURCE_FAB              = 703; //from a fab (new draft)
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({EDIT_MODE_NEW_SHOT, EDIT_MODE_UPDATE_SHOT})
+    public @interface ImageCroppingMode {}
+    public static final int CROP_MODE_HD = 801; //800*600
+    public static final int CROP_MODE_NORMAL = 802; //400*300
+    public static final int CROP_MODE_GIF_INCORRET_FORMAT = 803; //gif can't be cropped, so it must directly correct format
+
     public static final String INSTAGRAM = "instagram";
     public static final String FACEBOOK = "facebook";
     public static final String GITHUB = "github";

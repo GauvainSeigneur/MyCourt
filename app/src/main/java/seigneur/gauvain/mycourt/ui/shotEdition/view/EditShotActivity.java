@@ -264,8 +264,14 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     }
 
     @Override
-    public void goToUCropActivity(String imagePickedformat, Uri imagePickedUriSource, String imagePickedFileName) {
-        ImageUtils.goToUCropActivity(imagePickedformat, imagePickedUriSource, Uri.fromFile(new File(getCacheDir(), imagePickedFileName)),this);
+    public void goToUCropActivity(String imagePickedformat,
+                                  Uri imagePickedUriSource,
+                                  String imagePickedFileName,
+                                  int[] imageSize) {
+        ImageUtils.goToUCropActivity(imagePickedformat,
+                imagePickedUriSource,
+                Uri.fromFile(new File(getCacheDir(), imagePickedFileName)),this,
+                imageSize);
     }
 
     @Override

@@ -119,10 +119,14 @@ public class EditShotPresenterImpl implements EditShotPresenter {
             if (mEditShotView!=null) {
                 imagePickedFileName = ImagePicker.getImageNameFromResult(context, resultCode);
                 imagePickedUriSource = ImagePicker.getImageUriFromResult(context, resultCode, data);
-                 int[] lol= ImageUtils.imagePickedWidthHeight(context, imagePickedUriSource,0);
-                //ImageUtils.getImageWidthAndHeight(context,imagePickedUriSource);
                 imagePickedformat= ImageUtils.getImageExtension(imagePickedUriSource, context);
-                mEditShotView.goToUCropActivity(imagePickedformat, imagePickedUriSource,imagePickedFileName);
+                int[] imageSize= ImageUtils.imagePickedWidthHeight(context, imagePickedUriSource,0);
+                if (imageSize[0]>=800 && imageSize[1]>=600)
+                    mEditShotView.goToUCropActivity(imagePickedformat, imagePickedUriSource,
+                        imagePickedFileName, imageSize);
+                else
+                    mEditShotView.goToUCropActivity(imagePickedformat, imagePickedUriSource,
+                             imagePickedFileName, imageSize);
             }
         }
     }

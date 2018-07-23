@@ -44,27 +44,48 @@ public class ImageUtils {
      * @param source of the view :set by the return intent from ImagePicker
      * @param destination : uri of destination folder: cacheDif
      * @param activity
+     * @param imageSize
      */
-    public static void goToUCropActivity(String ImageCroppedFormat, Uri source, Uri destination, Activity activity) {
+    public static void goToUCropActivity(String ImageCroppedFormat,
+                                         Uri source,
+                                         Uri destination,
+                                         Activity activity,
+                                         int[] imageSize) {
         UCrop.Options options = new UCrop.Options();
         options.setStatusBarColor(activity.getResources().getColor(R.color.colorPrimaryDark));
         options.setToolbarColor(activity.getResources().getColor(R.color.colorPrimary));
+        options.setActiveWidgetColor(activity.getResources().getColor(R.color.colorAccent));
         //todo : refactor this! it does not prevent issue!
         if (ImageCroppedFormat!=null && ImageCroppedFormat.equals("gif")){
-            options.setHideBottomControls(true);
-            options.setAllowedGestures(0,0,0);
-            UCrop.of(source, destination)
-                    .useSourceImageAspectRatio() //use source aspect ratio
-                    .withOptions(options)
-                    //.withMaxResultSize(maxWidth, maxHeight)
-                    .start(activity);
-            Toast.makeText(activity, "gif can't be cropped", Toast.LENGTH_SHORT).show();
+            if (imageSize[0]==800 && imageSize[1]==600 || imageSize[0]==400
+                    && imageSize[1]==300 ) {
+                options.setHideBottomControls(true);
+                options.setAllowedGestures(0,0,0);
+                UCrop.of(source, destination)
+                        .useSourceImageAspectRatio() //use source aspect ratio
+                        .withOptions(options)
+                        .start(activity);
+                Toast.makeText(activity, "gif can't be cropped", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(activity, "gif can't be cropped. the size must be...", Toast.LENGTH_SHORT).show();
+            }
         } else {
-            UCrop.of(source, destination)
-                    .withAspectRatio(4, 3)
-                    .withOptions(options)
-                    //.withMaxResultSize(maxWidth, maxHeight)
-                    .start(activity);
+            if (imageSize[0]>=800 && imageSize[1]>=600) {
+                UCrop.of(source, destination)
+                        .withAspectRatio(4, 3)
+                        .withOptions(options)
+                        .withMaxResultSize(800, 600)//set in in constants
+                        .start(activity);
+                Timber.d("crop hd mode");
+            }
+            else {
+                UCrop.of(source, destination)
+                        .withAspectRatio(4, 3)
+                        .withOptions(options)
+                        .withMaxResultSize(400, 300) //set in in constants
+                        .start(activity);
+                Timber.d("crop normal mode");
+            }
         }
     }
 
@@ -168,17 +189,15 @@ public class ImageUtils {
 
     public static Bitmap decodeBitmap(Context context, Uri uri, int sampleSize) {
         BitmapFactory.Options options = new BitmapFactory.Options();
-        //options.inSampleSize = sampleSize;
         AssetFileDescriptor fileDescriptor = null;
+        Bitmap actuallyUsableBitmap = null;
         try {
             fileDescriptor = context.getContentResolver().openAssetFileDescriptor(uri, "r");
-            Timber.d("ok");
+            actuallyUsableBitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor.getFileDescriptor(), null, options);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             Timber.d("error");
         }
-
-        Bitmap actuallyUsableBitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor.getFileDescriptor(), null, options);
         return actuallyUsableBitmap;
     }
 
