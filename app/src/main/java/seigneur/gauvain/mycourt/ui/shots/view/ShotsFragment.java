@@ -25,7 +25,7 @@ import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.ui.base.BaseFragment;
 import seigneur.gauvain.mycourt.ui.shots.recyclerview.ShotListAdapter;
 import seigneur.gauvain.mycourt.ui.shots.recyclerview.ShotListCallback;
-import seigneur.gauvain.mycourt.ui.shots.recyclerview.PaginationScrollListener;
+import seigneur.gauvain.mycourt.ui.shots.recyclerview.ShotScrollListener;
 import seigneur.gauvain.mycourt.ui.shots.presenter.ShotsPresenter;
 import seigneur.gauvain.mycourt.ui.shotDetail.view.ShotDetailActivity;
 
@@ -93,7 +93,7 @@ public class ShotsFragment extends BaseFragment implements ShotsView {
         mShotsPresenter.onAttach();
         recyclerView.setLayoutManager(mGridLayoutManager);
         recyclerView.setAdapter(adapter);
-        recyclerView.addOnScrollListener(new PaginationScrollListener(mGridLayoutManager) {
+        recyclerView.addOnScrollListener(new ShotScrollListener(mGridLayoutManager) {
             @Override
             protected void loadMoreItems() {
                 mShotsPresenter.onLoading();
