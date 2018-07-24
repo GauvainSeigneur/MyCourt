@@ -23,6 +23,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+
 import javax.inject.Inject;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -90,7 +92,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     private Shot shotToPublish;
 
 
-
+    ArrayList<String> lol;
 
     @Inject
     public EditShotPresenterImpl() {
@@ -166,12 +168,14 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     public void onConfirmEditionClicked(boolean isFromFab) {
         //create the list just one time, not any time the tags changed
         if (mTags!=null && mTags.length()>0)
-            tagList = new ArrayList<String>(Arrays.asList(mTags.split(",")));
-            /*tagList = new ArrayList<>();
+            lol = new ArrayList<String>(Arrays.asList(mTags.split(",")));
+            tagList = new ArrayList<>();
             tagList.add("a");
             tagList.add("b");
-            tagList.add("c");*/
+            tagList.add("c");
             Timber.d("taglist generated: "+tagList+"");
+
+        Timber.d("taglist generated: "+lol+"");
         if (mEditShotView!=null && isFromFab) //else is from the dialog called from onAbort method.
                 mEditShotView.openConfirmMenu();
 
@@ -338,7 +342,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                         getShotId(),
                         getShotDescription(),
                         getProfile(),
-                        getTagList(),
+                        lol,
                         shotTitle)
                         .doOnSuccess(new Consumer<Shot>() {
                             @Override
