@@ -1,5 +1,6 @@
 package seigneur.gauvain.mycourt.data.api;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Completable;
@@ -11,6 +12,7 @@ import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
+import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -44,17 +46,18 @@ public interface DribbbleService {
     @GET("user")
     Single<User> getUser();
 
-    @PUT("shots/{id}")
     @FormUrlEncoded
+    @PUT("shots/{id}")
     Single<Shot> updateShot(
             @Path(value = "id", encoded = true) String id,
             @Field("description") String description,
             @Field("low_profile") boolean isLowProfile,
             //@Field("scheduled_for") Date publishDate, //todo : to manage it for phase 2
-            @Field("tags") String[] tags,
+            @Field("tags[]") ArrayList<String> tags,
             // @Field("teamID") int teamID //todo : to mange it for phase 2
             @Field("title") String title
     );
+
 
     //todo : check this : https://medium.com/@adinugroho/upload-image-from-android-app-using-retrofit-2-ae6f922b184c
     @Multipart

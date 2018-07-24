@@ -4,12 +4,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 
-public abstract class PaginationScrollListener extends RecyclerView.OnScrollListener {
+public abstract class ShotScrollListener extends RecyclerView.OnScrollListener {
 
     LinearLayoutManager layoutManager;
 
    //todo change it by GridLayout Manager
-    public PaginationScrollListener(LinearLayoutManager layoutManager) {
+    public ShotScrollListener(LinearLayoutManager layoutManager) {
         this.layoutManager = layoutManager;
     }
 

@@ -1,5 +1,6 @@
 package seigneur.gauvain.mycourt.data.repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -37,7 +38,7 @@ public class ShotRepository {
     public Single<Shot> updateShot(String id,
                                    String description,
                                    boolean isLowProfile,
-                                   String[] tags,
+                                   ArrayList<String> tags,
                                    String title) {
         return mDribbbleService.updateShot(id, description, isLowProfile,tags, title)
                 .subscribeOn(Schedulers.io())

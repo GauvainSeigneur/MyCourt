@@ -24,7 +24,7 @@ import seigneur.gauvain.mycourt.data.model.Shot;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
-public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     // View Types
     public static final int ITEM = 0;
@@ -35,11 +35,11 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private boolean isLoadingAdded = false;
     private boolean retryPageLoad = false;
 
-    private PaginationAdapterCallback mCallback;
+    private ShotListCallback mCallback;
 
     private String errorMsg;
 
-    public PaginationAdapter(Context context, PaginationAdapterCallback callback) {
+    public ShotListAdapter(Context context, ShotListCallback callback) {
         this.context = context;
         this.mCallback = callback;
         shotsResults = new ArrayList<Shot>();

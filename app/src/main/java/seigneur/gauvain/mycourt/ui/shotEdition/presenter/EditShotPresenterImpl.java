@@ -167,7 +167,11 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         //create the list just one time, not any time the tags changed
         if (mTags!=null && mTags.length()>0)
             tagList = new ArrayList<String>(Arrays.asList(mTags.split(",")));
-            Timber.d(tagList+"");
+            /*tagList = new ArrayList<>();
+            tagList.add("a");
+            tagList.add("b");
+            tagList.add("c");*/
+            Timber.d("taglist generated: "+tagList+"");
         if (mEditShotView!=null && isFromFab) //else is from the dialog called from onAbort method.
                 mEditShotView.openConfirmMenu();
 
@@ -334,7 +338,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                         getShotId(),
                         getShotDescription(),
                         getProfile(),
-                        getTagArray(),
+                        getTagList(),
                         shotTitle)
                         .doOnSuccess(new Consumer<Shot>() {
                             @Override
@@ -542,9 +546,6 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     public String[] getTagArray() {
         if (getTagList()!=null && !getTagList().isEmpty()) {
-            //Object[] objectList = getTagList().toArray();
-            //String[] stringArray =  Arrays.copyOf(objectList,objectList.length,String[].class);
-            //Timber.d("taglist not null:"+ stringArray.toString());
             String[] array = new String[getTagList().size()];
             for (int i = 0; i < getTagList().size(); i++) {
                 array[i] = getTagList().get(i);

@@ -23,8 +23,8 @@ import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.ui.base.BaseFragment;
-import seigneur.gauvain.mycourt.ui.shots.recyclerview.PaginationAdapter;
-import seigneur.gauvain.mycourt.ui.shots.recyclerview.PaginationAdapterCallback;
+import seigneur.gauvain.mycourt.ui.shots.recyclerview.ShotListAdapter;
+import seigneur.gauvain.mycourt.ui.shots.recyclerview.ShotListCallback;
 import seigneur.gauvain.mycourt.ui.shots.recyclerview.PaginationScrollListener;
 import seigneur.gauvain.mycourt.ui.shots.presenter.ShotsPresenter;
 import seigneur.gauvain.mycourt.ui.shotDetail.view.ShotDetailActivity;
@@ -46,8 +46,8 @@ public class ShotsFragment extends BaseFragment implements ShotsView {
     //pagination tests
     private static final int PAGE_START = 1;
     private int currentPage = PAGE_START;
-    private PaginationAdapter adapter;
-    private PaginationAdapterCallback adapterCallback;
+    private ShotListAdapter adapter;
+    private ShotListCallback adapterCallback;
     private ProgressBar progressBar;
 
     /*
@@ -57,7 +57,7 @@ public class ShotsFragment extends BaseFragment implements ShotsView {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //first time created
-        adapterCallback = new PaginationAdapterCallback() {
+        adapterCallback = new ShotListCallback() {
             @Override
             public void retryPageLoad() {
                 mShotsPresenter.onLoadNextPage(currentPage);
@@ -67,15 +67,15 @@ public class ShotsFragment extends BaseFragment implements ShotsView {
                 mShotsPresenter.onShotClicked(shot, position);
             }
         };
-        adapter = new PaginationAdapter(getContext(),adapterCallback);
+        adapter = new ShotListAdapter(getContext(),adapterCallback);
         mGridLayoutManager = new GridLayoutManager(getContext(),2);
         mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
                 switch(adapter.getItemViewType(position)){
-                    case PaginationAdapter.ITEM:
+                    case ShotListAdapter.ITEM:
                         return position == 0 ? 2 : 1;
-                    case PaginationAdapter.LOADING:
+                    case ShotListAdapter.LOADING:
                         return 2;
                     default:
                         return 1;
