@@ -31,7 +31,7 @@ public interface EditShotPresenter extends BasePresenter {
 
     void onDraftShotClicked(Context context);
 
-    void onAbort();
+    void onAbort(boolean isMenuOpen);
 
     void onTitleChanged(String title);
 

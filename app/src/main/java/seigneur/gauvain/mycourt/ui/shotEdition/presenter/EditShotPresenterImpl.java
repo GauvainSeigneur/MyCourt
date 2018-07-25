@@ -1,32 +1,16 @@
 package seigneur.gauvain.mycourt.ui.shotEdition.presenter;
 
-
-import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.v4.content.FileProvider;
 import android.widget.Toast;
-
 import com.yalantis.ucrop.UCrop;
-
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.inject.Inject;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -37,7 +21,6 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.HttpException;
-import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
@@ -74,25 +57,24 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     @Inject
     TempDataRepository mTempDataRepository;
 
-    private ShotDraft mShotDraft;
-    private Shot mShot;
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
-    private int mEditionMode;
-
     //Manage Image picking and cropping
     private Uri imagePickedUriSource = null;
     private String imagePickedFileName = null;
     private String imagePickedformat = null;
     private Uri imageCroppedUri = null;
-    private Uri imageSavedUri = null;
     private boolean isImageChanged=false;
+    private boolean isStartEditing=false;
     //Manage data
     private int mSource;
     private String mTags;
     private ArrayList<String> tagList;
     private String shotTitle;
     private String shotDescription;
-    private Shot shotToPublish;
+    private ShotDraft mShotDraft;
+    private Shot mShot;
+    private int mEditionMode;
+    //RX disposable
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     @Inject
     public EditShotPresenterImpl() {
@@ -122,7 +104,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                 imagePickedFileName = ImagePicker.getImageNameFromResult(context, resultCode);
                 imagePickedUriSource = ImagePicker.getImageUriFromResult(context, resultCode, data);
                 imagePickedformat= ImageUtils.getImageExtension(imagePickedUriSource, context);
-                int[] imageSize= ImageUtils.imagePickedWidthHeight(context, imagePickedUriSource,0);
+                int[] imageSize= ImageUtils.imagePickedWidthHeight(context, imagePickedUriSource,
+                        0);
                 if (imageSize[0]>=800 && imageSize[1]>=600)
                     mEditShotView.goToUCropActivity(imagePickedformat, imagePickedUriSource,
                         imagePickedFileName, imageSize);
@@ -166,30 +149,14 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     @Override
     public void onConfirmEditionClicked(boolean isFromFab) {
+        createTagList();
         if (mEditShotView!=null && isFromFab) //else is from the dialog called from onAbort method.
             mEditShotView.openConfirmMenu();
-        //create the list just one time, not any time the tags changed
-        if (mTags!=null && !mTags.isEmpty()) {
-            Pattern p = Pattern.compile(MyTextUtils.tagRegex);
-            Matcher m = p.matcher(mTags);
-            if (MyTextUtils.isDoubleQuoteCountEven(mTags)) {
-                // number is even or 0
-                tagList = new ArrayList<>();
-                while (m.find()) {
-                    //add to list the matched values and remove double quotes
-                    tagList.add(m.group(0));//replace("\"", ""));
-                }
-
-            }
-            else {
-                // number is odd: warn user and stop
-            }
-        }
     }
 
     @Override
     public void onDraftShotClicked(Context context) {
-        if (shotTitle==null || shotTitle.isEmpty())
+        if (getTitle()==null || getTitle().isEmpty())
             mEditShotView.showMessageEmptyTitle();
         else {
             if (imageCroppedUri!=null && imagePickedformat!=null) {
@@ -204,18 +171,23 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     @Override
     public void onPublishClicked(Context context) {
         if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT) {
-            //publishShot(shot);
-            postShot(context, getImageCroppedUri(),getImageFormat(),shotTitle);
+            postShot(context, getImageCroppedUri(),getImageFormat(),getTitle());
         } else if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
             updateShot();
         }
     }
 
     @Override
-    public void onAbort() {
+    public void onAbort(boolean isMenuOpen) {
         //todo : check if user has started to write or download a pic
         //if yes : warn him
         //if no : do nothing but close activity
+       if (mEditShotView !=null) {
+           if (isMenuOpen)
+               mEditShotView.openConfirmMenu(); //in fact close it
+           //else if (isStartEditing())
+       }
+
     }
 
     @Override
@@ -246,40 +218,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     public void onTagChanged(String tags) {
        if (!tags.isEmpty()) {
            mTags = tags;
-           //Regex function to count words separated by space or commas and remove blank space
-           // Zero or more whitespaces (\\s*)
-           //Arrow, or comma, or whitespace (=>|,|\\s)
-           //Zero or more whitespaces (\\s*)
-
-          // https://stackoverflow.com/questions/3654446/java-regex-help-splitting-string-on-spaces-and-commas
-
-           //final String tagsPattern = "(\\s+|\\s*,\\s*)";
-           //final String presquePattern ="(\\s*(\\\\s|,)\\\\s*'.*?'|\".*?\"|\\S+)"; //test  https://regexr.com
-           //final String finalpattern = "(\\s+|\\s*,\\s*|\"[^\\\"].*\\)";
-
-           String[] WC = tags.split("(\\s+|\\s*,\\s*)");
-           Timber.tag("tag test").d(WC.length+"");
-
        }
-    }
-
-    private void registerOrUpdateDraft(Context context,boolean isRegisteringImage) {
-        if (mSource==Constants.SOURCE_DRAFT) {
-            if (isRegisteringImage) {
-                Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
-                storeDraftImage(imagePickedformat, imageCroppedUri, context);
-            }
-            else
-                updateInfoDraft(mShotDraft.getImageUrl(), mShotDraft.getImageFormat());
-        } else if (mSource==Constants.SOURCE_SHOT) {
-            saveInfoDraft(mShot.getImageUrl(), null);
-        } else if (mSource==Constants.SOURCE_FAB) {
-            if (isRegisteringImage)
-                storeDraftImage(imagePickedformat,imageCroppedUri,context);
-            else
-                saveInfoDraft( null, null);
-        }
-
     }
     /**************************************************************************
      * get data source on opening activity
@@ -355,7 +294,28 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     }
 
     /*************************************************************************
-     * UPDATE
+     * DB OPERATIONS - REGISTER OR UPDATE SHOTDRAFT
+     *************************************************************************/
+    private void registerOrUpdateDraft(Context context,boolean isRegisteringImage) {
+        if (mSource==Constants.SOURCE_DRAFT) {
+            if (isRegisteringImage) {
+                Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
+                storeDraftImage(imagePickedformat, imageCroppedUri, context);
+            }
+            else
+                updateInfoDraft(mShotDraft.getImageUrl(), mShotDraft.getImageFormat());
+        } else if (mSource==Constants.SOURCE_SHOT) {
+            saveInfoDraft(mShot.getImageUrl(), null);
+        } else if (mSource==Constants.SOURCE_FAB) {
+            if (isRegisteringImage)
+                storeDraftImage(imagePickedformat,imageCroppedUri,context);
+            else
+                saveInfoDraft( null, null);
+        }
+    }
+
+    /*************************************************************************
+     * UPDATE SHOT ON DRIBBBLE
      *************************************************************************/
     private void updateShot() {
         compositeDisposable.add(
@@ -364,7 +324,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                         getShotDescription(),
                         getProfile(),
                         getTagList(),
-                        shotTitle)
+                        getTitle())
                         .doOnSuccess(new Consumer<Shot>() {
                             @Override
                             public void accept(Shot shot) throws Exception {
@@ -496,7 +456,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                 imageUri,
                 imageFormat,
                 getShotId(),
-                shotTitle,
+                getTitle(),
                 getShotDescription(),
                 getProfile(),
                 null, //todo - for phase 2 : allow user to schedule publishing
@@ -565,61 +525,18 @@ public class EditShotPresenterImpl implements EditShotPresenter {
             return null;
     }
 
-    public ArrayList<String> getTagList() {
-        return tagList;
+    public String getTitle() {
+        return shotTitle;
     }
 
-    public String[] getTagArray() {
-        if (getTagList()!=null && !getTagList().isEmpty()) {
-            String[] array = new String[getTagList().size()];
-            for (int i = 0; i < getTagList().size(); i++) {
-                array[i] = getTagList().get(i);
-                Timber.d(array[i]);
-            }
-            Timber.d(array.toString());
-            return array;
-        }
-        else {
-            Timber.d("taglist null");
-            return null;
-        }
+
+    public ArrayList<String> getTagList() {
+        return tagList;
     }
 
     public String getShotDescription() {
         return shotDescription;
     }
-
-    /*private void testPostShot(Uri fileUri, String titleString) {
-        File file = new File(fileUri.getPath());
-        // creates RequestBody instance from file
-        RequestBody requestFile = RequestBody.create(MediaType.parse("image/"+imagePickedformat), file);
-        //RequestBody requestFile = RequestBody.create(MediaType.parse(getContentResolver().getType(fileUri)), file);
-        Timber.tag("babar").d(imagePickedformat);
-        // MultipartBody.Part is used to send also the actual filename
-        //todo : offer possibility user to rename the file when he sends it to Dribbble
-        MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-       // MultipartBody.Part body = MultipartBody.Part.createFormData("file", "lol", requestFile);
-
-
-        // adds another part within the multipart request
-        RequestBody title = RequestBody.create(MultipartBody.FORM, titleString);
-        // executes the request
-        Call<ResponseBody> call = DribbbleService.postShot(body, title);
-        Timber.tag("callMade").d(call.request().body().toString()
-        );
-
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Timber.d(response.toString());
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-            }
-        });
-    }*/
 
     /*************************************************************************
      * MANAGE NETWORK OPERATION EXCEPTION
@@ -652,4 +569,86 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
         });
     }
+
+    /*************************************************************************
+     * OTHERS
+     *************************************************************************/
+
+    /**
+     * Create tag List according to Dribbble pattern
+     */
+    private void createTagList() {
+        //create the list just one time, not any time the tags changed
+        if (mTags!=null && !mTags.isEmpty()) {
+            Pattern p = Pattern.compile(MyTextUtils.tagRegex);
+            Matcher m = p.matcher(mTags);
+            if (MyTextUtils.isDoubleQuoteCountEven(mTags)) {
+                // number is even or 0
+                tagList = new ArrayList<>();
+                while (m.find()) {
+                    //add to list the matched values and remove double quotes
+                    tagList.add(m.group(0));//replace("\"", ""));
+                }
+
+            }
+            else {
+                // number is odd: warn user and stop
+            }
+        }
+    }
+
+    private boolean isStartEditing() {
+      return false;
+    }
+
+
+
+
+    /*public String[] getTagArray() {
+        if (getTagList()!=null && !getTagList().isEmpty()) {
+            String[] array = new String[getTagList().size()];
+            for (int i = 0; i < getTagList().size(); i++) {
+                array[i] = getTagList().get(i);
+                Timber.d(array[i]);
+            }
+            Timber.d(array.toString());
+            return array;
+        }
+        else {
+            Timber.d("taglist null");
+            return null;
+        }
+    }*/
+
+    /*private void testPostShot(Uri fileUri, String titleString) {
+        File file = new File(fileUri.getPath());
+        // creates RequestBody instance from file
+        RequestBody requestFile = RequestBody.create(MediaType.parse("image/"+imagePickedformat), file);
+        //RequestBody requestFile = RequestBody.create(MediaType.parse(getContentResolver().getType(fileUri)), file);
+        Timber.tag("babar").d(imagePickedformat);
+        // MultipartBody.Part is used to send also the actual filename
+        //todo : offer possibility user to rename the file when he sends it to Dribbble
+        MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+       // MultipartBody.Part body = MultipartBody.Part.createFormData("file", "lol", requestFile);
+
+
+        // adds another part within the multipart request
+        RequestBody title = RequestBody.create(MultipartBody.FORM, titleString);
+        // executes the request
+        Call<ResponseBody> call = DribbbleService.postShot(body, title);
+        Timber.tag("callMade").d(call.request().body().toString()
+        );
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Timber.d(response.toString());
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
+    }*/
 }
