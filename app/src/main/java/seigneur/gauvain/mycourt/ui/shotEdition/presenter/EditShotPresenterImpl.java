@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import io.reactivex.Single;
@@ -47,6 +49,7 @@ import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.ImagePicker;
 import seigneur.gauvain.mycourt.utils.ImageUtils;
+import seigneur.gauvain.mycourt.utils.MyTextUtils;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import timber.log.Timber;
 
@@ -91,9 +94,6 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     private String shotDescription;
     private Shot shotToPublish;
 
-
-    ArrayList<String> lol;
-
     @Inject
     public EditShotPresenterImpl() {
     }
@@ -116,7 +116,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     @Override
     public void onImagePicked(Context context, int requestCode, int resultCode, Intent data) {
-        if (requestCode==Constants.PICK_IMAGE_ID) {
+        if (requestCode==Constants.PICK_IMAGE_REQUEST) {
             Timber.d(imagePickedformat);
             if (mEditShotView!=null) {
                 imagePickedFileName = ImagePicker.getImageNameFromResult(context, resultCode);
@@ -166,19 +166,25 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     @Override
     public void onConfirmEditionClicked(boolean isFromFab) {
-        //create the list just one time, not any time the tags changed
-        if (mTags!=null && mTags.length()>0)
-            lol = new ArrayList<String>(Arrays.asList(mTags.split(",")));
-            tagList = new ArrayList<>();
-            tagList.add("a");
-            tagList.add("b");
-            tagList.add("c");
-            Timber.d("taglist generated: "+tagList+"");
-
-        Timber.d("taglist generated: "+lol+"");
         if (mEditShotView!=null && isFromFab) //else is from the dialog called from onAbort method.
-                mEditShotView.openConfirmMenu();
+            mEditShotView.openConfirmMenu();
+        //create the list just one time, not any time the tags changed
+        if (mTags!=null && !mTags.isEmpty()) {
+            Pattern p = Pattern.compile(MyTextUtils.tagRegex);
+            Matcher m = p.matcher(mTags);
+            if (MyTextUtils.isDoubleQuoteCountEven(mTags)) {
+                // number is even or 0
+                tagList = new ArrayList<>();
+                while (m.find()) {
+                    //add to list the matched values and remove double quotes
+                    tagList.add(m.group(0));//replace("\"", ""));
+                }
 
+            }
+            else {
+                // number is odd: warn user and stop
+            }
+        }
     }
 
     @Override
@@ -238,8 +244,23 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     @Override
     public void onTagChanged(String tags) {
-       if (tags.length()>0)
+       if (!tags.isEmpty()) {
            mTags = tags;
+           //Regex function to count words separated by space or commas and remove blank space
+           // Zero or more whitespaces (\\s*)
+           //Arrow, or comma, or whitespace (=>|,|\\s)
+           //Zero or more whitespaces (\\s*)
+
+          // https://stackoverflow.com/questions/3654446/java-regex-help-splitting-string-on-spaces-and-commas
+
+           //final String tagsPattern = "(\\s+|\\s*,\\s*)";
+           //final String presquePattern ="(\\s*(\\\\s|,)\\\\s*'.*?'|\".*?\"|\\S+)"; //test  https://regexr.com
+           //final String finalpattern = "(\\s+|\\s*,\\s*|\"[^\\\"].*\\)";
+
+           String[] WC = tags.split("(\\s+|\\s*,\\s*)");
+           Timber.tag("tag test").d(WC.length+"");
+
+       }
     }
 
     private void registerOrUpdateDraft(Context context,boolean isRegisteringImage) {
@@ -342,7 +363,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                         getShotId(),
                         getShotDescription(),
                         getProfile(),
-                        lol,
+                        getTagList(),
                         shotTitle)
                         .doOnSuccess(new Consumer<Shot>() {
                             @Override

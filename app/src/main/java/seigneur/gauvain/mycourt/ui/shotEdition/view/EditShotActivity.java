@@ -167,7 +167,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            if (requestCode== Constants.PICK_IMAGE_ID)
+            if (requestCode== Constants.PICK_IMAGE_REQUEST)
                 mEditShotPresenter.onImagePicked(this, requestCode, resultCode, data);
             else
                 mEditShotPresenter.onImageCropped(requestCode,resultCode, data);
@@ -259,8 +259,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
 
     @Override
     public void openImagePicker() {
-        Intent chooseImageIntent = ImagePicker.getPickImageIntent(EditShotActivity.this);
-        startActivityForResult(chooseImageIntent, Constants.PICK_IMAGE_ID);
+        ImagePicker.pickImage(this, Constants.PICK_IMAGE_REQUEST);
     }
 
     @Override

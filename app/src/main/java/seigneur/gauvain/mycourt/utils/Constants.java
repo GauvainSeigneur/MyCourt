@@ -21,7 +21,8 @@ public class Constants {
 
     public static final int NO_TEAM_ID = -1;
 
-    public static final int PICK_IMAGE_ID = 234; // the number doesn't matter
+    //public static final int PICK_IMAGE_ID = 1001; // the number doesn't matter
+    public static final int PICK_IMAGE_REQUEST = 1001; // the number doesn't matter
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({EDIT_MODE_NEW_SHOT, EDIT_MODE_UPDATE_SHOT})
