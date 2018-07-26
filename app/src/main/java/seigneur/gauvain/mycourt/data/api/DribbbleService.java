@@ -58,27 +58,15 @@ public interface DribbbleService {
             @Field("title") String title
     );
 
-
-    //todo : check this : https://medium.com/@adinugroho/upload-image-from-android-app-using-retrofit-2-ae6f922b184c
     @Multipart
     @POST("shots")
-    Call<ResponseBody> postShot(
-            @Part MultipartBody.Part image,
-            @Part("title") RequestBody title
-           // @Part("description") RequestBody description,
-            //@Part("low_profile") RequestBody isLowProfile
-    );
-
-    @Multipart
-    @POST("shots")
-    Observable<Shot> postShotTwo(
+    Observable<Shot> postShot(
             @Part MultipartBody.Part image,
             @Part("title") RequestBody title
             // @Part("description") RequestBody description,
             //@Part("low_profile") RequestBody isLowProfile
     );
 
-    //https://code.tutsplus.com/tutorials/sending-data-with-retrofit-2-http-client-for-android--cms-27845
     @POST("shots")
     @FormUrlEncoded
     Call<Project> postProject(

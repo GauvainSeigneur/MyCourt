@@ -185,10 +185,15 @@ public class ShotsFragment extends BaseFragment implements ShotsView {
 
     @Override
     public void showLoadingFooter(boolean isVisible) {
-        if (isVisible)
+        /*if (isVisible)
             adapter.addLoadingFooter();
         else
-            adapter.removeLoadingFooter();
+           adapter.removeLoadingFooter();*/
+    }
+
+    @Override
+    public void showEndListMessage(boolean isVisible) {
+
     }
 
     @Override

@@ -6,7 +6,6 @@
     android:id="@+id/user_link_layout"
     android:layout_margin="@dimen/padding_8"
     android:background="@drawable/social_item_background"
-    android:backgroundTint="@color/colorAccent"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 

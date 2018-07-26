@@ -11,9 +11,8 @@ import android.view.ViewGroup;
 
 
 public abstract class BaseFragment extends Fragment {
-    public View rootview;
+    public View mRootview;
     public Activity activity;
-    public boolean isNewInstance;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -25,14 +24,11 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        //issue :fragment instance lost on Activity Resume after some time inactive : app crash
-        //solution : put the view variable inside class and inflating it as new only if the view instance is null or otherwise use the one created before - (todo-to be tested : DOESN'T WORK AS EXPECTED)
-        //source solution :  https://stackoverflow.com/questions/18428152/stop-fragment-from-being-recreated-after-resume
-        if (rootview == null) {
-            rootview = inflater.inflate(getFragmentLayout(), container, false );
-            onCreateView(rootview,savedInstanceState);
+        if (mRootview == null) {
+            mRootview = inflater.inflate(getFragmentLayout(), container, false );
+            onCreateView(mRootview,savedInstanceState);
         }
-        return rootview;
+        return mRootview;
 
     }
 

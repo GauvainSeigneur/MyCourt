@@ -16,8 +16,6 @@ import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.local.SharedPrefs;
 import seigneur.gauvain.mycourt.utils.Constants;
 
-//activity only dedicated to UI for now
-//dynamic theme based on this example: https://medium.com/@vinitagrawal91/android-colors-and-multiple-themes-fdfca3f75a15
 public class BaseActivity extends AppCompatActivity {
 
     private AlertDialog mAlertDialog;

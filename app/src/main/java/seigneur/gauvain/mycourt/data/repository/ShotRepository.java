@@ -47,7 +47,7 @@ public class ShotRepository {
 
     public Observable<Shot> postShot(MultipartBody.Part body,
                                          RequestBody title) {
-        return mDribbbleService.postShotTwo(body, title)
+        return mDribbbleService.postShot(body, title)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

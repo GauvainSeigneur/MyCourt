@@ -40,18 +40,4 @@ public interface PostDao {
     @Query("DELETE FROM shotdraft WHERE id = :id")
     int deletDraftByID(int id);
 
-   /* @Delete
-    void delete(ShotDraft... posts);*/
-
-    /*@Insert(onConflict = OnConflictStrategy.REPLACE)
-    void saveAPost(ShotDraft post);*/
-
-    /*@Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertAll(ShotDraft... posts);
-
-    @Update
-    void updateAllPosts(ShotDraft... posts);
-
-    @Update
-    void update(ShotDraft post);*/
 }

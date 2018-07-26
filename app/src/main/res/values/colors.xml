@@ -1,26 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!--<color name="colorPrimaryLight">#2a2d33</color>
-    <color name="colorPrimary">#2A2C33</color>
-    <color name="colorPrimaryDark">#21272E</color>
-    <color name="colorAccent">#FB6794</color>
-    <color name="delete_chip_icon_bg">#8C222222</color>
-    <color name="color_title_primary">#F9F9F9</color>-->
-
     <color name="colorPrimaryLight">#292B33</color>
     <color name="colorPrimary">#1E1E24</color>
     <color name="colorPrimaryDark">#1E1E24</color>
     <color name="colorAccent">#FB6794</color>
     <color name="delete_chip_icon_bg">#8C222222</color>
     <color name="color_title_primary">#F9F9F9</color>
-
-    <color name="background_light">#F9F9F9</color>
     <color name="background_primary">#1E1E24</color>
     <color name="content_placeholder">#ffe0e0e0</color>
     <color name="mid_grey">#40808080</color>
     <color name="confirm_edition_background">#33000000</color>
-
     <color name="colorWhite">#FFFFFFFF</color>
 
     <!-- Text -->
@@ -33,6 +22,10 @@
     <color name="colorDraftContent">#E6FFFFFF</color><!-- 65% opacity-->
 
     <!--social colors -->
+
+    <color name="colorInstagramOne">#F6C584</color>
+    <color name="colorInstagramTwo">#F09BA6</color>
+    <color name="colorInstagramThree">#EC7AC1</color>
     <color name="colorFacebook">#3B5998</color>
     <color name="colorGithub">#e36209 </color>
 

@@ -123,7 +123,6 @@ public class ShotsPresenterImpl implements ShotsPresenter {
                                     //progressBar.setVisibility(View.GONE); //todo
                                     mShotsView.showFirstFecthErrorView(false);
                                     mShotsView.addShots(shots);
-                                    mShotsView.showLoadingFooter(true);
                                 }
 
                             }
@@ -154,29 +153,30 @@ public class ShotsPresenterImpl implements ShotsPresenter {
                             @Override
                             public void accept(List<Shot> shots) throws Exception {
                                 isLoading = false;
-                                Timber.tag("newRequest").d(shots.size()+"");
-                                oldList=shots;
+                                if (oldList==null)
+                                    oldList=shots;
                                 if (shots.size()<Constants.PER_PAGE) {
                                     Timber.tag("newrequest").d("not the same size");
                                     isReachedLastPage =true; //stop request on scroll
                                     if (mShotsView!=null) {
+                                        //mShotsView.showLoadingFooter(false);
+                                        mShotsView.showEndListMessage(true);
                                         mShotsView.addShots(shots);
-                                        mShotsView.showLoadingFooter(false);
                                     }
                                 } else {
-                                    if (!oldList.get(0).getId().equals(shots.get(0).getId())){
+                                    if (oldList.get(0).getId().equals(shots.get(0).getId())){
                                         Timber.tag("newrequest").d("same id");
                                         isReachedLastPage =true; //continue request on scroll
                                         if (mShotsView!=null) {
-                                           // mShotsView.addShots(shots);
-                                            mShotsView.showLoadingFooter(false);
+                                            mShotsView.showEndListMessage(true);
+                                            //mShotsView.showLoadingFooter(false);
                                         }
                                     } else {
                                         Timber.tag("newrequest").d("not same id");
+                                        oldList=shots;
                                         isReachedLastPage =false; //continue request on scroll
                                         if (mShotsView!=null) {
                                             mShotsView.addShots(shots);
-                                            mShotsView.showLoadingFooter(true);
                                         }
                                     }
                                 }
@@ -215,7 +215,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
                                     mShotsView.stopRefreshing();
                                     mShotsView.clearShots(); // todo - use diffutils in order to not use clear all the list
                                     mShotsView.addShots(shots); // todo - use diffutils in order
-                                    mShotsView.showLoadingFooter(true);
+                                    //mShotsView.showLoadingFooter(true);
                                 }
 
                             }

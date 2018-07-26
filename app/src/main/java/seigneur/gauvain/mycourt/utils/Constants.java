@@ -12,17 +12,18 @@ public class Constants {
     public static final String HEADER_CACHE = "android-cache";
     public static final String RESPONSE_CACHE_DELAY = "ResponseCacheDelay";
     public static final String HEADER_SHOT_ID = "ShotID";
+    //pagination
+    public static final int PAGE_START = 1;
+    public static int CURRENT_PAGE = PAGE_START;
+    public static final int PER_PAGE = 10;
 
     /**
      * INTERNAL CONSTANTS
      */
     public static final int REQUEST_STORAGE_READ_ACCESS_PERMISSION = 101;
     public static final int REQUEST_STORAGE_WRITE_ACCESS_PERMISSION = 102;
-
     public static final int NO_TEAM_ID = -1;
-
-    //public static final int PICK_IMAGE_ID = 1001; // the number doesn't matter
-    public static final int PICK_IMAGE_REQUEST = 1001; // the number doesn't matter
+    public static final int PICK_IMAGE_REQUEST = 1001;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({EDIT_MODE_NEW_SHOT, EDIT_MODE_UPDATE_SHOT})
@@ -46,12 +47,15 @@ public class Constants {
     public static final int SOURCE_FAB              = 703; //from a fab (new draft)
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({EDIT_MODE_NEW_SHOT, EDIT_MODE_UPDATE_SHOT})
+    @IntDef({CROP_MODE_HD, CROP_MODE_NORMAL,CROP_MODE_GIF_INCORRET_FORMAT})
     public @interface ImageCroppingMode {}
     public static final int CROP_MODE_HD = 801; //800*600
     public static final int CROP_MODE_NORMAL = 802; //400*300
     public static final int CROP_MODE_GIF_INCORRET_FORMAT = 803; //gif can't be cropped, so it must directly correct format
 
+    /**
+     * Social
+     */
     public static final String INSTAGRAM = "instagram";
     public static final String FACEBOOK = "facebook";
     public static final String GITHUB = "github";
@@ -60,16 +64,5 @@ public class Constants {
     public static final String MEDIUM = "medium";
     public static final String BEHANCE = "behance";
     public static final String LINKEDIN = "linkedin";
-
-    //pagination
-    public static final int PAGE_START = 1;
-    public static int CURRENT_PAGE = PAGE_START;
-    public static final int PER_PAGE = 30;
-
-    //use it like this in activity
-    /*@EditionMode
-    public abstract int getEditionMode();
-    // Attach the annotation
-    public abstract void setEditionMode(@EditionMode int mode);*/
 
 }

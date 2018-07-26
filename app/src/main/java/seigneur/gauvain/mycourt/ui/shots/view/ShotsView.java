@@ -19,11 +19,13 @@ public interface ShotsView {
 
     //void showRecyclerview(boolean visible);
 
-    void addShots(List<Shot> shots);
+    void addShots(List<Shot> shots); //must set as observable to ake loader visible again
 
     void clearShots();
 
     void showLoadingFooter(boolean visible);
+
+    void showEndListMessage(boolean visible);
 
     void goToShotDetail(Shot shot, int position);
 

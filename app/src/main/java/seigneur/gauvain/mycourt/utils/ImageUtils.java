@@ -40,11 +40,11 @@ public class ImageUtils {
 
     /**
      * Go to cropping activity
-     * @param ImageCroppedFormat
-     * @param source of the view :set by the return intent from ImagePicker
-     * @param destination : uri of destination folder: cacheDif
-     * @param activity
-     * @param imageSize
+     * @param ImageCroppedFormat -  PNG, JPEG, GIF
+     * @param source of the view  - set by the return intent from ImagePicker
+     * @param destination - uri of destination folder: cacheDif
+     * @param activity - context
+     * @param imageSize - height and width in pixels
      */
     public static void goToUCropActivity(String ImageCroppedFormat,
                                          Uri source,
@@ -55,7 +55,8 @@ public class ImageUtils {
         options.setStatusBarColor(activity.getResources().getColor(R.color.colorPrimaryDark));
         options.setToolbarColor(activity.getResources().getColor(R.color.colorPrimary));
         options.setActiveWidgetColor(activity.getResources().getColor(R.color.colorAccent));
-        //todo : refactor this! it does not prevent issue!
+        //if image is Gif, it can't be cropped. so check if the px size is in accordance to
+        //Dribbble specifications
         if (ImageCroppedFormat!=null && ImageCroppedFormat.equals("gif")){
             if (imageSize[0]==800 && imageSize[1]==600 || imageSize[0]==400
                     && imageSize[1]==300 ) {
@@ -70,6 +71,7 @@ public class ImageUtils {
                 Toast.makeText(activity, "gif can't be cropped. the size must be...", Toast.LENGTH_SHORT).show();
             }
         } else {
+            //HD image set withMaxResultSize in accordance
             if (imageSize[0]>=800 && imageSize[1]>=600) {
                 UCrop.of(source, destination)
                         .withAspectRatio(4, 3)
@@ -79,6 +81,7 @@ public class ImageUtils {
                 Timber.d("crop hd mode");
             }
             else {
+                //NORMAL image set withMaxResultSize in accordance
                 UCrop.of(source, destination)
                         .withAspectRatio(4, 3)
                         .withOptions(options)
@@ -92,6 +95,11 @@ public class ImageUtils {
     /**
      * Return file path of Image after being saved in gallery
      * Must use Single or Observable to get the Uri returned
+     * @param ImageCroppedFormat -  PNG, JPEG, GIF
+     * @param croppedFileUri -  uri of the image (in temp files) after being cropped
+     * @param context - activity
+     * @return the file absolute path saved
+     * @throws Exception - stream broke up
      */
     public static String saveImageAndGetItsFinalUri(String ImageCroppedFormat, Uri croppedFileUri, Context context) throws Exception {
         Timber.d(croppedFileUri.getLastPathSegment());
@@ -120,24 +128,8 @@ public class ImageUtils {
     }
 
     /**
-     * get the uri of the saved cropped image: to be used to save ShotDraft object in Room
-     * @return UriOfImageCroppedSaved
-     */
-    public static Uri getUriOfImageCroppedSaved(){
-        return mUriOfImageCroppedSaved;
-    }
-
-    /**
-     * set UriOgImageCropped
-     * @param uriOfImageCroppedSaved
-     */
-    public static void setUriOfImageCroppedSaved(Uri uriOfImageCroppedSaved) {
-        mUriOfImageCroppedSaved = uriOfImageCroppedSaved;
-    }
-
-    /**
      * get extension of Image from Image picker intent result
-     * @param uri of the image selected by user
+     * @param uri - uri the image selected by user
      * @return the format. must be JPG, PNG or GIF. Nothing else
      */
     public static String getImageExtension(Uri uri, Context context) {
@@ -147,6 +139,35 @@ public class ImageUtils {
         return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
     }
 
+    /**
+     * Get the the file system path from the content provider uri
+     * @param context - activity or fragment
+     * @param selectedImageUri - Uri of the image
+     * @return the system file url (get the file)
+     */
+    public static String getRealPathFromImage(Context context, Uri selectedImageUri) {
+        String selectedImagePath = null;
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = context.getContentResolver().query(selectedImageUri,
+                projection, null, null, null);
+        if (cursor == null) {
+            selectedImagePath = selectedImageUri.getPath();
+        } else {
+            if (!cursor.moveToFirst()) {
+                cursor.moveToFirst();
+                int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                selectedImagePath = cursor.getString(idx);
+            }
+        }
+        return selectedImagePath;
+    }
+
+
+    /**
+     * Transform image to bitmap
+     * @param drawable - resource load from Glide
+     * @return the bitmap
+     */
     public static Bitmap drawableToBitmap(Drawable drawable) {
         if (drawable instanceof BitmapDrawable) {
             return ((BitmapDrawable) drawable).getBitmap();
@@ -170,37 +191,14 @@ public class ImageUtils {
         return bitmap;
     }
 
-    public static String getRealPathFromImage(Context context, Uri selectedImageUri) {
-        String selectedImagePath = null;
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = context.getContentResolver().query(selectedImageUri,
-                projection, null, null, null);
-        if (cursor == null) {
-            selectedImagePath = selectedImageUri.getPath();
-        } else {
-            if (!cursor.moveToFirst()) {
-                cursor.moveToFirst();
-                int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-                selectedImagePath = cursor.getString(idx);
-            }
-        }
-        return selectedImagePath;
-    }
 
-    public static Bitmap decodeBitmap(Context context, Uri uri, int sampleSize) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        AssetFileDescriptor fileDescriptor = null;
-        Bitmap actuallyUsableBitmap = null;
-        try {
-            fileDescriptor = context.getContentResolver().openAssetFileDescriptor(uri, "r");
-            actuallyUsableBitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor.getFileDescriptor(), null, options);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Timber.d("error");
-        }
-        return actuallyUsableBitmap;
-    }
-
+    /**
+     * Get the image height and width to
+     * @param context
+     * @param uri
+     * @param sampleSize
+     * @return
+     */
     public static int[] imagePickedWidthHeight(Context context, Uri uri, int sampleSize) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         AssetFileDescriptor fileDescriptor = null;
@@ -218,6 +216,36 @@ public class ImageUtils {
         else
             return new int[] {0,0};
 
+    }
+
+    /**
+     * get the uri of the saved cropped image: to be used to save ShotDraft object in Room
+     * @return UriOfImageCroppedSaved
+     */
+    public static Uri getUriOfImageCroppedSaved(){
+        return mUriOfImageCroppedSaved;
+    }
+
+    /**
+     * set UriOgImageCropped
+     * @param uriOfImageCroppedSaved
+     */
+    public static void setUriOfImageCroppedSaved(Uri uriOfImageCroppedSaved) {
+        mUriOfImageCroppedSaved = uriOfImageCroppedSaved;
+    }
+
+    public static Bitmap decodeBitmap(Context context, Uri uri, int sampleSize) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        AssetFileDescriptor fileDescriptor = null;
+        Bitmap actuallyUsableBitmap = null;
+        try {
+            fileDescriptor = context.getContentResolver().openAssetFileDescriptor(uri, "r");
+            actuallyUsableBitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor.getFileDescriptor(), null, options);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Timber.d("error");
+        }
+        return actuallyUsableBitmap;
     }
 
 }

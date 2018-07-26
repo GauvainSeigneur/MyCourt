@@ -64,8 +64,7 @@ public class UserLinksAdapter extends RecyclerView.Adapter<LinksViewHolder> {
         switch(ListUtils.mapToListKey(links).get(position)) {
             case INSTAGRAM:
                 holder.linkIcon.setImageResource(R.drawable.ic_instagram);
-                holder.linklayout.setBackgroundTintList(ColorStateList.valueOf(
-                        mContext.getResources().getColor(R.color.colorFacebook)));
+                holder.linklayout.setBackgroundResource(R.drawable.social_item_background_instagram);
                 break;
             case FACEBOOK:
                 holder.linkIcon.setImageResource(R.drawable.ic_facebook);
@@ -94,6 +93,8 @@ public class UserLinksAdapter extends RecyclerView.Adapter<LinksViewHolder> {
                 break;
             default:
                 holder.linkIcon.setImageResource(R.drawable.ic_web);
+                holder.linklayout.setBackgroundTintList(ColorStateList.valueOf(
+                        mContext.getResources().getColor(R.color.colorAccent)));
         }
     }
 
