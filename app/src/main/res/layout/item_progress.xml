@@ -60,4 +60,26 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/endlist_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/padding_16"
+        android:paddingTop="@dimen/padding_16"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/endlist_text"
+            style="@style/Base.TextAppearance.AppCompat.Body1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textAlignment="center"
+            tools:text="you reached the end of the list"/>
+
+    </LinearLayout>
+
 </FrameLayout>

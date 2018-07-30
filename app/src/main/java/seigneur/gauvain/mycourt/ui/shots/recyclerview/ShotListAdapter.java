@@ -26,6 +26,7 @@ import java.util.List;
 
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.Shot;
+import timber.log.Timber;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 //refactor recyclerview : https://jayrambhia.com/blog/footer-loader
@@ -43,6 +44,7 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private ShotListCallback mCallback;
 
     private String errorMsg;
+    private String endMessage;
 
     public ShotListAdapter(Context context, ShotListCallback callback) {
         this.context = context;
@@ -111,13 +113,20 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 LoadingVH loadingVH = (LoadingVH) holder;
                 if (retryPageLoad) {
                     loadingVH.mErrorLayout.setVisibility(View.VISIBLE);
+                    loadingVH.mEndListlayout.setVisibility(View.GONE);
                     loadingVH.mProgressBar.setVisibility(View.GONE);
                     loadingVH.mErrorTxt.setText(
                             errorMsg != null ?
                                     errorMsg :
                                     context.getString(R.string.error_msg_unknown));
                 } else if (isEndListReached)  {
-
+                    loadingVH.mErrorLayout.setVisibility(View.GONE);
+                    loadingVH.mEndListlayout.setVisibility(View.VISIBLE);
+                    loadingVH.mProgressBar.setVisibility(View.GONE);
+                    loadingVH.mEndListText.setText(
+                            endMessage != null ?
+                                    endMessage :
+                                    context.getString(R.string.error_msg_unknown));
                 } else {
                     loadingVH.mErrorLayout.setVisibility(View.GONE);
                     loadingVH.mProgressBar.setVisibility(View.VISIBLE);
@@ -129,12 +138,10 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public int getItemCount() {
         //return shotsResults == null ? 0 : shotsResults.size();
-
         // If no items are present, there's no need for loader
         if (shotsResults == null || shotsResults.size() == 0) {
             return 0;
         }
-
         // +1 for loader
         return shotsResults.size() + 1;
     }
@@ -156,7 +163,6 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     /****************************************************************************
      * Pagination
      * *************************************************************************/
-
     public void add(Shot r) {
         shotsResults.add(r);
         notifyItemInserted(shotsResults.size());
@@ -214,7 +220,8 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
      */
     public void showRetry(boolean show, @Nullable String errorMsg) {
         retryPageLoad = show;
-        notifyItemChanged(shotsResults.size() - 1);
+        //notifyItemChanged(shotsResults.size() - 1);
+        notifyItemChanged(shotsResults.size());
         if (errorMsg != null) this.errorMsg = errorMsg;
     }
 
@@ -223,9 +230,11 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
      *
      */
     public void showEndListMessage(boolean show, @Nullable String message) {
-        retryPageLoad = show;
-        notifyItemChanged(shotsResults.size() - 1);
-        if (message != null) this.errorMsg = message;
+        Timber.tag("newrequest").d("showEndListMessage of adapter called");
+        isEndListReached = show;
+        if (message != null) this.endMessage = message;
+        //notifyDataSetChanged();
+        notifyItemChanged(shotsResults.size());
     }
 
 
@@ -238,6 +247,8 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         private ImageButton mRetryBtn;
         private TextView mErrorTxt;
         private LinearLayout mErrorLayout;
+        private TextView mEndListText;
+        private LinearLayout mEndListlayout;
 
         public LoadingVH(View itemView) {
             super(itemView);
@@ -246,6 +257,8 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             mRetryBtn = (ImageButton) itemView.findViewById(R.id.loadmore_retry);
             mErrorTxt = (TextView) itemView.findViewById(R.id.loadmore_errortxt);
             mErrorLayout = (LinearLayout) itemView.findViewById(R.id.loadmore_errorlayout);
+            mEndListText = (TextView) itemView.findViewById(R.id.endlist_text);
+            mEndListlayout = (LinearLayout) itemView.findViewById(R.id.endlist_layout);
 
             mRetryBtn.setOnClickListener(this);
             mErrorLayout.setOnClickListener(this);

@@ -13,7 +13,7 @@ public interface ShotsPresenter extends BasePresenter {
 
     void onShotClicked(Shot shot, int position);
 
-    boolean onLastPageReached();
+    boolean isLastPageReached();
 
     boolean isLoading();
 

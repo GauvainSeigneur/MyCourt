@@ -10,6 +10,8 @@ public interface ShotsView {
 
     void showNextFetchError(boolean isVisible, String error);
 
+    void showEndListReached(boolean isVisible, String message);
+
     /**
      * User is set has a prospect, so he can upload shot,
      * but in this case he doesn't upload any shot
@@ -24,8 +26,6 @@ public interface ShotsView {
     void clearShots();
 
     void showLoadingFooter(boolean visible);
-
-    void showEndListMessage(boolean visible);
 
     void goToShotDetail(Shot shot, int position);
 

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -28,6 +29,7 @@ import seigneur.gauvain.mycourt.ui.shots.recyclerview.ShotListCallback;
 import seigneur.gauvain.mycourt.ui.shots.recyclerview.ShotScrollListener;
 import seigneur.gauvain.mycourt.ui.shots.presenter.ShotsPresenter;
 import seigneur.gauvain.mycourt.ui.shotDetail.view.ShotDetailActivity;
+import timber.log.Timber;
 
 /**
  * Created by gse on 22/11/2017.
@@ -91,6 +93,13 @@ public class ShotsFragment extends BaseFragment implements ShotsView {
         //bindView here
         ButterKnife.bind(this, rootView);
         mShotsPresenter.onAttach();
+        DefaultItemAnimator animator = new DefaultItemAnimator() {
+            @Override
+            public boolean canReuseUpdatedViewHolder(RecyclerView.ViewHolder viewHolder) {
+                return true;
+            }
+        };
+        recyclerView.setItemAnimator(animator);
         recyclerView.setLayoutManager(mGridLayoutManager);
         recyclerView.setAdapter(adapter);
         recyclerView.addOnScrollListener(new ShotScrollListener(mGridLayoutManager) {
@@ -103,7 +112,7 @@ public class ShotsFragment extends BaseFragment implements ShotsView {
 
             @Override
             public boolean isLastPage() {
-                return mShotsPresenter.onLastPageReached();
+                return mShotsPresenter.isLastPageReached();
             }
 
             @Override
@@ -192,27 +201,26 @@ public class ShotsFragment extends BaseFragment implements ShotsView {
     }
 
     @Override
-    public void showEndListMessage(boolean isVisible) {
-
-    }
-
-    @Override
     public void showFirstFecthErrorView(boolean isVisible) {
         if (isVisible)
-            Toast.makeText(activity, "error fetch first list!!!!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "error fetch first list!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void showNextFetchError(boolean isVisible, String error) {
-        if (isVisible)
-            adapter.showRetry(isVisible, error);
+        adapter.showRetry(isVisible, error);
+    }
+
+    @Override
+    public void showEndListReached(boolean isVisible, String message) {
+        Timber.tag("newrequest").d("showEndListReached called");
+        adapter.showEndListMessage(isVisible, message);
     }
 
     @Override
     public void showEmptyListView(boolean visible) {
-        if(visible) {
+        if(visible)
             Toast.makeText(activity, "list empty", Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override
