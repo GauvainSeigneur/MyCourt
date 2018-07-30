@@ -61,6 +61,40 @@ public class ShotDraftPresenterImpl implements ShotDraftPresenter {
         }
     }
 
+    //todo - use May be instead of Single
+    private Single<List<ShotDraft>> getShotDrafts(boolean isRefreshing) {
+        Timber.d ("getPostFromDB called");
+        return mShotDraftRepository.getShotDraft()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(shotDrafts ->{
+                    Timber.d("list loaded"+shotDrafts.toString());
+                    if (mShotDraftView!=null) {
+                        mShotDraftView.stopRefresh();
+                        if (!shotDrafts.isEmpty()) {
+                            mShotDraftView.showEmptyView(false);
+                            mShotDraftView.showDraftList(shotDrafts, isRefreshing);
+                        } else {
+                            mShotDraftView.showEmptyView(true);
+                        }
+                    }
+                })
+                .doOnError(t-> {
+                    Timber.d(t);
+                    if (mShotDraftView!=null) {
+                        mShotDraftView.stopRefresh();
+                    }
+                });
+    }
+
+    private void doOnShotDratFetched(List<ShotDraft> shotDrafts){
+
+    }
+
+    private void doOnShotDraftError(Throwable throwable){
+
+    }
+
     private Single<List<ShotDraft>> getPostFromDB(boolean isRefreshing) {
         Timber.d ("getPostFromDB called");
         return mShotDraftRepository.getShotDraft()
