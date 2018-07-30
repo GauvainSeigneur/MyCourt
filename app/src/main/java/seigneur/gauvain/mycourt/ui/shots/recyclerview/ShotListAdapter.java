@@ -79,7 +79,7 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 //shotViewHolder.title.setText(shotList.getTitle());
                 Glide
                         .with(context)
-                        .load(Uri.parse(shotItem.getTeaserUrl()))
+                        .load(Uri.parse(shotItem.getImageUrl()))
                         .transition(withCrossFade())
                         .apply(new RequestOptions()
                                 .dontAnimate()

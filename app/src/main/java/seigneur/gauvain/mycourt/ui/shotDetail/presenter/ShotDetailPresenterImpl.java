@@ -61,12 +61,7 @@ public class ShotDetailPresenterImpl implements ShotDetailPresenter {
              * if not, just go to Edition
              */
             Timber.d(mShot.getId());
-            compositeDisposable.add(getShotDraftByShotId(mShot.getId())
-                    .subscribe(
-                            s -> doIfDraftFoundInDB(s),
-                            t -> Timber.e(t),
-                            () ->doIfNoDraftFoundInDB()
-                    ));
+            checkDraftAndGoToEdition();
         }
 
     }
@@ -90,42 +85,61 @@ public class ShotDetailPresenterImpl implements ShotDetailPresenter {
         }
     }
 
+    /**************************************************************************
+     * Get Shot clicked
+     *************************************************************************/
     private void getShot() {
-        Single.just(mTempDataRepository.getShot())
-                .subscribe(getShotObserver());
+        compositeDisposable.add(Single.just(mTempDataRepository.getShot())
+                //.subscribe(getShotObserver());
+                .subscribe(
+                        this::doOnShotRetrieve, //success
+                        this::doOnShotError //error
+                )
+        );
     }
 
-    private SingleObserver<Shot> getShotObserver() {
-        return new SingleObserver<Shot>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-            }
-
-            @Override
-            public void onSuccess(Shot shot) {
-                if (mShotDetailView!=null) {
-                    mShot=shot;
-                    mShotDetailView.loadShotImage(shot);
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                if (mShotDetailView!=null) {
-                    //todo - do something better
-                    mShotDetailView.showErrorView(true);
-                }
-            }
-        };
+    /**
+     * Manage when shot is retrieved
+     * @param shot - shot retrieve from TempRepository
+     */
+    private void doOnShotRetrieve(Shot shot) {
+        if (mShotDetailView!=null) {
+            mShot=shot;
+            mShotDetailView.loadShotImage(shot);
+        }
     }
 
-    private Maybe<ShotDraft> getShotDraftByShotId(String shotId) {
-        Timber.d ("getPostFromDB called");
-        return mShotDraftRepository.getShotDraftByShotId(shotId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+    /**
+     * Manage error
+     * @param error - Throwable
+     */
+    private void doOnShotError(Throwable error) {
+        if (mShotDetailView!=null) {
+            //todo - do something better
+            mShotDetailView.showErrorView(true);
+        }
     }
 
+    /**************************************************************************
+     * Check if the shot has already a draft saved in DB. if it has,
+     * call its draft, if not, just go to Edition
+     *************************************************************************/
+    private void checkDraftAndGoToEdition() {
+        compositeDisposable.add(
+                mShotDraftRepository.getShotDraftByShotId(mShot.getId())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                this::doIfDraftFoundInDB, //maybe onNext: shot draft found
+                                t -> Timber.e(t), //error
+                                this::doIfNoDraftFoundInDB //maybe onComplete without onNext called : nothing found
+                        ));
+    }
+
+    /**
+     * Manage if ShotDraft is found in db
+     * @param shotDraft - shotDRaft found in db
+     */
     private void doIfDraftFoundInDB(ShotDraft shotDraft) {
         Timber.d("Draft already exists");
         mTempDataRepository.setDraftCallingSource(Constants.SOURCE_DRAFT);
@@ -133,6 +147,9 @@ public class ShotDetailPresenterImpl implements ShotDetailPresenter {
         mShotDetailView.goToShotEdition();
     }
 
+    /**
+     * Manage if no ShotDraft found in db
+     */
     private void doIfNoDraftFoundInDB() {
         Timber.d("no item found");
         mTempDataRepository.setDraftCallingSource(Constants.SOURCE_SHOT);

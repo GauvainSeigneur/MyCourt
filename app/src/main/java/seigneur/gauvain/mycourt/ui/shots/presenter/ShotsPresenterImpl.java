@@ -102,7 +102,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
     }
 
     /**************************************************************************
-     * first load of data
+     * First load of data
      *************************************************************************/
     private void loadFirstPage(int page) {
         Timber.d("loadFirstPage: ");
@@ -118,9 +118,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
-                                shots -> {
-                                    doOnFirstPageNext(shots);
-                                },
+                                this::doOnFirstPageNext,
                                 error -> {
                                     handleRetrofitError(error);
                                     doOnFirstPageError(error);
@@ -171,9 +169,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
-                                shots -> {
-                                    doOnNextPageNext(shots);
-                                    },
+                                this::doOnNextPageNext,
                                 error -> {
                                     handleRetrofitError(error);
                                     doOnNextPageError(error);
@@ -236,22 +232,14 @@ public class ShotsPresenterImpl implements ShotsPresenter {
                         Constants.PER_PAGE+1) //+1 in order to not finish with one item empty
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .doOnNext(new Consumer<List<Shot>>() {
-                            @Override
-                            public void accept(List<Shot> shots) throws Exception {
-                                doOnRefreshNext(shots);
-                            }
-                        })
-                        .doOnError(new Consumer<Throwable>() {
-                            @Override
-                            public void accept(Throwable error) throws Exception {
-                                handleRetrofitError(error);
-                                doOnRefreshError(error);
-                            }
+                        .subscribe(
+                                this::doOnRefreshNext, //success
+                                error -> {
+                                    handleRetrofitError(error);
+                                    doOnRefreshError(error);
+                                }
+                        )
 
-                        })
-
-                        .subscribe()
         );
     }
 
