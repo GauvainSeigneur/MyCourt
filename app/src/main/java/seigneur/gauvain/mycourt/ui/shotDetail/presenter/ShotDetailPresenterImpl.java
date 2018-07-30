@@ -103,8 +103,8 @@ public class ShotDetailPresenterImpl implements ShotDetailPresenter {
      * @param shot - shot retrieve from TempRepository
      */
     private void doOnShotRetrieve(Shot shot) {
+        mShot=shot;
         if (mShotDetailView!=null) {
-            mShot=shot;
             mShotDetailView.loadShotImage(shot);
         }
     }
@@ -144,7 +144,8 @@ public class ShotDetailPresenterImpl implements ShotDetailPresenter {
         Timber.d("Draft already exists");
         mTempDataRepository.setDraftCallingSource(Constants.SOURCE_DRAFT);
         mTempDataRepository.setShotDraft(shotDraft);
-        mShotDetailView.goToShotEdition();
+        if (mShotDetailView!=null)
+            mShotDetailView.goToShotEdition();
     }
 
     /**
@@ -155,7 +156,8 @@ public class ShotDetailPresenterImpl implements ShotDetailPresenter {
         mTempDataRepository.setDraftCallingSource(Constants.SOURCE_SHOT);
         mTempDataRepository.setShot(mShot);
         //mTempDataRepository.setEditionMode(Constants.EDIT_MODE_UPDATE_SHOT);
-        mShotDetailView.goToShotEdition();
+        if (mShotDetailView!=null)
+            mShotDetailView.goToShotEdition();
     }
 
 
