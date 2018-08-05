@@ -8,8 +8,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.main.view.MainActivity">
 
-
-
     <FrameLayout
         android:id="@+id/fragment_place_holder"
         android:layout_width="match_parent"
@@ -22,6 +20,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
+        app:itemHorizontalTranslationEnabled="false"
+        app:labelVisibilityMode="unlabeled"
+        app:itemIconSize="28dp"
         app:itemIconTint="@drawable/selector_item_bottom_nav"
         app:itemTextColor="@drawable/selector_item_bottom_nav"
         android:background="@color/colorPrimary"

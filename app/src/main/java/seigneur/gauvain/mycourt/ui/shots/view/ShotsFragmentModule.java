@@ -6,6 +6,8 @@ import dagger.Binds;
 import dagger.Module;
 import seigneur.gauvain.mycourt.di.scope.PerFragment;
 import seigneur.gauvain.mycourt.ui.shots.presenter.ShotsPresenterModule;
+import seigneur.gauvain.mycourt.ui.shots.recyclerview.ShotListAdapter;
+import seigneur.gauvain.mycourt.ui.shots.recyclerview.ShotListCallback;
 
 
 @Module(includes={
@@ -33,5 +35,14 @@ public abstract class ShotsFragmentModule {
     @Binds
     @PerFragment
     abstract ShotsView shotsView(ShotsFragment shotsFragment);
+
+    /**
+     * Binds ShotListCallback into ShotsFragment
+     * @param shotsFragment - implementation
+     * @return implementation
+     */
+    @Binds
+    @PerFragment
+    abstract ShotListCallback shotListCallback(ShotsFragment shotsFragment);
 
 }

@@ -22,7 +22,8 @@ public class NetworkErrorHandlerImpl implements NetworkErrorHandler {
                 Timber.e(error.getMessage()+error.getCause());
                 listener.onUnexpectedException(error);
             }
-            if ((error instanceof IOException) || (error instanceof SocketException)) {
+            //SocketException: Timeout
+            if ((error instanceof SocketException) || (error instanceof IOException)) {
                 Timber.e(error.getMessage()+error.getCause());
                 listener.onNetworkException(error);
                 // fine, irrelevant network problem or API that throws on cancellation

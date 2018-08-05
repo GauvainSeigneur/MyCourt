@@ -29,7 +29,7 @@ public class ShotDraftRepository {
     @Inject
     public ShotDraftRepository(){}
 
-    public Single<List<ShotDraft>> getShotDraft() {
+    public Maybe<List<ShotDraft>> getShotDraft() {
         return postDao.getAllPost();
     }
 

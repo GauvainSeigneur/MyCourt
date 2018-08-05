@@ -60,12 +60,21 @@ public interface DribbbleService {
 
     @Multipart
     @POST("shots")
-    Observable<Shot> postShot(
+    Observable<Response<Shot>> postShot(
             @Part MultipartBody.Part image,
             @Part("title") RequestBody title
             // @Part("description") RequestBody description,
             //@Part("low_profile") RequestBody isLowProfile
     );
+
+    /*@Multipart
+    @POST("shots")
+    Observable<Shot> postShot(
+            @Part MultipartBody.Part image,
+            @Part("title") RequestBody title
+            // @Part("description") RequestBody description,
+            //@Part("low_profile") RequestBody isLowProfile
+    );*/
 
     @POST("shots")
     @FormUrlEncoded

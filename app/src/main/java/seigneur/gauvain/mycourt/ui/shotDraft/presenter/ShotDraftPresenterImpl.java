@@ -4,6 +4,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -32,13 +33,22 @@ public class ShotDraftPresenterImpl implements ShotDraftPresenter {
 
     CompositeDisposable compositeDisposable = new CompositeDisposable();
 
+    private boolean isRefreshing;
+
     @Inject
     public ShotDraftPresenterImpl() {
     }
 
     @Override
     public void onAttach() {
-        compositeDisposable.add(getPostFromDB(false).subscribe());
+        isRefreshing=false;
+        compositeDisposable.add(getShotDrafts()
+                .subscribe(
+                      this::doOnDraftFound,
+                      this::doOnError,
+                      this::doOnNothingFound
+                )
+        );
     }
 
     @Override
@@ -49,7 +59,12 @@ public class ShotDraftPresenterImpl implements ShotDraftPresenter {
 
     @Override
     public void onRefresh() {
-        compositeDisposable.add(getPostFromDB(true).subscribe());
+        isRefreshing=true;
+        compositeDisposable.add(getShotDrafts()
+                .subscribe(
+                        this::doOnDraftFound,
+                        this::doOnError,
+                        this::doOnNothingFound));
     }
 
     @Override
@@ -61,66 +76,37 @@ public class ShotDraftPresenterImpl implements ShotDraftPresenter {
         }
     }
 
-    //todo - use May be instead of Single
-    private Single<List<ShotDraft>> getShotDrafts(boolean isRefreshing) {
+
+    private Maybe<List<ShotDraft>> getShotDrafts() {
         Timber.d ("getPostFromDB called");
         return mShotDraftRepository.getShotDraft()
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSuccess(shotDrafts ->{
-                    Timber.d("list loaded"+shotDrafts.toString());
-                    if (mShotDraftView!=null) {
-                        mShotDraftView.stopRefresh();
-                        if (!shotDrafts.isEmpty()) {
-                            mShotDraftView.showEmptyView(false);
-                            mShotDraftView.showDraftList(shotDrafts, isRefreshing);
-                        } else {
-                            mShotDraftView.showEmptyView(true);
-                        }
-                    }
-                })
-                .doOnError(t-> {
-                    Timber.d(t);
-                    if (mShotDraftView!=null) {
-                        mShotDraftView.stopRefresh();
-                    }
-                });
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
-    private void doOnShotDratFetched(List<ShotDraft> shotDrafts){
-
+    private void doOnDraftFound(List<ShotDraft> shotDrafts){
+        Timber.d("list loaded"+shotDrafts.toString());
+        if (mShotDraftView!=null) {
+            mShotDraftView.stopRefresh();
+            if (!shotDrafts.isEmpty()) {
+                mShotDraftView.showEmptyView(false);
+                mShotDraftView.showDraftList(shotDrafts, isRefreshing);
+            } else {
+                mShotDraftView.showEmptyView(true);
+            }
+        }
     }
 
-    private void doOnShotDraftError(Throwable throwable){
-
+    private void doOnNothingFound(){
+        if (mShotDraftView!=null && isRefreshing)
+            mShotDraftView.stopRefresh();
     }
 
-    private Single<List<ShotDraft>> getPostFromDB(boolean isRefreshing) {
-        Timber.d ("getPostFromDB called");
-        return mShotDraftRepository.getShotDraft()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSuccess(shotDrafts ->{
-                    Timber.d("list loaded"+shotDrafts.toString());
-                    if (mShotDraftView!=null) {
-                        mShotDraftView.stopRefresh();
-                        if (!shotDrafts.isEmpty()) {
-                            mShotDraftView.showEmptyView(false);
-                            mShotDraftView.showDraftList(shotDrafts, isRefreshing);
-                        } else {
-                            mShotDraftView.showEmptyView(true);
-                        }
-                    }
-                })
-                .doOnError(t-> {
-                    Timber.d(t);
-                    if (mShotDraftView!=null) {
-                        mShotDraftView.stopRefresh();
-                    }
-                });
+    private void doOnError(Throwable throwable){
+        Timber.e(throwable);
+        if (mShotDraftView!=null)
+            mShotDraftView.stopRefresh();
     }
-
-
 
 }
 

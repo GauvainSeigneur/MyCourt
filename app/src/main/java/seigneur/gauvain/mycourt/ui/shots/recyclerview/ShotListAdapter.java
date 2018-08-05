@@ -8,10 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -26,16 +22,13 @@ import java.util.List;
 
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.Shot;
-import timber.log.Timber;
-
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
-//refactor recyclerview : https://jayrambhia.com/blog/footer-loader
+
 public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     // View Types
     public static final int ITEM = 0;
     public static final int LOADING = 1;
-
     private List<Shot> shotsResults;
     private Context context;
     //private boolean isLoadingAdded = true;
@@ -59,11 +52,11 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         switch (viewType) {
             case ITEM:
                 View viewItem = inflater.inflate(R.layout.list_item_shot, parent, false);
-                viewHolder = new ShotViewHolder(viewItem);
+                viewHolder = new ShotViewHolder(viewItem, mCallback);
                 break;
             case LOADING:
                 View viewLoading = inflater.inflate(R.layout.item_progress, parent, false);
-                viewHolder = new LoadingVH(viewLoading);
+                viewHolder = new LoadingViewHolder(viewLoading,mCallback);
                 break;
         }
         return viewHolder;
@@ -77,6 +70,7 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 Shot shotItem = shotsResults.get(position); //shots
                 final ShotViewHolder shotViewHolder = (ShotViewHolder) holder;
                 //shotViewHolder.title.setText(shotList.getTitle());
+                //todo - if animated - set label "GIF"
                 Glide
                         .with(context)
                         .load(Uri.parse(shotItem.getImageUrl()))
@@ -100,17 +94,10 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                             }
                         })
                         .into(shotViewHolder.image);
-                //todo - if animated - set label "GIF"
-                shotViewHolder.image.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mCallback.onShotClicked(shotItem, position);
-                    }
-                });
                 break;
 
             case LOADING:
-                LoadingVH loadingVH = (LoadingVH) holder;
+                LoadingViewHolder loadingVH = (LoadingViewHolder) holder;
                 if (retryPageLoad) {
                     loadingVH.mErrorLayout.setVisibility(View.VISIBLE);
                     loadingVH.mEndListlayout.setVisibility(View.GONE);
@@ -123,12 +110,9 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     loadingVH.mErrorLayout.setVisibility(View.GONE);
                     loadingVH.mEndListlayout.setVisibility(View.VISIBLE);
                     loadingVH.mProgressBar.setVisibility(View.GONE);
-                    loadingVH.mEndListText.setText(
-                            endMessage != null ?
-                                    endMessage :
-                                    context.getString(R.string.error_msg_unknown));
                 } else {
                     loadingVH.mErrorLayout.setVisibility(View.GONE);
+                    loadingVH.mEndListlayout.setVisibility(View.GONE);
                     loadingVH.mProgressBar.setVisibility(View.VISIBLE);
                 }
                 break;
@@ -151,7 +135,6 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public int getItemViewType(int position) {
         //return (position == shotsResults.size() -1)? LOADING : ITEM;
         //return (position == shotsResults.size() -1)? LOADING : ITEM; //+1 for loading view
-
         if (position != 0 && position == getItemCount() - 1) {
             return LOADING;
         }
@@ -193,20 +176,6 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return getItemCount() == 0;
     }
 
-    /*public void addLoadingFooter() {
-        isLoadingAdded = true;
-        add(new Shot());
-    }
-
-    public void removeLoadingFooter() {
-        isLoadingAdded = false;
-        int position = shotsResults.size() - 1;
-        Shot result = getItem(position);
-        if (result != null) {
-            shotsResults.remove(position);
-            notifyItemRemoved(position);
-        }
-    }*/
 
     public Shot getItem(int position) {
         return shotsResults.get(position);
@@ -227,53 +196,12 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     /**
      * Displays Pagination end list
-     *
+     * @param show
      */
-    public void showEndListMessage(boolean show, @Nullable String message) {
-        Timber.tag("newrequest").d("showEndListMessage of adapter called");
+    public void showEndListMessage(boolean show) {
         isEndListReached = show;
-        if (message != null) this.endMessage = message;
         //notifyDataSetChanged();
         notifyItemChanged(shotsResults.size());
-    }
-
-
-    /*
-   View Holders
-   _________________________________________________________________________________________________
-    */
-    protected class LoadingVH extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private ProgressBar mProgressBar;
-        private ImageButton mRetryBtn;
-        private TextView mErrorTxt;
-        private LinearLayout mErrorLayout;
-        private TextView mEndListText;
-        private LinearLayout mEndListlayout;
-
-        public LoadingVH(View itemView) {
-            super(itemView);
-
-            mProgressBar = (ProgressBar) itemView.findViewById(R.id.loadmore_progress);
-            mRetryBtn = (ImageButton) itemView.findViewById(R.id.loadmore_retry);
-            mErrorTxt = (TextView) itemView.findViewById(R.id.loadmore_errortxt);
-            mErrorLayout = (LinearLayout) itemView.findViewById(R.id.loadmore_errorlayout);
-            mEndListText = (TextView) itemView.findViewById(R.id.endlist_text);
-            mEndListlayout = (LinearLayout) itemView.findViewById(R.id.endlist_layout);
-
-            mRetryBtn.setOnClickListener(this);
-            mErrorLayout.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View view) {
-            switch (view.getId()) {
-                case R.id.loadmore_retry:
-                case R.id.loadmore_errorlayout:
-                    showRetry(false, null);
-                    mCallback.retryPageLoad();
-                    break;
-            }
-        }
     }
 
 }

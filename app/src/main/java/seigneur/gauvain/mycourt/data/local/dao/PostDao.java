@@ -20,7 +20,7 @@ import seigneur.gauvain.mycourt.data.model.ShotDraft;
 public interface PostDao {
 
     @Query("SELECT * FROM ShotDraft")
-    Single<List<ShotDraft>> getAllPost();
+    Maybe<List<ShotDraft>> getAllPost();
 
     @Query("SELECT * FROM ShotDraft WHERE id IN (:postIds)")
     Flowable<List<ShotDraft>> loadAllPostByIds(int[] postIds);

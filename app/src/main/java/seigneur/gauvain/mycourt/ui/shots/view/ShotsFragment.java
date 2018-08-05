@@ -34,7 +34,7 @@ import timber.log.Timber;
 /**
  * Created by gse on 22/11/2017.
  */
-public class ShotsFragment extends BaseFragment implements ShotsView {
+public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCallback {
 
     @Inject
     ShotsPresenter mShotsPresenter;
@@ -49,7 +49,7 @@ public class ShotsFragment extends BaseFragment implements ShotsView {
     private static final int PAGE_START = 1;
     private int currentPage = PAGE_START;
     private ShotListAdapter adapter;
-    private ShotListCallback adapterCallback;
+    //private ShotListCallback adapterCallback;
     private ProgressBar progressBar;
 
     /*
@@ -59,17 +59,20 @@ public class ShotsFragment extends BaseFragment implements ShotsView {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //first time created
-        adapterCallback = new ShotListCallback() {
+       /* adapterCallback = new ShotListCallback() {
             @Override
             public void retryPageLoad() {
                 mShotsPresenter.onLoadNextPage(currentPage);
             }
             @Override
             public void onShotClicked(Shot shot,int position) {
+                Shot vContract = adapter.getItem(position);
+                Timber.tag("swagman").d("shotImageClciked in fagment");
                 mShotsPresenter.onShotClicked(shot, position);
             }
-        };
-        adapter = new ShotListAdapter(getContext(),adapterCallback);
+        };*/
+       // adapter = new ShotListAdapter(getContext())
+        adapter = new ShotListAdapter(getContext(), this);
         mGridLayoutManager = new GridLayoutManager(getContext(),2);
         mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
@@ -212,9 +215,9 @@ public class ShotsFragment extends BaseFragment implements ShotsView {
     }
 
     @Override
-    public void showEndListReached(boolean isVisible, String message) {
+    public void showEndListReached(boolean isVisible) {
         Timber.tag("newrequest").d("showEndListReached called");
-        adapter.showEndListMessage(isVisible, message);
+        adapter.showEndListMessage(isVisible);
     }
 
     @Override
@@ -244,6 +247,17 @@ public class ShotsFragment extends BaseFragment implements ShotsView {
                     getActivity().getString(R.string.shot_transition_name));
             getContext().startActivity(i, options.toBundle());
         }
+    }
+
+    @Override
+    public void retryPageLoad() {
+        //adapter.showRetry(false, null); //to make it in View and call it in presenter
+        mShotsPresenter.onLoadNextPage(currentPage);
+    }
+    @Override
+    public void onShotClicked(int position) {
+        Shot shotItem = adapter.getItem(position);
+        mShotsPresenter.onShotClicked(shotItem, position);
     }
 
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.text.style.TtsSpan;
 import android.widget.Toast;
 import com.yalantis.ucrop.UCrop;
 import java.io.File;
@@ -80,9 +81,12 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     public EditShotPresenterImpl() {
     }
 
+    /**************************************************************************
+     * EditShotPresenter Implementation
+     *************************************************************************/
     @Override
     public void onAttach() {
-        getSource();
+        getSourceType();
     }
 
     @Override
@@ -122,9 +126,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
             imageCroppedUri = UCrop.getOutput(data); //get Image Uri after being cropped
             Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
             isImageChanged=true;
-            if (mEditShotView!=null) {
+            if (mEditShotView!=null)
                 mEditShotView.displayShotImagePreview(imageCroppedUri);
-            }
         } else if (resultCode == UCrop.RESULT_ERROR) {
             isImageChanged=false;
             final Throwable cropError = UCrop.getError(data);
@@ -220,88 +223,104 @@ public class EditShotPresenterImpl implements EditShotPresenter {
            mTags = tags;
        }
     }
-    /**************************************************************************
-     * get data source on opening activity
+
+    /*
+     *************************************************************************
+     * get data source type on opening activity
      *************************************************************************/
     // Check whether if the activity is opened from draft registered in database or other
-    private void getSource() {
-        compositeDisposable.add(Single.just(mTempDataRepository.getDraftCallingSource())
-                .doOnSuccess(source-> {
-                    mSource= source;
-                    Timber.d("calling source: " +source);
-                    if (source == Constants.SOURCE_DRAFT) {
-                        //user click on a saved shotdraft
-                        getShotDraft();
-                    } else if (source == Constants.SOURCE_SHOT) {
-                        //User wishes to update a published shot
-                        mEditionMode=Constants.EDIT_MODE_UPDATE_SHOT;
-                        getShot();
-                    } else if (source == Constants.SOURCE_FAB) {
-                        //User wishes to create a shot
-                        mEditionMode=Constants.EDIT_MODE_NEW_SHOT;
-                        if (mEditShotView!=null) {
-                            mEditShotView.setUpShotCreationUI();
-                        }
-                    } else {
-                        //can't happen
-                    }
-                })
-                .doOnError(t -> {
-                    mSource=-1;
-                })
-                .subscribe()
+    private void getSourceType() {
+        compositeDisposable
+                .add(Single.just(mTempDataRepository.getDraftCallingSource())
+                .subscribe(
+                        this::getDataFromSourceType,
+                        this::manageSourceTypeError
+                )
         );
     }
 
-    /**
-     * get the shot selected
-     */
+    private void getDataFromSourceType(int source) {
+        mSource= source;
+        Timber.d("calling source: " +source);
+        if (source == Constants.SOURCE_DRAFT) {
+            //user click on a saved shotdraft
+            getShotDraft();
+        } else if (source == Constants.SOURCE_SHOT) {
+            //User wishes to update a published shot
+            setEditionMode(Constants.EDIT_MODE_UPDATE_SHOT);
+            getShot();
+        } else if (source == Constants.SOURCE_FAB) {
+            //User wishes to create a shot
+            setEditionMode(Constants.EDIT_MODE_NEW_SHOT);
+            if (mEditShotView!=null) {
+                mEditShotView.setUpShotCreationUI();
+            }
+        } else {
+            Timber.d("impossible error happened! wait wut?");
+        }
+    }
+
+    private void manageSourceTypeError(Throwable throwable) {
+        Timber.d(throwable);
+        mSource=-1;
+    }
+
+    /*
+     *************************************************************************
+     * get shot if data source equals == SOURCE_SHOT
+     *************************************************************************/
     private void getShot() {
         compositeDisposable.add(Single.just(mTempDataRepository.getShot())
-                .doOnSuccess(shot-> {
-                    Timber.d(shot.title);
-                    mShot=shot;
-                    if (mEditShotView!=null) {
-                        mEditShotView.setUpShotEdtionUI(shot,null, getEditMode());
-                    }
-                })
-                .doOnError(t -> {
-
-                })
-                .subscribe()
+                .subscribe(
+                        this::manageShotInfo,
+                        this::doOngetShotError
+                )
         );
 
     }
 
-    /**
-     * get the ShotDraft selected
-     */
+    private void manageShotInfo(Shot shot) {
+        mShot=shot;
+        if (mEditShotView!=null)
+            mEditShotView.setUpShotEdtionUI(shot,null, getEditMode());
+    }
+
+    private void doOngetShotError(Throwable throwable) {
+        Timber.d(throwable);
+    }
+
+    /*
+     *************************************************************************
+     * get ShotDraft if data source equals == SOURCE_DRAFT
+     *************************************************************************/
     private void getShotDraft() {
         compositeDisposable.add(Single.just(mTempDataRepository.getShotDraft())
-                .doOnSuccess(shotDraft-> {
-                    Timber.d("shotdraft id: "+shotDraft.id+"");
-                    mEditionMode=shotDraft.getDraftType();
-                    mShotDraft = shotDraft;
-                    if (mEditShotView!=null) {
-                        mEditShotView.setUpShotEdtionUI(null,shotDraft,getEditMode());
-                    }
-                })
-                .doOnError(t -> {
-
-                })
-                .subscribe()
+                .subscribe(
+                        this::manageShotDraftInfo,
+                        this::doOnGetShotDraftError
+                )
         );
     }
 
-    /*************************************************************************
+    private void manageShotDraftInfo(ShotDraft shotDraft) {
+        setShotDraft(shotDraft);
+        setEditionMode(shotDraft.getDraftType());
+        if (mEditShotView!=null)
+            mEditShotView.setUpShotEdtionUI(null,shotDraft,getEditMode());
+    }
+
+    private void doOnGetShotDraftError(Throwable throwable) {
+        Timber.d(throwable);
+    }
+
+    /*
+     *************************************************************************
      * DB OPERATIONS - REGISTER OR UPDATE SHOTDRAFT
      *************************************************************************/
     private void registerOrUpdateDraft(Context context,boolean isRegisteringImage) {
         if (mSource==Constants.SOURCE_DRAFT) {
-            if (isRegisteringImage) {
-                Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
+            if (isRegisteringImage)
                 storeDraftImage(imagePickedformat, imageCroppedUri, context);
-            }
             else
                 updateInfoDraft(mShotDraft.getImageUrl(), mShotDraft.getImageFormat());
         } else if (mSource==Constants.SOURCE_SHOT) {
@@ -314,8 +333,9 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         }
     }
 
-    /*************************************************************************
-     * UPDATE SHOT ON DRIBBBLE
+    /*
+     *************************************************************************
+     * NETWORK OPERATION - UPDATE SHOT ON DRIBBBLE
      *************************************************************************/
     private void updateShot() {
         compositeDisposable.add(
@@ -325,27 +345,26 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                         getProfile(),
                         getTagList(),
                         getTitle())
-                        .doOnSuccess(new Consumer<Shot>() {
-                            @Override
-                            public void accept(Shot shot) throws Exception {
-                                Timber.d("success: "+shot.getTitle());
-                                if (mSource==Constants.SOURCE_DRAFT) {
-                                    deleteDraftAfterPublishing();
-                                    //todo must finish with a code to send to Main ctviity to dleete the draft
-                                } else {
-                                    if (mEditShotView!=null)
-                                        mEditShotView.stopActivity();
-                                }
-                            }
-                        })
-                        .doOnError(new Consumer<Throwable>() {
-                            @Override
-                            public void accept(Throwable error) throws Exception {
-                                handleRetrofitError(error);
-                            }
-                        })
-                        .subscribe()
+                        .subscribe(
+                                this::doOnUpdateShotSuccess,
+                                this::doOnUpdateShotError
+                        )
         );
+    }
+
+    private void doOnUpdateShotSuccess(Shot shot) {
+        //todo must finish with a code to send to Main Activity to delete the draft
+        Timber.d("success: "+shot.getTitle());
+        if (mSource==Constants.SOURCE_DRAFT)
+            deleteDraftAfterPublishing();
+        else
+            if (mEditShotView!=null)
+                mEditShotView.stopActivity();
+    }
+
+    private void doOnUpdateShotError(Throwable throwable) {
+        //todo - manage UI
+        handleRetrofitError(throwable);
     }
 
     private void deleteDraftAfterPublishing() {
@@ -364,8 +383,9 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         );
     }
 
-    /*************************************************************************
-     * POST SHOT
+    /*
+     *************************************************************************
+     * NETWORK OPERATION - POST SHOT ON DRIBBBLE
      *************************************************************************/
     private void postShot(Context context, Uri fileUri, String imageFormat, String titleString) {
         String uriOfFile = ImageUtils.getRealPathFromImage(context,fileUri);
@@ -382,22 +402,34 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         compositeDisposable.add(mShotRepository.postShot(body,title)
                 .subscribe(
                         response -> {
-                            Timber.d("post shot success");
+                            //response must be 202 : accepted
+                            if (response.code()==Constants.ACCEPTED)
+                                Timber.d("post shot success: "+response.code() + "/ shot posted: "+ response.body().title);
+                            else
+                                Timber.d("post shot not succeed: "+response.code());
                         },
                         throwable -> {
-                            Timber.d("post shot failed" + throwable);
+                            Timber.d("post shot failed: " + throwable);
                         }
                 )
         );
     }
 
-    /*************************************************************************
+    /*
+     *************************************************************************
      * STORING DRAFTS IN DB
-     *************************************************************************/
+     ************************************************************************/
+    /**
+     * Store image in "My Court" folder in external storage and get the URI to save it in DB
+     * @param imageCroppedFormat - jpeg, png, gif
+     * @param croppedFileUri - uri of the image
+     * @param context - EditShot Activity
+     */
     private void storeDraftImage(String imageCroppedFormat, Uri croppedFileUri, Context context) {
+        Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
         compositeDisposable.add(mShotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
                 //.onErrorResumeNext(whenExceptionIsThenIgnore(IllegalArgumentException.class))
-                .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t))
+                .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t)) //todo : to comment this
                 .doOnSuccess(imageSaved-> {
                     //String filePath = imageSaved.getAbsolutePath();
                     //Uri imageUri = FileProvider.getUriForFile(context, context.getString(R.string.file_provider_authorities), imageSaved);
@@ -421,6 +453,11 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         );
     }
 
+    /**
+     * save draft information in DB (all info except image)
+     * @param imageUri - image url
+     * @param imageFormat - jpeg, png, gif
+     */
     private void saveInfoDraft(@Nullable String imageUri,@Nullable String imageFormat) {
         compositeDisposable.add(
                 mShotDraftRepository.storeShotDraft(createShotDraft(0,imageUri,imageFormat)
@@ -438,6 +475,11 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         );
     }
 
+    /**
+     * update draft information in DB (all info except image)
+     * @param imageUri - image url
+     * @param imageFormat - jpeg, png, gif
+     */
     private void updateInfoDraft(@Nullable String imageUri, @Nullable String imageFormat) {
         compositeDisposable.add(mShotDraftRepository.updateShotDraft(
                 createShotDraft(mShotDraft.getId(),imageUri,imageFormat))
@@ -447,9 +489,13 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         );
     }
 
-    /*************************************************************************
-     * Create shotDraft object to save or update in database
-     *************************************************************************/
+    /**
+     * Create Shot draft object to insert or update a ShotDraft
+     * @param primarykey - unique identifier
+     * @param imageUri - image url
+     * @param imageFormat _ jpeg, png, gif
+     * @return ShotDraft
+     */
     private ShotDraft createShotDraft(int primarykey, @Nullable String imageUri, @Nullable String imageFormat) {
         return new  ShotDraft(
                 primarykey,
@@ -468,10 +514,12 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         );
     }
 
-    /*************************************************************************
-     * Get data to create shot, draft, publish update, etc.
+    /*
+     *************************************************************************
+     * Get data from UI and from data source
+     * to create shot, draft and perform network and  DB operation
      *************************************************************************/
-    public int getEditMode() {
+    private int getEditMode() {
         return mEditionMode;
     }
 
@@ -529,7 +577,6 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         return shotTitle;
     }
 
-
     public ArrayList<String> getTagList() {
         return tagList;
     }
@@ -538,7 +585,44 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         return shotDescription;
     }
 
-    /*************************************************************************
+    /**
+     * Create tag List according to Dribbble pattern
+     */
+    private void createTagList() {
+        //create the list just one time, not any time the tags changed
+        if (mTags!=null && !mTags.isEmpty()) {
+            Pattern p = Pattern.compile(MyTextUtils.tagRegex);
+            Matcher m = p.matcher(mTags);
+            if (MyTextUtils.isDoubleQuoteCountEven(mTags)) {
+                // number is even or 0
+                tagList = new ArrayList<>();
+                while (m.find()) {
+                    //add to list the matched values and remove double quotes
+                    tagList.add(m.group(0));//replace("\"", ""));
+                }
+
+            }
+            else {
+                // number is odd: warn user and stop
+            }
+        }
+    }
+
+    private boolean isStartEditing() {
+        return false;
+    }
+
+    private void setEditionMode(int editionMode) {
+        mEditionMode = editionMode;
+    }
+
+    private void setShotDraft(ShotDraft shotDraft) {
+        mShotDraft = shotDraft;
+    }
+
+
+    /*
+     *************************************************************************
      * MANAGE NETWORK OPERATION EXCEPTION
      *************************************************************************/
     private void handleRetrofitError(final Throwable error) {
@@ -570,40 +654,10 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         });
     }
 
-    /*************************************************************************
-     * OTHERS
-     *************************************************************************/
-
-    /**
-     * Create tag List according to Dribbble pattern
-     */
-    private void createTagList() {
-        //create the list just one time, not any time the tags changed
-        if (mTags!=null && !mTags.isEmpty()) {
-            Pattern p = Pattern.compile(MyTextUtils.tagRegex);
-            Matcher m = p.matcher(mTags);
-            if (MyTextUtils.isDoubleQuoteCountEven(mTags)) {
-                // number is even or 0
-                tagList = new ArrayList<>();
-                while (m.find()) {
-                    //add to list the matched values and remove double quotes
-                    tagList.add(m.group(0));//replace("\"", ""));
-                }
-
-            }
-            else {
-                // number is odd: warn user and stop
-            }
-        }
-    }
-
-    private boolean isStartEditing() {
-      return false;
-    }
-
-
-
-
+    /*
+     *************************************************************************
+     * to delete
+     ************************************************************************/
     /*public String[] getTagArray() {
         if (getTagList()!=null && !getTagList().isEmpty()) {
             String[] array = new String[getTagList().size()];

@@ -42,39 +42,55 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
+            <!--android:paddingTop="@dimen/padding_16"
+            android:paddingStart="@dimen/padding_16"
+            android:paddingEnd="@dimen/padding_16"-->
             <android.support.design.widget.TextInputLayout
-                android:paddingTop="@dimen/padding_16"
-                android:paddingStart="@dimen/padding_16"
-                android:paddingEnd="@dimen/padding_16"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:textColorHint="@color/colorDraftHint"
                 android:id="@+id/shot_title_input"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/colorAccent"
+                app:boxCornerRadiusBottomEnd="@dimen/padding_4"
+                app:boxCornerRadiusBottomStart="@dimen/padding_4"
+                app:boxCornerRadiusTopEnd="@dimen/padding_4"
+                app:boxCornerRadiusTopStart="@dimen/padding_4"
+                android:hint="Title"
+                android:layout_margin="@dimen/padding_16">
 
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/shot_title_edt"
                     android:backgroundTint="@color/colorDraftHint"
                     android:textColorHint="@color/colorDraftHint"
                     android:textColor="@color/colorDraftContent"
+                    android:paddingStart="@dimen/padding_16"
+                    android:paddingEnd="@dimen/padding_16"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Title" />
+                    android:layout_height="wrap_content" />
 
             </android.support.design.widget.TextInputLayout>
 
-            <seigneur.gauvain.mycourt.ui.widget.CustomTextInputLayout
-                android:paddingStart="@dimen/padding_16"
-                android:paddingEnd="@dimen/padding_16"
+            <android.support.design.widget.TextInputLayout
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:textColorHint="@color/colorDraftHint"
                 android:id="@+id/shot_tag_input"
-                android:inputType="textMultiLine"
+                app:helperTextEnabled="true"
                 app:helperText="Separates tags with commas (eg.TagA, Tag b)"
+                android:inputType="textMultiLine"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:boxBackgroundMode="filled"
+                app:boxBackgroundColor="@color/colorPrimaryLight"
+                app:boxCornerRadiusTopEnd="@dimen/padding_4"
+                app:boxCornerRadiusTopStart="@dimen/padding_4"
+                android:hint="Tags"
+                android:gravity="center"
+                android:layout_marginStart="@dimen/padding_16"
+                android:layout_marginEnd="@dimen/padding_16">
 
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/shot_tag_edt"
@@ -84,9 +100,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:imeOptions="actionDone"
-                    android:hint="Tags" />
+                    android:padding="@dimen/padding_16"/>
 
-            </seigneur.gauvain.mycourt.ui.widget.CustomTextInputLayout>
+            </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
                 android:paddingStart="@dimen/padding_16"

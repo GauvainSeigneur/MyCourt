@@ -45,7 +45,8 @@ public class ShotsPresenterImpl implements ShotsPresenter {
     //to compare prev list fetch and next list fetched in loadNextPage();
     private List<Shot> oldList = null;
     private int responsCacheDelay =0;
-    //private boolean isAllowedToUpload; //todo - check list first and check user after : if list is empty, check if user is allowed tu upload...
+    //todo - check list first and check user after : if list is empty, check if user is allowed tu upload...
+    //private boolean isAllowedToUpload;
 
     @Inject
     public ShotsPresenterImpl() {
@@ -100,7 +101,6 @@ public class ShotsPresenterImpl implements ShotsPresenter {
             Timber.d(shot.id) ;
         }
     }
-
     /**************************************************************************
      * First load of data
      *************************************************************************/
@@ -110,7 +110,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
         // To ensure list is visible when retry button in error view is clicked
         if (mShotsView!=null) {
             mShotsView.showFirstFecthErrorView(false);
-            mShotsView.showEndListReached(false,"");
+            mShotsView.showEndListReached(false);
         }
         compositeDisposable.add(
                 mShotRepository.getShotsFromAPI(0, page,
@@ -161,8 +161,10 @@ public class ShotsPresenterImpl implements ShotsPresenter {
         isLoading = true;
         isReachedLastPage = false;
         if (mShotsView!=null) {
+            //todo - reorganize in dedicated void
             mShotsView.showFirstFecthErrorView(false);
-            mShotsView.showEndListReached(false,"");
+            mShotsView.showEndListReached(false);
+            mShotsView.showNextFetchError(false, null);
         }
         compositeDisposable.add(
                 mShotRepository.getShotsFromAPI(responsCacheDelay, page, Constants.PER_PAGE)
@@ -191,7 +193,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
             isReachedLastPage =true; //stop request on scroll
             if (mShotsView!=null) {
                 mShotsView.addShots(shots);
-                mShotsView.showEndListReached(true, "end");
+                mShotsView.showEndListReached(true);
             }
         } else {
             //if the list size equals 30 items, check the first id,
@@ -200,7 +202,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
             if (oldList.get(0).getId().equals(shots.get(0).getId())){
                 isReachedLastPage = true; //stop request on scroll
                 if (mShotsView!=null) {
-                    mShotsView.showEndListReached(true, "end");
+                    mShotsView.showEndListReached(true);
                 }
                 //if false, we didn't reach the end : continue request
             } else {
@@ -266,6 +268,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
     private void doOnRefreshError(Throwable error) {
         if (mShotsView!=null) {
             mShotsView.stopRefreshing();
+            //todo - only if the list is already empty!
             mShotsView.showFirstFecthErrorView(true);
         }
     }
