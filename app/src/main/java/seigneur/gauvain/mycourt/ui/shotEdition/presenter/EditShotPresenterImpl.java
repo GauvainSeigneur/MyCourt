@@ -10,6 +10,7 @@ import com.yalantis.ucrop.UCrop;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
@@ -21,7 +22,13 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.HttpException;
+import retrofit2.Response;
+import retrofit2.http.Multipart;
+import seigneur.gauvain.mycourt.data.api.DribbbleService;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
@@ -58,13 +65,13 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     @Inject
     TempDataRepository mTempDataRepository;
 
+
     //Manage Image picking and cropping
     private Uri imagePickedUriSource = null;
     private String imagePickedFileName = null;
     private String imagePickedformat = null;
     private Uri imageCroppedUri = null;
     private boolean isImageChanged=false;
-    private boolean isStartEditing=false;
     //Manage data
     private int mSource;
     private String mTags;
@@ -159,7 +166,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     @Override
     public void onDraftShotClicked(Context context) {
-        if (getTitle()==null || getTitle().isEmpty())
+        if (getTitle()==null && getTitle().isEmpty())
             mEditShotView.showMessageEmptyTitle();
         else {
             if (imageCroppedUri!=null && imagePickedformat!=null) {
@@ -173,11 +180,17 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     @Override
     public void onPublishClicked(Context context) {
-        if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT) {
-            postShot(context, getImageCroppedUri(),getImageFormat(),getTitle());
-        } else if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
-            updateShot();
+        if (isAuthorizedToPublish()) {
+            if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT) {
+                postShot(context, getImageUri(),getImageFormat(),getTitle());
+            } else if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
+                updateShot();
+            }
+        } else {
+            //todo - make a view call
+            Timber.d("not allowed to publish or update");
         }
+
     }
 
     @Override
@@ -388,21 +401,16 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      * NETWORK OPERATION - POST SHOT ON DRIBBBLE
      *************************************************************************/
     private void postShot(Context context, Uri fileUri, String imageFormat, String titleString) {
-        String uriOfFile = ImageUtils.getRealPathFromImage(context,fileUri);
-        Timber.d(fileUri.toString());
-        File file = new File(fileUri.getPath());
-        // creates RequestBody instance from file
-        RequestBody requestFile = RequestBody.create(MediaType.parse("image/"+imageFormat), file);
-        //RequestBody requestFile = RequestBody.create(MediaType.parse(getContentResolver().getType(fileUri)), file);
-        //todo : offer possibility user to rename the file when he sends it to Dribbble
-        MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-        // MultipartBody.Part body = MultipartBody.Part.createFormData("file", "lol", requestFile);
+        MultipartBody.Part body = prepareFilePart(context,fileUri,imageFormat,"image");
         // adds another part within the multipart request
         RequestBody title = RequestBody.create(MultipartBody.FORM, titleString);
-        compositeDisposable.add(mShotRepository.postShot(body,title)
+        //add to HashMap key and RequestBody
+        HashMap<String, RequestBody> map = new HashMap<>();
+        map.put("title", title);
+        // executes the request
+        compositeDisposable.add(mShotRepository.publishANewShot(map, body)
                 .subscribe(
                         response -> {
-                            //response must be 202 : accepted
                             if (response.code()==Constants.ACCEPTED)
                                 Timber.d("post shot success: "+response.code() + "/ shot posted: "+ response.body().title);
                             else
@@ -413,6 +421,25 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                         }
                 )
         );
+    }
+
+    /**
+     * Create MultipartBody.Part instance separated in order to use @PartMap annotation
+     * to pass parameters along with File request. PartMap is a Map of "Key" and RequestBody.
+     * See : https://stackoverflow.com/a/40873297
+     */
+    private MultipartBody.Part prepareFilePart(Context context, Uri fileUri,String imageFormat, String partName) {
+        //Get file
+        String uriOfFile = ImageUtils.getRealPathFromImage(context,fileUri);
+        File file = new File(uriOfFile);
+        String imageFormatFixed;
+        //Word around for jpg format - refused by dribbble
+        if (imageFormat.equals("jpg")) imageFormatFixed="JPG";
+        else imageFormatFixed =imageFormat;
+        // create RequestBody instance from file
+        RequestBody requestFile = RequestBody.create(MediaType.parse("image/"+imageFormatFixed), file);
+        // MultipartBody.Part is used to send also the actual file name
+        return MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
     }
 
     /*
@@ -430,9 +457,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         compositeDisposable.add(mShotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
                 //.onErrorResumeNext(whenExceptionIsThenIgnore(IllegalArgumentException.class))
                 .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t)) //todo : to comment this
-                .doOnSuccess(imageSaved-> {
-                    //String filePath = imageSaved.getAbsolutePath();
-                    //Uri imageUri = FileProvider.getUriForFile(context, context.getString(R.string.file_provider_authorities), imageSaved);
+                .doOnSuccess(imageSaved-> { ;
                     if (mSource==Constants.SOURCE_DRAFT) {
                         updateInfoDraft(imageSaved,imageCroppedFormat);
                     } else {
@@ -440,14 +465,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                     }
                 })
                 .doOnError(t -> {
-                    //todo - reactivate for release!
-                    /*RxJavaPlugins.setErrorHandler(e ->{
-                        Timber.w("Undeliverable exception received, not sure what to do", e);
-                        Toast.makeText(context, "Undeliverable exception: "+e, Toast.LENGTH_SHORT).show();
-                        }
-                    );*/
-                    //to deactivate and move Ui function in RxJavaPlugins.setErrorHandler in production
-                    Toast.makeText(context, "failed: "+t, Toast.LENGTH_SHORT).show();
+                    //todo - reactivate RXJavaplugins for release!
                 })
                 .subscribe()
         );
@@ -519,60 +537,6 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      * Get data from UI and from data source
      * to create shot, draft and perform network and  DB operation
      *************************************************************************/
-    private int getEditMode() {
-        return mEditionMode;
-    }
-
-    private Uri getImageCroppedUri() {
-        if(!isImageChanged && mShotDraft!=null && mShotDraft.getImageUrl()!=null)
-                return Uri.parse(mShotDraft.getImageUrl());
-            else
-                return imageCroppedUri;
-    }
-
-    private String getImageFormat() {
-        if(!isImageChanged && mShotDraft!=null && mShotDraft.getImageFormat()!=null)
-            return mShotDraft.getImageFormat();
-        else
-            return imagePickedformat;
-    }
-
-    private boolean getProfile(){
-        if(mSource==Constants.SOURCE_SHOT)
-            return mShot.isLow_profile();
-        if(mSource==Constants.SOURCE_DRAFT)
-            return mShotDraft.isLowProfile();
-        else
-            return false;
-    }
-
-    private String getShotId(){
-        if(mSource==Constants.SOURCE_SHOT)
-            return mShot.getId();
-        if(mSource==Constants.SOURCE_DRAFT)
-            return mShotDraft.getShotId();
-        else
-            return "undefined";
-    }
-
-    private Date getDateOfPublication(){
-        if(mSource==Constants.SOURCE_SHOT)
-            return mShot.getPublishDate();
-        if(mSource==Constants.SOURCE_DRAFT)
-            return mShotDraft.getDateOfPublication();
-        else
-            return null;
-    }
-
-    private Date getDateOfupdate(){
-        if(mSource==Constants.SOURCE_SHOT)
-            return mShot.getUpdateDate();
-        if(mSource==Constants.SOURCE_DRAFT)
-            return mShotDraft.getDateOfUpdate();
-        else
-            return null;
-    }
-
     public String getTitle() {
         return shotTitle;
     }
@@ -581,13 +545,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         return tagList;
     }
 
-    public String getShotDescription() {
-        return shotDescription;
-    }
-
-    /**
-     * Create tag List according to Dribbble pattern
-     */
+    //Create taglist according to Dribbble pattern
     private void createTagList() {
         //create the list just one time, not any time the tags changed
         if (mTags!=null && !mTags.isEmpty()) {
@@ -608,6 +566,67 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         }
     }
 
+    public String getShotDescription() {
+        return shotDescription;
+    }
+
+    private int getEditMode() {
+        return mEditionMode;
+    }
+
+    private Uri getImageUri() {
+        if(!isImageChanged && mShotDraft!=null && mShotDraft.getImageUrl()!=null)
+                return Uri.parse(mShotDraft.getImageUrl());
+            else
+                return imageCroppedUri;
+    }
+
+    private String getImageFormat() {
+        if(!isImageChanged && mShotDraft!=null && mShotDraft.getImageFormat()!=null)
+            return mShotDraft.getImageFormat();
+        else
+            return imagePickedformat;
+    }
+    //Todo - manage this from UI
+    private boolean getProfile(){
+        if(mSource==Constants.SOURCE_SHOT)
+            return mShot.isLow_profile();
+        if(mSource==Constants.SOURCE_DRAFT)
+            return mShotDraft.isLowProfile();
+        else
+            return false;
+    }
+
+    //Todo - manage this from UI (only of new draft)
+    private Date getDateOfPublication(){
+        if(mSource==Constants.SOURCE_SHOT)
+            return mShot.getPublishDate();
+        if(mSource==Constants.SOURCE_DRAFT)
+            return mShotDraft.getDateOfPublication();
+        else
+            return null;
+    }
+
+    //info that can't be change
+    private String getShotId(){
+        if(mSource==Constants.SOURCE_SHOT)
+            return mShot.getId();
+        if(mSource==Constants.SOURCE_DRAFT)
+            return mShotDraft.getShotId();
+        else
+            return "undefined";
+    }
+
+    private Date getDateOfupdate(){
+        if(mSource==Constants.SOURCE_SHOT)
+            return mShot.getUpdateDate();
+        if(mSource==Constants.SOURCE_DRAFT)
+            return mShotDraft.getDateOfUpdate();
+        else
+            return null;
+    }
+
+    //Info related to Edition
     private boolean isStartEditing() {
         return false;
     }
@@ -620,7 +639,9 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         mShotDraft = shotDraft;
     }
 
-
+    private boolean isAuthorizedToPublish() {
+        return getTitle()!=null && !getTitle().isEmpty() && getImageUri()!=null;
+    }
     /*
      *************************************************************************
      * MANAGE NETWORK OPERATION EXCEPTION
@@ -674,35 +695,4 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         }
     }*/
 
-    /*private void testPostShot(Uri fileUri, String titleString) {
-        File file = new File(fileUri.getPath());
-        // creates RequestBody instance from file
-        RequestBody requestFile = RequestBody.create(MediaType.parse("image/"+imagePickedformat), file);
-        //RequestBody requestFile = RequestBody.create(MediaType.parse(getContentResolver().getType(fileUri)), file);
-        Timber.tag("babar").d(imagePickedformat);
-        // MultipartBody.Part is used to send also the actual filename
-        //todo : offer possibility user to rename the file when he sends it to Dribbble
-        MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-       // MultipartBody.Part body = MultipartBody.Part.createFormData("file", "lol", requestFile);
-
-
-        // adds another part within the multipart request
-        RequestBody title = RequestBody.create(MultipartBody.FORM, titleString);
-        // executes the request
-        Call<ResponseBody> call = DribbbleService.postShot(body, title);
-        Timber.tag("callMade").d(call.request().body().toString()
-        );
-
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Timber.d(response.toString());
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-            }
-        });
-    }*/
 }

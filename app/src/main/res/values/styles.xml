@@ -1,5 +1,5 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. not managing colors here-->
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:app="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Base application theme-->
     <style name="MyCourt" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Colors -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -7,8 +7,10 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:statusBarColor">@color/colorPrimaryDark</item>
         <item name="android:textColor">@android:color/white</item>
-        <item name="android:windowBackground">@color/colorPrimary</item>
+        <item name="android:colorBackground">@color/colorBackground</item>
         <item name="android:colorEdgeEffect">@color/colorAccent</item>
+        <!--<item name="android:colorError">@color/colorError</item>
+        <item name="android:colorSurface">@color/colorError</item>-->
         <!-- transition and overlay-->
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
         <item name="android:windowAllowReturnTransitionOverlap">true</item>
@@ -21,12 +23,60 @@
         <item name="android:fontFamily">@font/raleway_medium</item>
     </style>
 
+    <!-- Widgets-->
+    <style name="Widget.MyCourt" parent="android:Widget" />
+
     <!--AppBar and Toolbar style -->
-    <style name="MyCourt.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" /> <!--todo ; change it -->
-    <style name="MyCourt.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" /><!--todo ; change it -->
+    <style name="MyCourt.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="MyCourt.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
     <style name="MyCourt.ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:fontFamily">@font/raleway_bold</item>
     </style>
+
+    <style name="TextAppearance.ToolbarTitle" parent="@android:style/TextAppearance.Material.Widget.Toolbar.Title">
+        <item name="android:fontFamily">@font/raleway_bold</item>
+        <item name="android:textColor">@color/colorHeadline</item>
+    </style>
+    <!-- Used to theme dark elements in light themed screens.
+         Extend the material dark Action Bar overlay as this contains text styling. -->
+    <style name="MyCourtDarkOverlay" parent="@android:style/ThemeOverlay.Material.Dark"/>
+    <style name="Widget.MyCourt.Toolbar">
+        <item name="android:titleTextAppearance">@style/TextAppearance.ToolbarTitle</item>
+        <item name="android:background">?android:colorPrimary</item>
+        <!--<item name="android:elevation">@dimen/z_app_bar</item>-->
+        <item name="android:theme">@style/MyCourtDarkOverlay</item>
+    </style>
+
+    <style name="Widget.MyCourt.BottomNavigationTheme" parent="Widget.Design.BottomNavigationView">
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="labelVisibilityMode">unlabeled</item>
+        <item name="itemHorizontalTranslationEnabled">false</item>
+        <item name="itemIconSize">24dp</item>
+        <item name="itemIconTint">@drawable/selector_item_bottom_nav</item>
+        <item name="itemTextColor">@drawable/selector_item_bottom_nav</item>
+    </style>
+
+    <style name="Widget.MyCourt.TextInputLayoutStyle" parent="Widget.Design.TextInputLayout">
+        <item name="android:textColorHint">@color/colorDraftHint</item>
+        <item name="boxBackgroundMode">filled</item>
+        <item name="boxBackgroundColor">@color/colorSurface</item>
+        <!--<item name="boxStrokeColor">@color/colorSurface</item>-->
+        <item name="boxCornerRadiusTopEnd">@dimen/padding_4</item>
+        <item name="boxCornerRadiusTopStart">@dimen/padding_4</item>
+        <item name="boxCollapsedPaddingTop">@dimen/padding_4</item>
+    </style>
+
+    <style name="Widget.MyCourt.TextInputEditTextStyle">
+        <item name="android:textColor">@color/colorDraftContent</item>
+        <item name="android:paddingStart">@dimen/padding_8</item>
+        <item name="android:paddingEnd">@dimen/padding_8</item>
+    </style>
+
+    <style name="hintTextStye" parent="TextAppearance.Design.Hint">
+
+    </style>
+
+    <!--Activity Theming-->
 
     <style name="MyCourt.MainActivityTheme">
         <!--<item name="android:windowLightStatusBar" tools:targetApi="23">true</item>-->
@@ -42,17 +92,9 @@
         <item name="android:windowReturnTransition">@transition/dribbble_shot_return</item>
     </style>
 
-    <!--SplashActivity theme -->
     <style name="MyCourt.SplashTheme">
         <item name="android:windowBackground">@drawable/splash_background</item>
         <item name="android:statusBarColor">@color/colorPrimary</item>
-    </style>
-
-    <!--TEXT GENERAL-->
-    <!-- Toolbar -->
-    <style name="TextAppearance.ToolbarTitle" parent="@android:style/TextAppearance.Material.Widget.Toolbar.Title">
-        <item name="android:fontFamily">@font/raleway_bold</item>
-        <item name="android:textColor">@color/colorHeadline</item>
     </style>
 
     <!--Main title for shots and user name -->
@@ -117,20 +159,6 @@
         <item name="colorControlActivated">@color/colorWhite</item>
     </style>
 
-    <!-- Widgets-->
-    <style name="Widget.MyCourt" parent="android:Widget" />
-
-    <style name="Widget.MyCourt.Toolbar">
-        <item name="android:titleTextAppearance">@style/TextAppearance.ToolbarTitle</item>
-        <item name="android:background">?android:colorPrimary</item>
-        <!--<item name="android:elevation">@dimen/z_app_bar</item>-->
-        <item name="android:theme">@style/MyCourtDarkOverlay</item>
-    </style>
-
-    <style name="MyCourtDarkOverlay" parent="@android:style/ThemeOverlay.Material.Dark">
-        <!-- Used to theme dark elements in light themed screens.
-             Extend the material dark Action Bar overlay as this contains text styling. -->
-    </style>
 
 
 

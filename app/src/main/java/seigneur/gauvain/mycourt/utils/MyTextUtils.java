@@ -38,13 +38,6 @@ public class MyTextUtils {
      */
     public static boolean isDoubleQuoteCountEven(String text) {
         int doubleQuoteCount = text.replaceAll("[^"+ doublequote +"]", "").length();
-        if (doubleQuoteCount== 0 || (doubleQuoteCount % 2) == 0) {
-            // number is even or 0
-            return true;
-        }
-        else {
-            // number is odd
-            return false;
-        }
+        return (doubleQuoteCount== 0 || (doubleQuoteCount % 2) == 0);
     }
 }

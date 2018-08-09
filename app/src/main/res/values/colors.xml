@@ -4,9 +4,17 @@
     <color name="colorPrimary">#1E1E24</color>
     <color name="colorPrimaryDark">#1E1E24</color>
     <color name="colorAccent">#FB6794</color>
+    <color name="colorBackground">@color/colorPrimary</color>
+    <color name="colorError">#FF6859</color>
+    <color name="colorSurface">@color/colorPrimaryLight</color>
+    <!--A color that passes accessibility guidelines for text/iconography-->
+    <!--<color name="colorOnPrimary"></color>
+    <color name="colorOnSecondary"></color>
+    <color name="colorOnBackground"></color>
+    <color name="colorOnSurface"></color>-->
+    <!--todo : to reorganized -->
     <color name="delete_chip_icon_bg">#8C222222</color>
     <color name="color_title_primary">#F9F9F9</color>
-    <color name="background_primary">#1E1E24</color>
     <color name="content_placeholder">#ffe0e0e0</color>
     <color name="mid_grey">#40808080</color>
     <color name="confirm_edition_background">#33000000</color>

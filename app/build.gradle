@@ -26,10 +26,8 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     implementation 'com.google.android:flexbox:1.0.0'
-    implementation 'com.github.florent37:shapeofview:1.0.6'
     //implementation 'com.eightbitlab:blurview:1.3.4'
     implementation 'com.jakewharton.timber:timber:4.6.1'
-    implementation 'org.greenrobot:eventbus:3.1.1'
     implementation 'com.github.yalantis:ucrop:2.2.2-native'
     implementation 'com.google.code.gson:gson:2.8.2'
     //RxJava & RxAndroid
@@ -45,7 +43,7 @@ dependencies {
     //if use this you must not used com.android.support lib but androidx
     //see : https://material.io/develop/android/docs/getting-started/
     //implementation 'com.google.android.material:material:1.0.0-beta01'
-    def androidSupportVersion = '28.0.0-beta01'//'27.1.1'
+    def androidSupportVersion = '28.0.0-rc01'//'27.1.1'
     implementation "com.android.support:support-v4:$androidSupportVersion"
     implementation "com.android.support:appcompat-v7:$androidSupportVersion"
     implementation "com.android.support:design:$androidSupportVersion"

@@ -1,6 +1,7 @@
 package seigneur.gauvain.mycourt.data.repository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -45,18 +46,12 @@ public class ShotRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Response<Shot>> postShot(MultipartBody.Part body,
-                                     RequestBody title) {
-        return mDribbbleService.postShot(body, title)
+    public Observable<Response<Shot>> publishANewShot(
+            HashMap<String, RequestBody> map,
+            MultipartBody.Part file) {
+        return mDribbbleService.publishANewShot(map, file)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
-
-    /*public Observable<Shot> postShot(MultipartBody.Part body,
-                                         RequestBody title) {
-        return mDribbbleService.postShot(body, title)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }*/
 
 }
