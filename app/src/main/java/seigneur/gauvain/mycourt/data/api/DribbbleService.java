@@ -64,9 +64,10 @@ public interface DribbbleService {
     @POST("shots")
     Observable<Response<Shot>> publishANewShot(
             @PartMap() Map<String, RequestBody> partMap, //See : https://stackoverflow.com/a/40873297
-            @Part MultipartBody.Part file
-            //@Part("description") RequestBody description,
-            //@Part("low_profile") RequestBody isLowProfile
+            @Part MultipartBody.Part file,
+            @Part("title") String title,
+            @Part("description") String description,
+            @Part("items[]") List<String> tags
     );
 
 

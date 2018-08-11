@@ -58,20 +58,6 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //first time created
-       /* adapterCallback = new ShotListCallback() {
-            @Override
-            public void retryPageLoad() {
-                mShotsPresenter.onLoadNextPage(currentPage);
-            }
-            @Override
-            public void onShotClicked(Shot shot,int position) {
-                Shot vContract = adapter.getItem(position);
-                Timber.tag("swagman").d("shotImageClciked in fagment");
-                mShotsPresenter.onShotClicked(shot, position);
-            }
-        };*/
-       // adapter = new ShotListAdapter(getContext())
         adapter = new ShotListAdapter(getContext(), this);
         mGridLayoutManager = new GridLayoutManager(getContext(),2);
         mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {

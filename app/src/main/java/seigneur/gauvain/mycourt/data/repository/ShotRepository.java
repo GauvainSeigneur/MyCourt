@@ -1,5 +1,6 @@
 package seigneur.gauvain.mycourt.data.repository;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,8 +49,11 @@ public class ShotRepository {
 
     public Observable<Response<Shot>> publishANewShot(
             HashMap<String, RequestBody> map,
-            MultipartBody.Part file) {
-        return mDribbbleService.publishANewShot(map, file)
+            MultipartBody.Part file,
+            String title,
+            String description,
+            ArrayList<String> tags) {
+        return mDribbbleService.publishANewShot(map, file,title,description,tags)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

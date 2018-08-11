@@ -65,11 +65,10 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     @Inject
     TempDataRepository mTempDataRepository;
 
-
     //Manage Image picking and cropping
     private Uri imagePickedUriSource = null;
-    private String imagePickedFileName = null;
-    private String imagePickedformat = null;
+    private String imagePickedFileName = null; //todo - must define a way to keep the original file name
+    private String imagePickedFormat = null;
     private Uri imageCroppedUri = null;
     private boolean isImageChanged=false;
     //Manage data
@@ -110,19 +109,14 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     @Override
     public void onImagePicked(Context context, int requestCode, int resultCode, Intent data) {
         if (requestCode==Constants.PICK_IMAGE_REQUEST) {
-            Timber.d(imagePickedformat);
             if (mEditShotView!=null) {
                 imagePickedFileName = ImagePicker.getImageNameFromResult(context, resultCode);
                 imagePickedUriSource = ImagePicker.getImageUriFromResult(context, resultCode, data);
-                imagePickedformat= ImageUtils.getImageExtension(imagePickedUriSource, context);
+                imagePickedFormat= ImageUtils.getImageExtension(imagePickedUriSource, context);
                 int[] imageSize= ImageUtils.imagePickedWidthHeight(context, imagePickedUriSource,
                         0);
-                if (imageSize[0]>=800 && imageSize[1]>=600)
-                    mEditShotView.goToUCropActivity(imagePickedformat, imagePickedUriSource,
-                        imagePickedFileName, imageSize);
-                else
-                    mEditShotView.goToUCropActivity(imagePickedformat, imagePickedUriSource,
-                             imagePickedFileName, imageSize);
+                mEditShotView.goToUCropActivity(imagePickedFormat, imagePickedUriSource,
+                         imagePickedFileName, imageSize);
             }
         }
     }
@@ -169,7 +163,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         if (getTitle()==null && getTitle().isEmpty())
             mEditShotView.showMessageEmptyTitle();
         else {
-            if (imageCroppedUri!=null && imagePickedformat!=null) {
+            if (imageCroppedUri!=null && imagePickedFormat!=null) {
                 if (mEditShotView!=null)
                     mEditShotView.checkPermissionExtStorage();
             } else {
@@ -182,7 +176,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     public void onPublishClicked(Context context) {
         if (isAuthorizedToPublish()) {
             if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT) {
-                postShot(context, getImageUri(),getImageFormat(),getTitle());
+                postShot(context, getImageUri(),getImageFormat(),getTitle(), getShotDescription(), getTagList());
             } else if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
                 updateShot();
             }
@@ -333,14 +327,14 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     private void registerOrUpdateDraft(Context context,boolean isRegisteringImage) {
         if (mSource==Constants.SOURCE_DRAFT) {
             if (isRegisteringImage)
-                storeDraftImage(imagePickedformat, imageCroppedUri, context);
+                storeDraftImage(imagePickedFormat, imageCroppedUri, context);
             else
                 updateInfoDraft(mShotDraft.getImageUrl(), mShotDraft.getImageFormat());
         } else if (mSource==Constants.SOURCE_SHOT) {
             saveInfoDraft(mShot.getImageUrl(), null);
         } else if (mSource==Constants.SOURCE_FAB) {
             if (isRegisteringImage)
-                storeDraftImage(imagePickedformat,imageCroppedUri,context);
+                storeDraftImage(imagePickedFormat,imageCroppedUri,context);
             else
                 saveInfoDraft( null, null);
         }
@@ -400,15 +394,26 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      *************************************************************************
      * NETWORK OPERATION - POST SHOT ON DRIBBBLE
      *************************************************************************/
-    private void postShot(Context context, Uri fileUri, String imageFormat, String titleString) {
+    private void postShot(Context context,
+                          Uri fileUri,
+                          String imageFormat,
+                          String titleString,
+                          String descriptionString,
+                          ArrayList<String> tagList) {
         MultipartBody.Part body = prepareFilePart(context,fileUri,imageFormat,"image");
         // adds another part within the multipart request
-        RequestBody title = RequestBody.create(MultipartBody.FORM, titleString);
+        //RequestBody title = RequestBody.create(MultipartBody.FORM, titleString);
         //add to HashMap key and RequestBody
         HashMap<String, RequestBody> map = new HashMap<>();
-        map.put("title", title);
+        /*map.put("title", title);*/
         // executes the request
-        compositeDisposable.add(mShotRepository.publishANewShot(map, body)
+        compositeDisposable.add(
+                mShotRepository.publishANewShot(
+                map,
+                body,
+                titleString,
+                descriptionString,
+                tagList)
                 .subscribe(
                         response -> {
                             if (response.code()==Constants.ACCEPTED)
@@ -434,7 +439,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         File file = new File(uriOfFile);
         String imageFormatFixed;
         //Word around for jpg format - refused by dribbble
-        if (imageFormat.equals("jpg")) imageFormatFixed="JPG";
+        if (imageFormat.equals("jpg")) imageFormatFixed="JPG"; // to be tested
         else imageFormatFixed =imageFormat;
         // create RequestBody instance from file
         RequestBody requestFile = RequestBody.create(MediaType.parse("image/"+imageFormatFixed), file);
@@ -509,14 +514,14 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     /**
      * Create Shot draft object to insert or update a ShotDraft
-     * @param primarykey - unique identifier
+     * @param primaryKey - unique identifier
      * @param imageUri - image url
      * @param imageFormat _ jpeg, png, gif
      * @return ShotDraft
      */
-    private ShotDraft createShotDraft(int primarykey, @Nullable String imageUri, @Nullable String imageFormat) {
+    private ShotDraft createShotDraft(int primaryKey, @Nullable String imageUri, @Nullable String imageFormat) {
         return new  ShotDraft(
-                primarykey,
+                primaryKey,
                 imageUri,
                 imageFormat,
                 getShotId(),
@@ -585,7 +590,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         if(!isImageChanged && mShotDraft!=null && mShotDraft.getImageFormat()!=null)
             return mShotDraft.getImageFormat();
         else
-            return imagePickedformat;
+            return imagePickedFormat;
     }
     //Todo - manage this from UI
     private boolean getProfile(){
