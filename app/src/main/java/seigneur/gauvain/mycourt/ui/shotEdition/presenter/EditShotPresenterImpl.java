@@ -462,20 +462,24 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     private void storeDraftImage(String imageCroppedFormat, Uri croppedFileUri, Context context) {
         Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
         compositeDisposable.add(mShotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
-                //.onErrorResumeNext(whenExceptionIsThenIgnore(IllegalArgumentException.class))
                 .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t)) //todo : to comment this
-                .doOnSuccess(imageSaved-> { ;
-                    if (mSource==Constants.SOURCE_DRAFT) {
-                        updateInfoDraft(imageSaved,imageCroppedFormat);
-                    } else {
-                       saveInfoDraft(imageSaved,imageCroppedFormat);
-                    }
-                })
-                .doOnError(t -> {
-                    //todo - reactivate RXJavaplugins for release!
-                })
-                .subscribe()
+                .subscribe(
+                        imageSaved -> doOnImageSaved(imageSaved, imageCroppedFormat),
+                        this::doOnCopyImageError
+                )
         );
+    }
+
+    private void doOnImageSaved(String imageStorageURL,String imageCroppedFormat)  {
+        if (mSource==Constants.SOURCE_DRAFT) {
+            updateInfoDraft(imageStorageURL,imageCroppedFormat);
+        } else {
+            saveInfoDraft(imageStorageURL,imageCroppedFormat);
+        }
+    }
+
+    private void doOnCopyImageError(Throwable t)  {
+        Timber.d(t);
     }
 
     /**
@@ -487,8 +491,6 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         compositeDisposable.add(
                 mShotDraftRepository.storeShotDraft(createShotDraft(0,imageUri,imageFormat)
                 )
-                        .subscribeOn(Schedulers.computation())
-                        .observeOn(AndroidSchedulers.mainThread())
                         .doOnSubscribe(id -> {
                             if (mEditShotView!=null)
                                 mEditShotView.notifyPostSaved();

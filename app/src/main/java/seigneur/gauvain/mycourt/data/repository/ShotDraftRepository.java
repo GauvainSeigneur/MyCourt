@@ -14,7 +14,9 @@ import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.local.dao.PostDao;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
@@ -45,7 +47,11 @@ public class ShotDraftRepository {
     }
 
     public Completable storeShotDraft(ShotDraft shotDraft) {
-        return Completable.fromRunnable(() -> postDao.insertPost(shotDraft));
+        return Completable.fromRunnable(
+                () -> postDao.insertPost(shotDraft)
+        )
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Single<String> storeImageAndReturnItsUri(String imageCroppedFormat, Uri croppedFileUri, Context context) {
