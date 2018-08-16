@@ -176,9 +176,10 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     public void onPublishClicked(Context context) {
         if (isAuthorizedToPublish()) {
             if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT) {
-                postShot(context, getImageUri(),getImageFormat(),getTitle(), getShotDescription(), getTagList());
+                postShot(context, getImageUri(),getImageFormat(),getTitle(), getShotDescription(),
+                        getTagList());
             } else if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
-                updateShot();
+                updateShot(getTitle(), getShotDescription(), getTagList(), getProfile());
             }
         } else {
             //todo - make a view call
@@ -344,14 +345,14 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      *************************************************************************
      * NETWORK OPERATION - UPDATE SHOT ON DRIBBBLE
      *************************************************************************/
-    private void updateShot() {
+    private void updateShot(String title, String desc, ArrayList<String> tags, boolean profile) {
         compositeDisposable.add(
                 mShotRepository.updateShot(
                         getShotId(),
-                        getShotDescription(),
-                        getProfile(),
-                        getTagList(),
-                        getTitle())
+                        title,
+                        desc,
+                        tags,
+                        profile)
                         .subscribe(
                                 this::doOnUpdateShotSuccess,
                                 this::doOnUpdateShotError
@@ -417,7 +418,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                 .subscribe(
                         response -> {
                             if (response.code()==Constants.ACCEPTED)
-                                Timber.d("post shot success: "+response.code() + "/ shot posted: "+ response.body().title);
+                                Timber.d("post shot success: "+response.code() +
+                                        "/ shot posted: "+ response.body().title);
                             else
                                 Timber.d("post shot not succeed: "+response.code());
                         },
@@ -540,7 +542,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     /*
      *************************************************************************
      * Get data from UI and from data source
-     * to create shot, draft and perform network and  DB operation
+     * to create shot or draft and perform network and DB operation
      *************************************************************************/
     public String getTitle() {
         return shotTitle;
@@ -649,7 +651,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     }
     /*
      *************************************************************************
-     * MANAGE NETWORK OPERATION EXCEPTION
+     * MANAGE NETWORK EXCEPTION
      *************************************************************************/
     private void handleRetrofitError(final Throwable error) {
         mNetworkErrorHandler.handleNetworkErrors(error,new NetworkErrorHandler.onRXErrorListener() {

@@ -52,12 +52,12 @@ public interface DribbbleService {
     @PUT("shots/{id}")
     Single<Shot> updateShot(
             @Path(value = "id", encoded = true) String id,
+            @Field("title") String title,
             @Field("description") String description,
-            @Field("low_profile") boolean isLowProfile,
-            //@Field("scheduled_for") Date publishDate, //todo : to manage it for phase 2
             @Field("tags[]") ArrayList<String> tags,
+            @Field("low_profile") boolean isLowProfile
+            //@Field("scheduled_for") Date publishDate, //todo : to manage it for phase 2
             // @Field("teamID") int teamID //todo : to mange it for phase 2
-            @Field("title") String title
     );
 
     @Multipart
