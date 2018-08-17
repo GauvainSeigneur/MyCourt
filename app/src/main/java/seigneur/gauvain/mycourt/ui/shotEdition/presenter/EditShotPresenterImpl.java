@@ -378,6 +378,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
             case Constants.ACCEPTED:
                 Timber.d("post succeed");
                 //todo - do something in UI
+                onPublishOrUpdateSucceed();
                 break;
             default:
                 Timber.d("post not succeed: "+response.code());
@@ -406,28 +407,46 @@ public class EditShotPresenterImpl implements EditShotPresenter {
                         tags,
                         profile)
                         .subscribe(
-                                this::doOnUpdateShotSuccess,
-                                this::doOnUpdateShotError
+                                this::onUpdateShotSuccess,
+                                this::onUpdateShotError
                         )
         );
     }
 
-    private void doOnUpdateShotSuccess(Shot shot) {
+    /**
+     * Shot update succeed
+     * @param shot - shot updated
+     */
+    private void onUpdateShotSuccess(Shot shot) {
         //todo must finish with a code to send to Main Activity to delete the draft
         Timber.d("success: "+shot.getTitle());
-        if (mSource==Constants.SOURCE_DRAFT)
-            deleteDraftAfterPublishing();
-        else
-            if (mEditShotView!=null)
-                mEditShotView.stopActivity();
+        onPublishOrUpdateSucceed();
     }
 
-    private void doOnUpdateShotError(Throwable throwable) {
+    /**
+     * Manage network error while trying to perform update
+     * @param throwable - throwable
+     */
+    private void onUpdateShotError(Throwable throwable) {
         //todo - manage UI
         handleNetworkOperationError(throwable);
     }
 
-    private void deleteDraftAfterPublishing() {
+    /**
+     * manage UI and DB items on Post/Updated Succeed
+     */
+    private void onPublishOrUpdateSucceed() {
+        if (mSource==Constants.SOURCE_DRAFT)
+            deleteDraft();
+        else
+        if (mEditShotView!=null)
+            mEditShotView.stopActivity();
+    }
+
+    /**
+     * Delete draft after has been published or updated on Dribbble
+     */
+    private void deleteDraft() {
         compositeDisposable.add(
                 mShotDraftRepository.deleteDraft(mShotDraft.getId())
                         .subscribeOn(Schedulers.computation())
