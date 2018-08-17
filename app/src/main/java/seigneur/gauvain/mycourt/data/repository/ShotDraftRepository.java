@@ -40,10 +40,9 @@ public class ShotDraftRepository {
     }
 
     public Completable updateShotDraft(ShotDraft shotDraft) {
-        return Completable.fromRunnable(() -> postDao.updateDraft(shotDraft));
-    }
-    public Completable deleteDraft(int id) {
-        return Completable.fromRunnable(() -> postDao.deletDraftByID(id));
+        return Completable.fromRunnable(() -> postDao.updateDraft(shotDraft))
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Completable storeShotDraft(ShotDraft shotDraft) {
@@ -52,6 +51,10 @@ public class ShotDraftRepository {
         )
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Completable deleteDraft(int id) {
+        return Completable.fromRunnable(() -> postDao.deletDraftByID(id));
     }
 
     public Single<String> storeImageAndReturnItsUri(String imageCroppedFormat, Uri croppedFileUri, Context context) {

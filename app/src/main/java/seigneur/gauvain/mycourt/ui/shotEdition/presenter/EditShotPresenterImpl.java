@@ -323,22 +323,74 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     /*
      *************************************************************************
-     * DB OPERATIONS - REGISTER OR UPDATE SHOTDRAFT
+     * NETWORK OPERATION - POST SHOT ON DRIBBBLE
      *************************************************************************/
-    private void registerOrUpdateDraft(Context context,boolean isRegisteringImage) {
-        if (mSource==Constants.SOURCE_DRAFT) {
-            if (isRegisteringImage)
-                storeDraftImage(imagePickedFormat, imageCroppedUri, context);
-            else
-                updateInfoDraft(mShotDraft.getImageUrl(), mShotDraft.getImageFormat());
-        } else if (mSource==Constants.SOURCE_SHOT) {
-            saveInfoDraft(mShot.getImageUrl(), null);
-        } else if (mSource==Constants.SOURCE_FAB) {
-            if (isRegisteringImage)
-                storeDraftImage(imagePickedFormat,imageCroppedUri,context);
-            else
-                saveInfoDraft( null, null);
+    private void postShot(Context context,
+                          Uri fileUri,
+                          String imageFormat,
+                          String titleString,
+                          String descriptionString,
+                          ArrayList<String> tagList) {
+        MultipartBody.Part body = prepareFilePart(context,fileUri,imageFormat,"image");
+        //add to HashMap key and RequestBody
+        HashMap<String, RequestBody> map = new HashMap<>();
+        // executes the request
+        compositeDisposable.add(
+                mShotRepository.publishANewShot(
+                        map,
+                        body,
+                        titleString,
+                        descriptionString,
+                        tagList)
+                        .subscribe(
+                                this::onPostSucceed,
+                                this::onPostFailed
+                        )
+        );
+    }
+
+    /**
+     * Create MultipartBody.Part instance separated in order to use @PartMap annotation
+     * to pass parameters along with File request. PartMap is a Map of "Key" and RequestBody.
+     * See : https://stackoverflow.com/a/40873297
+     */
+    private MultipartBody.Part prepareFilePart(Context context, Uri fileUri,String imageFormat, String partName) {
+        //Get file
+        String uriOfFile = ImageUtils.getRealPathFromImage(context,fileUri);
+        File file = new File(uriOfFile);
+        String imageFormatFixed;
+        //Word around for jpg format - refused by dribbble
+        if (imageFormat.equals("jpg")) imageFormatFixed="JPG"; // to be tested
+        else imageFormatFixed =imageFormat;
+        // create RequestBody instance from file
+        RequestBody requestFile = RequestBody.create(MediaType.parse("image/"+imageFormatFixed), file);
+        // MultipartBody.Part is used to send also the actual file name
+        return MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
+    }
+
+    /**
+     * Post operation has succeed - check the response from server
+     * response must be 202 to be publish on Dribbble
+     * @param response - body response from Dribbble
+     */
+    private void onPostSucceed(Response<Shot> response) {
+        switch(response.code()) {
+            case Constants.ACCEPTED:
+                Timber.d("post succeed");
+                //todo - do something in UI
+                break;
+            default:
+                Timber.d("post not succeed: "+response.code());
         }
+    }
+
+    /**
+     * An error occurred while trying to make post request
+     * @param t - throwable
+     */
+    private void onPostFailed(Throwable t) {
+        Timber.e(t);
+        handleNetworkOperationError(t);
     }
 
     /*
@@ -372,7 +424,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     private void doOnUpdateShotError(Throwable throwable) {
         //todo - manage UI
-        handleRetrofitError(throwable);
+        handleNetworkOperationError(throwable);
     }
 
     private void deleteDraftAfterPublishing() {
@@ -393,66 +445,57 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     /*
      *************************************************************************
-     * NETWORK OPERATION - POST SHOT ON DRIBBBLE
+     * MANAGE NETWORK EXCEPTION
      *************************************************************************/
-    private void postShot(Context context,
-                          Uri fileUri,
-                          String imageFormat,
-                          String titleString,
-                          String descriptionString,
-                          ArrayList<String> tagList) {
-        MultipartBody.Part body = prepareFilePart(context,fileUri,imageFormat,"image");
-        // adds another part within the multipart request
-        //RequestBody title = RequestBody.create(MultipartBody.FORM, titleString);
-        //add to HashMap key and RequestBody
-        HashMap<String, RequestBody> map = new HashMap<>();
-        /*map.put("title", title);*/
-        // executes the request
-        compositeDisposable.add(
-                mShotRepository.publishANewShot(
-                map,
-                body,
-                titleString,
-                descriptionString,
-                tagList)
-                .subscribe(
-                        response -> {
-                            if (response.code()==Constants.ACCEPTED)
-                                Timber.d("post shot success: "+response.code() +
-                                        "/ shot posted: "+ response.body().title);
-                            else
-                                Timber.d("post shot not succeed: "+response.code());
-                        },
-                        throwable -> {
-                            Timber.d("post shot failed: " + throwable);
-                        }
-                )
-        );
-    }
+    private void handleNetworkOperationError(final Throwable error) {
+        mNetworkErrorHandler.handleNetworkErrors(error,new NetworkErrorHandler.onRXErrorListener() {
+            @Override
+            public void onUnexpectedException(Throwable throwable) {
+                Timber.d("unexpected error happened, don't know what to do...");
+            }
 
-    /**
-     * Create MultipartBody.Part instance separated in order to use @PartMap annotation
-     * to pass parameters along with File request. PartMap is a Map of "Key" and RequestBody.
-     * See : https://stackoverflow.com/a/40873297
-     */
-    private MultipartBody.Part prepareFilePart(Context context, Uri fileUri,String imageFormat, String partName) {
-        //Get file
-        String uriOfFile = ImageUtils.getRealPathFromImage(context,fileUri);
-        File file = new File(uriOfFile);
-        String imageFormatFixed;
-        //Word around for jpg format - refused by dribbble
-        if (imageFormat.equals("jpg")) imageFormatFixed="JPG"; // to be tested
-        else imageFormatFixed =imageFormat;
-        // create RequestBody instance from file
-        RequestBody requestFile = RequestBody.create(MediaType.parse("image/"+imageFormatFixed), file);
-        // MultipartBody.Part is used to send also the actual file name
-        return MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
+            @Override
+            public void onNetworkException(Throwable throwable) {
+                Timber.d(throwable);
+                if (mConnectivityReceiver.isOnline()) {
+                    Timber.d("it seems that you have unexpected errors");
+                } else {
+                    Timber.d("Not connected to internet, so it is normal that you have an error");
+                }
+
+            }
+
+            @Override
+            public void onHttpException(Throwable throwable) {
+                Timber.tag("HttpNetworks").d(throwable);
+                if (((HttpException) throwable).code() == 403) {
+                    //todo - access forbidden
+                }
+            }
+
+        });
     }
 
     /*
      *************************************************************************
-     * STORING DRAFTS IN DB
-     ************************************************************************/
+     * DB OPERATIONS - REGISTER OR UPDATE SHOTDRAFT
+     *************************************************************************/
+    private void registerOrUpdateDraft(Context context,boolean isRegisteringImage) {
+        if (mSource==Constants.SOURCE_DRAFT) {
+            if (isRegisteringImage)
+                storeDraftImage(imagePickedFormat, imageCroppedUri, context);
+            else
+                updateInfoDraft(mShotDraft.getImageUrl(), mShotDraft.getImageFormat());
+        } else if (mSource==Constants.SOURCE_SHOT) {
+            saveInfoDraft(mShot.getImageUrl(), null);
+        } else if (mSource==Constants.SOURCE_FAB) {
+            if (isRegisteringImage)
+                storeDraftImage(imagePickedFormat,imageCroppedUri,context);
+            else
+                saveInfoDraft( null, null);
+        }
+    }
+
     /**
      * Store image in "My Court" folder in external storage and get the URI to save it in DB
      * @param imageCroppedFormat - jpeg, png, gif
@@ -464,13 +507,18 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         compositeDisposable.add(mShotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
                 .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t)) //todo : to comment this
                 .subscribe(
-                        imageSaved -> doOnImageSaved(imageSaved, imageCroppedFormat),
+                        imageSaved -> saveDraftInDB(imageSaved, imageCroppedFormat),
                         this::doOnCopyImageError
                 )
         );
     }
 
-    private void doOnImageSaved(String imageStorageURL,String imageCroppedFormat)  {
+    /**
+     * Save draft in db
+     * @param imageStorageURL - string to be saved in db
+     * @param imageCroppedFormat - jpeg, png, gif
+     */
+    private void saveDraftInDB(String imageStorageURL,String imageCroppedFormat)  {
         if (mSource==Constants.SOURCE_DRAFT) {
             updateInfoDraft(imageStorageURL,imageCroppedFormat);
         } else {
@@ -478,6 +526,10 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         }
     }
 
+    /**
+     * Indicates to user that an error occurred while trying to copy Image in MyCourt folder
+     * @param t - throwable
+     */
     private void doOnCopyImageError(Throwable t)  {
         Timber.d(t);
     }
@@ -489,16 +541,12 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      */
     private void saveInfoDraft(@Nullable String imageUri,@Nullable String imageFormat) {
         compositeDisposable.add(
-                mShotDraftRepository.storeShotDraft(createShotDraft(0,imageUri,imageFormat)
-                )
-                        .doOnSubscribe(id -> {
-                            if (mEditShotView!=null)
-                                mEditShotView.notifyPostSaved();
-                        })
-                        .doOnError(t->{
-                            Timber.d("error: "+t);
-                        })
-                        .subscribe()
+                mShotDraftRepository.storeShotDraft(
+                        createShotDraft(0,imageUri,imageFormat))
+                        .subscribe(
+                            this::onDraftSaved,
+                            this::onDraftSavingError
+                        )
         );
     }
 
@@ -510,10 +558,27 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     private void updateInfoDraft(@Nullable String imageUri, @Nullable String imageFormat) {
         compositeDisposable.add(mShotDraftRepository.updateShotDraft(
                 createShotDraft(mShotDraft.getId(),imageUri,imageFormat))
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe()
+                .subscribe(
+                        this::onDraftSaved,
+                        this::onDraftSavingError
+                )
         );
+    }
+
+    /**
+     * Draft has been saved/updated in DB
+     */
+    private void onDraftSaved() {
+        if (mEditShotView!=null)
+            mEditShotView.notifyPostSaved();
+    }
+
+    /**
+     * An error occurred while trying to saved draft in db
+     * @param t - throwable
+     */
+    private void onDraftSavingError(Throwable t) {
+        Timber.d(t);
     }
 
     /**
@@ -650,38 +715,6 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     private boolean isAuthorizedToPublish() {
         return getTitle()!=null && !getTitle().isEmpty() && getImageUri()!=null;
-    }
-    /*
-     *************************************************************************
-     * MANAGE NETWORK EXCEPTION
-     *************************************************************************/
-    private void handleRetrofitError(final Throwable error) {
-        mNetworkErrorHandler.handleNetworkErrors(error,new NetworkErrorHandler.onRXErrorListener() {
-            @Override
-            public void onUnexpectedException(Throwable throwable) {
-                Timber.d("unexpected error happened, don't know what to do...");
-            }
-
-            @Override
-            public void onNetworkException(Throwable throwable) {
-                Timber.d(throwable);
-                if (mConnectivityReceiver.isOnline()) {
-                    Timber.d("it seems that you have unexpected errors");
-                } else {
-                    Timber.d("Not connected to internet, so it is normal that you have an error");
-                }
-
-            }
-
-            @Override
-            public void onHttpException(Throwable throwable) {
-                Timber.tag("HttpNetworks").d(throwable);
-                if (((HttpException) throwable).code() == 403) {
-                    //todo - access forbidden
-                }
-            }
-
-        });
     }
 
     /*
