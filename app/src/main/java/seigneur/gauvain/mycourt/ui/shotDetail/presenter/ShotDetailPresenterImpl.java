@@ -56,11 +56,6 @@ public class ShotDetailPresenterImpl implements ShotDetailPresenter {
     @Override
     public void onEditShotClicked() {
         if (mShotDetailView!=null) {
-            /**
-             * Check if the shot has already a draft saved in DB. if it has, call its draft
-             * if not, just go to Edition
-             */
-            Timber.d(mShot.getId());
             checkDraftAndGoToEdition();
         }
 
@@ -85,12 +80,12 @@ public class ShotDetailPresenterImpl implements ShotDetailPresenter {
         }
     }
 
-    /**************************************************************************
+    /*
+     **************************************************************************
      * Get Shot clicked
      *************************************************************************/
     private void getShot() {
         compositeDisposable.add(Single.just(mTempDataRepository.getShot())
-                //.subscribe(getShotObserver());
                 .subscribe(
                         this::doOnShotRetrieve, //success
                         this::doOnShotError //error

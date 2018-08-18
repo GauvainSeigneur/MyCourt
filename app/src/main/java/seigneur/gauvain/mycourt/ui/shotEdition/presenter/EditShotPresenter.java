@@ -12,7 +12,7 @@ import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.ui.base.BasePresenter;
 
 public interface EditShotPresenter extends BasePresenter {
-
+    
     void onIllustrationClicked();
 
     void onConfirmEditionClicked(boolean isFromFab);

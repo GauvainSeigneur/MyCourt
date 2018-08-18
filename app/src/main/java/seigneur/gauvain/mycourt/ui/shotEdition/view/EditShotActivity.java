@@ -60,8 +60,6 @@ import seigneur.gauvain.mycourt.utils.MyTextUtils;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import timber.log.Timber;
 
-
-//todo - style for edit text : https://medium.com/@Gryzor/styling-textinputlayout-and-textinputedittext-on-android-9ab786bef7af
 public class EditShotActivity extends BaseActivity implements EditShotView {
 
     @Inject
@@ -115,6 +113,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     @BindView(R.id.fab_confirm)
     FloatingActionButton fabConfirm;
 
+    //for confirmation menu
     private boolean isConfirmMenuOpen = false;
     private int revealX;
     private int revealY;
@@ -246,7 +245,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     }
 
     @Override
-    public void setUpShotEdtionUI(Shot shot, ShotDraft shotDraft, int source) {
+    public void setUpShotEditionUI(Shot shot, ShotDraft shotDraft, int source) {
         mToolbar.setTitle("Edit a shot");
         setUpShotEditionUI(true, shot, shotDraft, source);
     }
@@ -287,6 +286,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     public void stopActivity() {
         finish();
     }
+
     /********************************************************************
      * ACTIVITY PRIVATE METHODS
      *******************************************************************/

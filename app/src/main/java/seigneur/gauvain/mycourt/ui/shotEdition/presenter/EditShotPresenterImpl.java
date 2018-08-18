@@ -290,7 +290,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     private void manageShotInfo(Shot shot) {
         mShot=shot;
         if (mEditShotView!=null)
-            mEditShotView.setUpShotEdtionUI(shot,null, getEditMode());
+            mEditShotView.setUpShotEditionUI(shot,null, getEditMode());
     }
 
     private void doOngetShotError(Throwable throwable) {
@@ -314,7 +314,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         setShotDraft(shotDraft);
         setEditionMode(shotDraft.getDraftType());
         if (mEditShotView!=null)
-            mEditShotView.setUpShotEdtionUI(null,shotDraft,getEditMode());
+            mEditShotView.setUpShotEditionUI(null,shotDraft,getEditMode());
     }
 
     private void doOnGetShotDraftError(Throwable throwable) {
