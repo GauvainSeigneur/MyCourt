@@ -9,7 +9,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-
+/**
+ * Base fragment which allows to not duplicate some methods in child
+ * Fragment - dedicated to UI not DI
+ */
 public abstract class BaseFragment extends Fragment {
     public View mRootview;
     public Activity activity;

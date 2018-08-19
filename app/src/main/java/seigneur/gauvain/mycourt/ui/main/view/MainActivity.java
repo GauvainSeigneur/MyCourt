@@ -32,7 +32,6 @@ import seigneur.gauvain.mycourt.ui.user.view.UserFragment;
 import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.FragmentStateManager;
 
-//todo : fragment transition : https://medium.com/bynder-tech/how-to-use-material-transitions-in-fragment-transactions-5a62b9d0b26b
 public class MainActivity extends BaseActivity implements MainView, HasSupportFragmentInjector {
 
     @Inject
@@ -66,7 +65,7 @@ public class MainActivity extends BaseActivity implements MainView, HasSupportFr
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int position = getNavPositionFromMenuItem(item);
                 if (position != -1) {
-                    mFragmentStateManager.changeFragment(getNavPositionFromMenuItem(item));
+                    mMainPresenter.onBottomNavItemSelected(item);
                     return true;
                 }
                 return false;
@@ -90,15 +89,6 @@ public class MainActivity extends BaseActivity implements MainView, HasSupportFr
         mMainPresenter.onCheckInternetConnection();
     }
 
-    /*@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
-            if (requestCode== Constants.DRAFT_PUBLISHED){
-                mMainPresenter.onReturnFromDraftPublishing();
-            }
-        }
-    }*/
-
     @OnClick(R.id.fab_add_shot)
     public void goToEdition() {
         mMainPresenter.onAddFabclicked();
@@ -115,8 +105,8 @@ public class MainActivity extends BaseActivity implements MainView, HasSupportFr
     }
 
     @Override
-    public void showFragment(int position) {
-        //todo - not managed yet....
+    public void showFragment(MenuItem item) {
+        mFragmentStateManager.changeFragment(getNavPositionFromMenuItem(item));
     }
 
     @Override

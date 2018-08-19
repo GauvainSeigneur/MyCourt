@@ -16,6 +16,9 @@ import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.local.SharedPrefs;
 import seigneur.gauvain.mycourt.utils.Constants;
 
+/**
+ * Base activity dedicated to some global actions -  Only UI, not DI
+ */
 public class BaseActivity extends AppCompatActivity {
 
     private AlertDialog mAlertDialog;

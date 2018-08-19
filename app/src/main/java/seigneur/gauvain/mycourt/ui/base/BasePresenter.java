@@ -1,5 +1,9 @@
 package seigneur.gauvain.mycourt.ui.base;
 
+/**
+ * Base presenter to not duplicate some global methods
+ * ONLY UI, NOT DI
+ */
 public interface BasePresenter {
 
     /**

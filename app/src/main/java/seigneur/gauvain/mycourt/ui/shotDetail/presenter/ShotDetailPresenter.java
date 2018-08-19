@@ -7,8 +7,16 @@ import seigneur.gauvain.mycourt.ui.base.BasePresenter;
 
 public interface ShotDetailPresenter extends BasePresenter {
 
+    /**
+     * User has clicked on button to modify the shot
+     */
     void onEditShotClicked();
 
+    /**
+     * Callback from glide to know when the image is available to set up the activity UI
+     * @param isResourceReady   - boolean, must be true
+     * @param resource          - image
+     */
     void onShotImageAvailable(boolean isResourceReady,@Nullable Drawable resource);
 
     /**

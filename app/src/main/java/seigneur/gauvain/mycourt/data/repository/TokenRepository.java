@@ -9,6 +9,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Maybe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.local.SharedPrefs;
 import seigneur.gauvain.mycourt.data.local.dao.TokenDao;
 import seigneur.gauvain.mycourt.data.local.dao.UserDao;
@@ -35,7 +37,9 @@ public class TokenRepository {
     }
 
     public Maybe<Token> getAccessTokenFromDB() {
-        return mTokenDao.getToken();
+        return mTokenDao.getToken()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
     }
     /************************************
      * Manage Access token

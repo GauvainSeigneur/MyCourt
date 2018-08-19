@@ -1,11 +1,14 @@
 package seigneur.gauvain.mycourt.ui.main.presenter;
 
+import android.view.MenuItem;
+
 import javax.inject.Inject;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import seigneur.gauvain.mycourt.data.model.Token;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.data.repository.TokenRepository;
@@ -48,8 +51,8 @@ public class MainPresenterImpl implements MainPresenter {
     }
 
     @Override
-    public void onBottomNavItemSelected(int position) {
-        mMainview.showFragment(position);
+    public void onBottomNavItemSelected(MenuItem item) {
+        mMainview.showFragment(item);
     }
 
     @Override
@@ -96,10 +99,6 @@ public class MainPresenterImpl implements MainPresenter {
       }*/
     }
 
-    @Override
-    public void onReturnFromDraftPublishing() {
-        //todo - update shotDraft fragment
-    }
 
     @Override
     public void checkIfTokenIsNull() {
@@ -107,25 +106,44 @@ public class MainPresenterImpl implements MainPresenter {
             fetchTokenFromDB();
     }
 
+    /**
+     * Fetch token from DB - Maybe operator
+     */
     private void fetchTokenFromDB() {
         compositeDisposable.add(mTokenRepository.getAccessTokenFromDB()
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        token -> {
-                            if (mMainview!=null) {
-                                Timber.d("token found");
-                                TokenRepository.accessToken = String.valueOf(token.getAccessToken());
-                            }
-                        },
-                        c-> {
-                            Timber.d("no token found");
-                            //todo - avert user that the app has lost his token, he must reconnect his account
-                        }
+                        this::onTokenFetched,
+                        this:: onFetchTokenFromDBError,
+                        this:: onNoTokenFoundInDB
                 )
         );
     }
 
+    /**
+     * Token being fetched from DB
+     * @param token - Token object
+     */
+    private void onTokenFetched(Token token) {
+        if (mMainview!=null) {
+            Timber.d("token found");
+            TokenRepository.accessToken = String.valueOf(token.getAccessToken());
+        }
+    }
+
+    /**
+     * An error happened during the operation
+     * @param throwable - error
+     */
+    private void onFetchTokenFromDBError(Throwable throwable) {
+        Timber.d(throwable);
+    }
+
+    /**
+     * An error happened during the operation
+     */
+    private void onNoTokenFoundInDB() {
+       //todo -  perform again a Request to get the token again
+    }
 
 
 
