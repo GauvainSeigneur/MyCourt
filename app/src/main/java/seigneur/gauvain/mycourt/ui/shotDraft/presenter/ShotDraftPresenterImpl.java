@@ -76,14 +76,19 @@ public class ShotDraftPresenterImpl implements ShotDraftPresenter {
         }
     }
 
-
+    /**
+     * get ShotDrafts list from DB - Use mayBe because the list will be small
+     * @return - List of ShotDraft
+     */
     private Maybe<List<ShotDraft>> getShotDrafts() {
         Timber.d ("getPostFromDB called");
-        return mShotDraftRepository.getShotDraft()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        return mShotDraftRepository.getShotDraft();
     }
 
+    /**
+     * ShotDrafts being found in DB - do something with it
+     * @param shotDrafts - list Found in DB
+     */
     private void doOnDraftFound(List<ShotDraft> shotDrafts){
         Timber.d("list loaded"+shotDrafts.toString());
         if (mShotDraftView!=null) {
@@ -97,11 +102,18 @@ public class ShotDraftPresenterImpl implements ShotDraftPresenter {
         }
     }
 
+    /**
+     * When nothing found in DB, stop refreshing and set up a dedicated view
+     */
     private void doOnNothingFound(){
         if (mShotDraftView!=null && isRefreshing)
             mShotDraftView.stopRefresh();
     }
 
+    /**
+     * Error happened during shotDraft fetching
+     * @param throwable - error
+     */
     private void doOnError(Throwable throwable){
         Timber.e(throwable);
         if (mShotDraftView!=null)

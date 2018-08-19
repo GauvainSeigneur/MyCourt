@@ -11,6 +11,9 @@ import java.util.List;
 
 import seigneur.gauvain.mycourt.R;
 
+/**
+ * RecyclerView Adapter for Shot's tags
+ */
 public class TagListAdapter extends RecyclerView.Adapter<TagViewHolder> {
 
     private List<String> tags;

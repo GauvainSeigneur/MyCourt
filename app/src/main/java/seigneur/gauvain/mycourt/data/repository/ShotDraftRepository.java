@@ -32,7 +32,9 @@ public class ShotDraftRepository {
     public ShotDraftRepository(){}
 
     public Maybe<List<ShotDraft>> getShotDraft() {
-        return postDao.getAllPost();
+        return postDao.getAllPost()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Maybe<ShotDraft> getShotDraftByShotId(String ShotID) {

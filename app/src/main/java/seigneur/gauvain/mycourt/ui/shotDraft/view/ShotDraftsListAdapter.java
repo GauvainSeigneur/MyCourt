@@ -20,7 +20,9 @@ import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.utils.Constants;
 
-
+/**
+ * ShotDraft RecyclerView adapter
+ */
 public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHolder> {
 
     private List<ShotDraft> data;
@@ -28,6 +30,12 @@ public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHol
     public ShotDraftViewHolder shotDraftViewHolder;
     public ShotDraftListCallback mCallback;
 
+    /**
+     * Constructor
+     * @param context   - activity
+     * @param data      - list of ShotDraft object
+     * @param callback  - ShotDraftListCallback implementation
+     */
     public ShotDraftsListAdapter(Context context, @NonNull List<ShotDraft> data, ShotDraftListCallback callback) {
         this.context = context;
         this.data = data;
@@ -45,8 +53,6 @@ public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHol
     public void onBindViewHolder(final ShotDraftViewHolder holder, final int position) {
         ShotDraft item = data.get(position);
         holder.shotDraftTitle.setText(item.getTitle());
-
-
         if (item.getDraftType()== Constants.EDIT_MODE_NEW_SHOT) {
             holder.shotDraftType.setText("NEW");
         } else {
@@ -67,13 +73,10 @@ public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHol
         } else {
             holder.shotDraftImage.setImageResource(R.drawable.dribbble_ball_intro);
         }
-
-        holder.shotDraftLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCallback.onShotDraftClicked(data.get(position),position);
+        holder.shotDraftLayout.setOnClickListener(v -> {
+            mCallback.onShotDraftClicked(data.get(position),position);
             }
-        });
+        );
 
     }
 
@@ -88,6 +91,12 @@ public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHol
         }
     }
 
+    /**
+     * get imageUri from ShotDraft object. Can be an HTTP URL for published shot or Absolute URL
+     * for new shot project
+     * @param item - shotDraft item
+     * @return uri of the image
+     */
     private Uri getImageUri(ShotDraft item){
         if(item.getImageUrl()!=null)
                 if (item.getDraftType()==Constants.EDIT_MODE_NEW_SHOT)
