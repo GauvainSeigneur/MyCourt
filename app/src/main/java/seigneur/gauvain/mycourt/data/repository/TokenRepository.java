@@ -8,7 +8,9 @@ import com.google.gson.Gson;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.reactivex.Completable;
 import io.reactivex.Maybe;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.local.SharedPrefs;
@@ -31,9 +33,13 @@ public class TokenRepository {
     @Inject
     public TokenRepository(){}
 
-    public long insertToken(@NonNull Token token)  {
+    public Completable insertToken(@NonNull Token token)  {
         accessToken = String.valueOf(token.getAccessToken());
-        return mTokenDao.insertToken(token);
+        return Completable.fromAction(() ->
+                mTokenDao.insertToken(token)
+        )
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Maybe<Token> getAccessTokenFromDB() {

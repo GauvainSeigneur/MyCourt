@@ -160,7 +160,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     @Override
     public void onDraftShotClicked(Context context) {
-        if (getTitle()==null && getTitle().isEmpty())
+        if (getTitle()==null || getTitle()!=null && getTitle().isEmpty())
             mEditShotView.showMessageEmptyTitle();
         else {
             if (imageCroppedUri!=null && imagePickedFormat!=null) {

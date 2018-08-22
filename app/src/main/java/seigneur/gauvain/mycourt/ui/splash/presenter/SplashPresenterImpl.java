@@ -1,15 +1,9 @@
 package seigneur.gauvain.mycourt.ui.splash.presenter;
 
 import com.google.gson.Gson;
-
-import java.util.Collections;
-
 import javax.inject.Inject;
-
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
@@ -24,8 +18,6 @@ import seigneur.gauvain.mycourt.data.repository.UserRepository;
 import seigneur.gauvain.mycourt.di.scope.PerActivity;
 import seigneur.gauvain.mycourt.ui.splash.view.SplashView;
 import timber.log.Timber;
-
-
 
 @PerActivity
 public class SplashPresenterImpl implements SplashPresenter {
@@ -47,7 +39,7 @@ public class SplashPresenterImpl implements SplashPresenter {
 
     private Retrofit authRetrofit;
 
-    private AuthUtils.AuthService authService;
+    private AuthUtils.AuthService mAuthService;
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -58,7 +50,6 @@ public class SplashPresenterImpl implements SplashPresenter {
     @Override
     public void onAttach() {
         checkIfUserIsLoggedIn();
-        initAuthRetrofit();
     }
 
     @Override
@@ -79,30 +70,58 @@ public class SplashPresenterImpl implements SplashPresenter {
         fetchToken(authCode);
     }
 
+    /**
+     * Check if user is LoggedIn : check if a token is present in DB
+     * Todo - check api if we need user too to perfrom request
+     */
     private void checkIfUserIsLoggedIn() {
         compositeDisposable.add(mTokenRepository.getAccessTokenFromDB()
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                      token -> {
-                          if (mSplashView!=null) {
-                              Timber.d("token found");
-                              TokenRepository.accessToken = String.valueOf(token.getAccessToken());
-                              mSplashView.goToHome();
-                          }
+                        token -> {
+                            if (mSplashView!=null) {
+                                Timber.tag("jonh").d("token found");
+                                TokenRepository.accessToken = String.valueOf(token.getAccessToken());
+                                mSplashView.goToHome();
+                            }
+                          },
+                        t-> {
+                            Timber.tag("jonh").d(" error happened");
+                            initAuthRetrofit();
                       },
-                      c-> {
-                          Timber.d("no token found");
-                          //no access token
-                          //todo - do something
-                      }
+                        () -> {
+                            Timber.tag("jonh").d(" no token found");
+                            initAuthRetrofit();
+                            //no token found - todo - may be we need to  perform another authentication!
+
+                    }
                 )
         );
     }
 
+    /**
+     * Build Retrofit for authentication
+     * because it use a different URL that the base url, I have to build this one
+     * and not use the @NetworkModule injection
+     */
+    private void initAuthRetrofit() {
+        //todo find a way to change base url in this case in order to not instantiate another retrofit
+        authRetrofit = new Retrofit.Builder()
+                .baseUrl(AuthUtils.URI_TOKEN_RETROFIT)
+                .client(okHttpClient.build())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+        mAuthService = authRetrofit.create(AuthUtils.AuthService.class);
+    }
+
+
+    /**
+     * fetch Token from Dribbble after a successful authentication
+     * @param authCode - authCode received from intent from WebView - See activity
+     */
     private void fetchToken(String authCode) {
         compositeDisposable.add(
-                authService.getToken(AuthUtils.CLIENT_ID,
+                mAuthService.getToken(AuthUtils.CLIENT_ID,
                         AuthUtils.CLIENT_SECRET,
                         authCode,
                         AuthUtils.REDIRECT_URI)
@@ -124,17 +143,15 @@ public class SplashPresenterImpl implements SplashPresenter {
         );
     }
 
+    /**
+     * After fetch token get the user in order to register it
+     */
     private void getUserAndStoreIt() {
         Timber.d("get user called");
         compositeDisposable.add(
                 mUserRepository.getUserFromAPI(false)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        user -> {
-                            mUserRepository.insertUser(user);
-                            mSplashView.goToHome();
-                        },
+                        this::saveUser,
                         error -> {
                             //todo make a better management of errors
                             Timber.e(error);
@@ -143,32 +160,48 @@ public class SplashPresenterImpl implements SplashPresenter {
         );
     }
 
-    private void initAuthRetrofit() {
-        //todo find a way to change base url in this case in order to not instantiate another retrofit
-        authRetrofit = new Retrofit.Builder()
-                .baseUrl(AuthUtils.URI_TOKEN_RETROFIT)
-                .client(okHttpClient.build())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .build();
-        authService = authRetrofit.create(AuthUtils.AuthService.class);
+    /**
+     * Save user in DB
+     * @param user - User fetched
+     */
+    private void saveUser(User user) {
+       compositeDisposable.add(
+               mUserRepository.insertUser(user)
+               .subscribe(
+                       this::onUserSaved,
+                       this::onUserSavingError
+               )
+       );
     }
 
+    /**
+     * User has been successfully saved in DB, go to home
+     */
+    private void onUserSaved() {
+        mSplashView.goToHome();
+    }
+
+    /**
+     * An error happened during DB ope for save user
+     * @param t - Throwable
+     */
+    private void onUserSavingError(Throwable t) {
+        //todo - keep a ref of this error somewhere to retry to get user after
+        Timber.d(t);
+    }
+
+    /**
+     * Insert Token in DB in order to use it for future request
+     * @param token - token fetch after successful auth
+     */
     private void insertToken(Token token) {
-        Timber.d("insertToken called");
-        compositeDisposable.add(
-                Observable.fromCallable(() ->{
-                    return mTokenRepository.insertToken(token);
-                })
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
+        compositeDisposable.add(mTokenRepository.insertToken(token)
                         .subscribe(
-                                result -> {
-                                    Timber.d(result.toString());
+                                ()-> {
+                                    Timber.d("insert completed");
                                 },
-                                error -> {
-                                    //todo make a better management of errors
-                                    Timber.e(error);
+                                t -> {
+                                    Timber.d(t);
                                 }
                         )
         );

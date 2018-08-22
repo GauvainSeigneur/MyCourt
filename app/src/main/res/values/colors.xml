@@ -1,18 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimaryLight">#292B33</color>
+    <!--
+    Not available yet
+    Colors that passes accessibility guidelines for text/iconography
+    -->
+    <!--<color name="colorOnPrimary"></color>
+    <color name="colorOnSecondary"></color>
+    <color name="colorOnBackground"></color>
+    <color name="colorOnSurface"></color>-->
+
+    <!--Dark theme -->
+    <!--<color name="colorPrimaryLight">#292B33</color>
     <color name="colorPrimary">#1E1E24</color>
     <color name="colorPrimaryDark">#1E1E24</color>
     <color name="colorAccent">#FB6794</color>
     <color name="colorBackground">@color/colorPrimary</color>
     <color name="colorError">#FF6859</color>
+    <color name="colorSurface">@color/colorPrimaryLight</color>-->
+
+    <!-- Text -->
+    <!--<color name="colorHeadline">#FFFFFFFF</color>
+    <color name="colorSubHead">#CCFFFFFF</color>
+    <color name="colorPrimaryTitle">#E6FFFFFF</color>
+    <color name="colorSecondaryTitle">#BFFFFFFF</color>
+    <color name="colorTextBody">#A6FFFFFF</color>
+    <color name="colorDraftHint">#A6FFFFFF</color>
+    <color name="colorDraftContent">#E6FFFFFF</color>-->
+
+    <!--Light theme -->
+    <color name="colorPrimaryLight">#FFFFFF</color>
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimaryDark">#e6e6e6</color>
+    <color name="colorStatusBar">#bfbfbf</color>
+    <color name="colorAccent">#348EF7</color>
+    <color name="colorBackground">@color/colorPrimary</color>
+    <color name="colorError">#FF6859</color>
     <color name="colorSurface">@color/colorPrimaryLight</color>
-    <!--A color that passes accessibility guidelines for text/iconography-->
-    <!--<color name="colorOnPrimary"></color>
-    <color name="colorOnSecondary"></color>
-    <color name="colorOnBackground"></color>
-    <color name="colorOnSurface"></color>-->
-    <!--todo : to reorganized -->
+    <color name="colorOnPrimary">#FF424242</color>
+
+    <color name="colorHeadline">#FF424242</color><!-- 100% opacity-->
+    <color name="colorSubHead">#CC424242</color><!-- 80% opacity-->
+    <color name="colorPrimaryTitle">#E6424242</color><!-- 90% opacity-->
+    <color name="colorSecondaryTitle">#BF424242</color><!-- 75% opacity-->
+    <color name="colorTextBody">#A6424242</color><!-- 65% opacity-->
+    <color name="colorDraftHint">#A6424242</color><!-- 65% opacity-->
+    <color name="colorDraftContent">#E6424242</color><!-- 65% opacity-->
+
     <color name="delete_chip_icon_bg">#8C222222</color>
     <color name="color_title_primary">#F9F9F9</color>
     <color name="content_placeholder">#ffe0e0e0</color>
@@ -20,17 +53,9 @@
     <color name="confirm_edition_background">#33000000</color>
     <color name="colorWhite">#FFFFFFFF</color>
 
-    <!-- Text -->
-    <color name="colorHeadline">#FFFFFFFF</color><!-- 100% opacity-->
-    <color name="colorSubHead">#CCFFFFFF</color><!-- 80% opacity-->
-    <color name="colorPrimaryTitle">#E6FFFFFF</color><!-- 90% opacity-->
-    <color name="colorSecondaryTitle">#BFFFFFFF</color><!-- 75% opacity-->
-    <color name="colorTextBody">#A6FFFFFF</color><!-- 65% opacity-->
-    <color name="colorDraftHint">#A6FFFFFF</color><!-- 65% opacity-->
-    <color name="colorDraftContent">#E6FFFFFF</color><!-- 65% opacity-->
+    <!--Common colors -->
 
     <!--social colors -->
-
     <color name="colorInstagramOne">#F6C584</color>
     <color name="colorInstagramTwo">#F09BA6</color>
     <color name="colorInstagramThree">#EC7AC1</color>

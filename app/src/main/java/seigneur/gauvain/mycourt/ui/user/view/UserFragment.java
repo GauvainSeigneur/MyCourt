@@ -38,7 +38,6 @@ import seigneur.gauvain.mycourt.data.model.User;
 import seigneur.gauvain.mycourt.ui.base.BaseFragment;
 import seigneur.gauvain.mycourt.ui.user.presenter.UserPresenter;
 import seigneur.gauvain.mycourt.ui.user.recyclerView.UserLinksAdapter;
-import timber.log.Timber;
 
 import static seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp;
 
@@ -46,7 +45,6 @@ import static seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp;
 /**
  * Created by gse on 22/11/2017.
  */
-
 public class UserFragment extends BaseFragment implements UserView {
 
     @Inject
@@ -86,15 +84,8 @@ public class UserFragment extends BaseFragment implements UserView {
     RecyclerView mUserLinksList;
 
     private UserLinksAdapter mUserLinksAdapter;
+    private int screenWidth;
 
-    int screenWidth;
-    float screenHeightInDp;
-    float screenWidthDP;
-
-    //http://www.w3blogs.com/index.php/2017/12/09/android-collapsing-toolbar-layout/
-    /**
-     * FRAGMENT LIFE CYCLE
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -155,9 +146,6 @@ public class UserFragment extends BaseFragment implements UserView {
         return R.layout.fragment_user;
     }
 
-    /**
-     * USERVIEW METHODS
-     */
     @Override
     public void showNoConnectionView(boolean visible) {
         if(visible) {
@@ -229,7 +217,15 @@ public class UserFragment extends BaseFragment implements UserView {
         Toast.makeText(activity, "no user available", Toast.LENGTH_SHORT).show();
     }
 
-    public AppBarLayout.OnOffsetChangedListener appBarOffsetListener =
+    /*
+    *********************************************************************************
+    * Internal methods
+    *********************************************************************************/
+    /**
+     * add to appbar a listener for scroll change in order to provide some
+     * nice animation on scroll
+     */
+    private AppBarLayout.OnOffsetChangedListener appBarOffsetListener =
             new AppBarLayout.OnOffsetChangedListener() {
                 @Override
                 public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
@@ -268,7 +264,6 @@ public class UserFragment extends BaseFragment implements UserView {
                             (((nameWidth/4)+nameMargingLeftOnCollapsed)-(((nameWidth/4)+nameMargingLeftOnCollapsed)*vRatio));
                     name.setX(transitionXTitle);*/
 
-
                     /**
                      * scale effect effect on Avatar
                      */
@@ -290,23 +285,30 @@ public class UserFragment extends BaseFragment implements UserView {
                     //name.setY(transitionNameY);
                     userLocation.setAlpha(vRatio);
                     userFollowers.setAlpha(vRatio);
-
-                    Timber.d(avatar.getWidth()+"");
-
                 }
             };
 
+    /**
+     * init mathematics data for scroll animation
+     * init these only when view was created in order to avoid some weird behavior on first opening
+     */
     public void initMathData() {
         //ini math data
         Display display = getActivity().getWindowManager().getDefaultDisplay();
         DisplayMetrics displayMetrics = new DisplayMetrics ();
         display.getMetrics(displayMetrics);
         int screenHeight = displayMetrics.heightPixels;
-        screenHeightInDp = convertPixelsToDp(screenHeight,getActivity());
+        float screenHeightInDp = convertPixelsToDp(screenHeight,getActivity());
         screenWidth = displayMetrics.widthPixels;
-        screenWidthDP = convertPixelsToDp(screenWidth,getActivity());
+        float screenWidthDP = convertPixelsToDp(screenWidth,getActivity());
     }
 
+    /**
+     * Transform a key/value map to a a list of string using key
+     * for links
+     * @param env - map fetched
+     * @return - list of links
+     */
     public static List<String> mapToList(Map<String, String> env) {
         List<String> result = new ArrayList<String>();
         for (Map.Entry<String, String> entry : env.entrySet())

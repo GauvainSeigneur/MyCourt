@@ -14,12 +14,6 @@ import seigneur.gauvain.mycourt.ui.user.view.UserView;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import timber.log.Timber;
 
-//todo :
-// 1) Fetch user info from api
-// 2) store it in database
-// 3) display user info from database (even if api request has succeed or not)
-
-//test : https://medium.com/mobiwise-blog/load-cache-before-api-call-observable-concat-f527f267656
 @PerFragment
 public class UserPresenterImpl implements UserPresenter {
 
@@ -30,9 +24,9 @@ public class UserPresenterImpl implements UserPresenter {
     ConnectivityReceiver mConnectivityReceiver;
 
     @Inject
-    UserRepository userRepository;
+    UserRepository mUserRepository;
 
-    private CompositeDisposable compositeDisposable;
+    private CompositeDisposable mCompositeDisposable;
 
     @Inject
     public UserPresenterImpl() {
@@ -41,32 +35,27 @@ public class UserPresenterImpl implements UserPresenter {
 
     @Override
     public void onAttach() {
-        compositeDisposable = new CompositeDisposable();
+        mCompositeDisposable = new CompositeDisposable();
         getUserAndDisplayIt(mConnectivityReceiver.isOnline());
     }
 
     @Override
     public void onDetach() {
-        compositeDisposable.dispose();
+        mCompositeDisposable.dispose();
         mUserView=null;
     }
 
     /**
-     * Get user from DB and from API
+     * get user from both source and display info
+     * @param applyResponseCache - managed by internet connection state
      */
     private void getUserAndDisplayIt(boolean applyResponseCache) {
-        compositeDisposable.add(userRepository.getUser(applyResponseCache)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(new Consumer<User>() {
-                    @Override
-                    public void accept(User user) throws Exception {
-                        displayUserInfo(user);
-                        Timber.d(user.getFollowers_count()+"");
-                    }
-                })
-                .doOnComplete(this::manageUserUI)
-                .subscribe()
+        mCompositeDisposable.add(mUserRepository.getUser(applyResponseCache)
+                .subscribe(
+                        this::onUserFound,              //User found - display info
+                        this::onErrorHappened,          //Error happened during the request
+                        this::manageUIFromDataSource    //Manage UI according to data source
+                )
         );
     }
 
@@ -77,7 +66,7 @@ public class UserPresenterImpl implements UserPresenter {
      *  user profile
      * @param user object
      */
-    private void displayUserInfo(User user) {
+    private void onUserFound(User user) {
         if(mUserView!=null) {
             mUserView.setUpUserAccountInfo(user);
             mUserView.setUserPicture(user);
@@ -85,29 +74,40 @@ public class UserPresenterImpl implements UserPresenter {
         }
     }
 
-    private void showUserLink(User user) {
-        if (!user.getLinks().isEmpty()) {
-            mUserView.showUserLinks(user);
-            mUserView.showNoLinksView(false);
-        } else {
-            mUserView.showNoLinksView(true);
-        }
+    /**
+     * An error happened during the request, warn the user
+     * @param t - Throwable
+     */
+    private void onErrorHappened(Throwable t) {
+        Timber.d(t);
     }
 
     /**
      * display a message to user according to fetch result
      * and connectivity
      */
-    private void manageUserUI() {
-        Timber.d(String.valueOf(userRepository.isFetchFromAPISuccess)+" "+String.valueOf(userRepository.isFetchFromDBSuccess));
-        if (!userRepository.isFetchFromDBSuccess && !userRepository.isFetchFromAPISuccess) {
+    private void manageUIFromDataSource() {
+        if (!mUserRepository.isFetchFromDBSuccess && !mUserRepository.isFetchFromAPISuccess) {
             mUserView.showNoUserFoundView(true);
-        } else if (!userRepository.isFetchFromDBSuccess) {
+        } else if (!mUserRepository.isFetchFromDBSuccess) {
             Timber.d("user fetch from api only");
-        } else if (!userRepository.isFetchFromAPISuccess){
+        } else if (!mUserRepository.isFetchFromAPISuccess){
             Timber.d("user fetch from DB only");
         } else {
             Timber.d("user from both source");
+        }
+    }
+
+    /**
+     * Show user Links
+     * @param user - User fetched
+     */
+    private void showUserLink(User user) {
+        if (!user.getLinks().isEmpty()) {
+            mUserView.showUserLinks(user);
+            mUserView.showNoLinksView(false);
+        } else {
+            mUserView.showNoLinksView(true);
         }
     }
 
