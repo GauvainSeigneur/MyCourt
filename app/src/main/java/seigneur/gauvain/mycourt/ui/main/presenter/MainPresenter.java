@@ -44,4 +44,9 @@ public interface MainPresenter extends BasePresenter {
      *  any api operation. so check if user is null on resume and get it again from DB
      */
     void checkIfTokenIsNull();
+
+    /**
+     * User clicked on back button, go back on prev fragment
+     */
+    void onReturnNavigation(MenuItem item, int position);
 }

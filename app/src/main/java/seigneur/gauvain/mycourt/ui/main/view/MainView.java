@@ -17,6 +17,12 @@ public interface MainView {
     void showFragment(int pos);
 
     /**
+     * go Back on prev item when user click on back button
+     * @param pos -  item of bottom nav menu
+     */
+    void goBackOnPrevItem(int pos);
+
+    /**
      * Go to EditShotActivity
      */
     void goToShotEdition();
@@ -40,5 +46,10 @@ public interface MainView {
      * Show a message when internet connection is retrieved after being lost
      */
     void showInternetConnectionRetrieved(boolean showIt);
+
+    /**
+     * Finish activity
+     */
+    void closeActivity();
 
 }

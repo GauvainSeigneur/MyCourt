@@ -82,6 +82,14 @@ public class MainPresenterImpl implements MainPresenter {
         checkInternetConnection();
     }
 
+    @Override
+    public void onReturnNavigation(MenuItem item, int position) {
+        if (item!=null &&position!=-1 && position>0)
+            mMainview.goBackOnPrevItem(position-1);
+        else
+            mMainview.closeActivity();
+    }
+
     private void checkInternetConnection() {
 
       /*if (mConnectivityReceiver.isOnline() && isInternetLost) {

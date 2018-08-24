@@ -10,25 +10,26 @@
     <color name="colorOnSurface"></color>-->
 
     <!--Dark theme -->
-    <!--<color name="colorPrimaryLight">#292B33</color>
+    <color name="colorPrimaryLight">#292B33</color>
     <color name="colorPrimary">#1E1E24</color>
     <color name="colorPrimaryDark">#1E1E24</color>
+    <color name="colorStatusBar">#1E1E24</color>
     <color name="colorAccent">#FB6794</color>
     <color name="colorBackground">@color/colorPrimary</color>
     <color name="colorError">#FF6859</color>
     <color name="colorSurface">@color/colorPrimaryLight</color>-->
 
     <!-- Text -->
-    <!--<color name="colorHeadline">#FFFFFFFF</color>
-    <color name="colorSubHead">#CCFFFFFF</color>
-    <color name="colorPrimaryTitle">#E6FFFFFF</color>
-    <color name="colorSecondaryTitle">#BFFFFFFF</color>
-    <color name="colorTextBody">#A6FFFFFF</color>
-    <color name="colorDraftHint">#A6FFFFFF</color>
-    <color name="colorDraftContent">#E6FFFFFF</color>-->
+    <color name="colorHeadline">#FFFFFFFF</color><!-- 100% opacity-->
+    <color name="colorSubHead">#CCFFFFFF</color><!-- 80% opacity-->
+    <color name="colorPrimaryTitle">#E6FFFFFF</color><!-- 90% opacity-->
+    <color name="colorSecondaryTitle">#BFFFFFFF</color><!-- 75% opacity-->
+    <color name="colorTextBody">#A6FFFFFF</color><!-- 65% opacity-->
+    <color name="colorDraftHint">#A6FFFFFF</color><!-- 65% opacity-->
+    <color name="colorDraftContent">#E6FFFFFF</color><!-- 65% opacity-->
 
     <!--Light theme -->
-    <color name="colorPrimaryLight">#FFFFFF</color>
+    <!--<color name="colorPrimaryLight">#FFFFFF</color>
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryDark">#e6e6e6</color>
     <color name="colorStatusBar">#bfbfbf</color>
@@ -38,13 +39,13 @@
     <color name="colorSurface">@color/colorPrimaryLight</color>
     <color name="colorOnPrimary">#FF424242</color>
 
-    <color name="colorHeadline">#FF424242</color><!-- 100% opacity-->
-    <color name="colorSubHead">#CC424242</color><!-- 80% opacity-->
-    <color name="colorPrimaryTitle">#E6424242</color><!-- 90% opacity-->
-    <color name="colorSecondaryTitle">#BF424242</color><!-- 75% opacity-->
-    <color name="colorTextBody">#A6424242</color><!-- 65% opacity-->
-    <color name="colorDraftHint">#A6424242</color><!-- 65% opacity-->
-    <color name="colorDraftContent">#E6424242</color><!-- 65% opacity-->
+    <color name="colorHeadline">#FF424242</color>
+    <color name="colorSubHead">#CC424242</color>
+    <color name="colorPrimaryTitle">#E6424242</color>
+    <color name="colorSecondaryTitle">#BF424242</color>
+    <color name="colorTextBody">#A6424242</color>
+    <color name="colorDraftHint">#A6424242</color>
+    <color name="colorDraftContent">#E6424242</color>-->
 
     <color name="delete_chip_icon_bg">#8C222222</color>
     <color name="color_title_primary">#F9F9F9</color>

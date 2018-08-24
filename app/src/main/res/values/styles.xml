@@ -27,9 +27,9 @@
     <style name="Widget.MyCourt" parent="android:Widget" />
 
     <!--AppBar and Toolbar style -->
-    <style name="MyCourt.AppBarOverlay" parent="ThemeOverlay.AppCompat.Light" />
-    <style name="MyCourt.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-    <style name="MyCourt.ToolbarTheme" parent="ThemeOverlay.AppCompat.Light">
+    <style name="MyCourt.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="MyCourt.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="MyCourt.ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:fontFamily">@font/raleway_bold</item>
         <item name="android:textColor">@color/colorHeadline</item>
     </style>

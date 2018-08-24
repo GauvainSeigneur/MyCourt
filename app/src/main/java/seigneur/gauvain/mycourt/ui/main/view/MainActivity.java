@@ -41,7 +41,7 @@ public class MainActivity extends BaseActivity implements MainView, HasSupportFr
     FrameLayout mFragmentContainer;
 
     @BindView(R.id.navigation)
-    BottomNavigationView navigation;
+    BottomNavigationView mNavigation;
 
     @BindView(R.id.fab_add_shot)
     FloatingActionButton mFabAddShot;
@@ -49,6 +49,10 @@ public class MainActivity extends BaseActivity implements MainView, HasSupportFr
     private boolean isFAbVisible;
 
     private FragmentStateManager mFragmentStateManager;
+
+    private int mBottomNavPosition=0;
+
+    private MenuItem mItem;
 
     @Inject
     DispatchingAndroidInjector<Fragment> fragmentDispatchingAndroidInjector;
@@ -60,26 +64,28 @@ public class MainActivity extends BaseActivity implements MainView, HasSupportFr
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         initFragmentManager(savedInstanceState);
-        navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                int position = getNavPositionFromMenuItem(item);
-                if (position != -1) {
-                    mMainPresenter.onBottomNavItemSelected(position);
-                    return true;
-                }
-                return false;
+        mNavigation.setOnNavigationItemSelectedListener(item -> {
+            mItem=item;
+            mBottomNavPosition = getNavPositionFromMenuItem(mItem);
+            if (mBottomNavPosition != -1) {
+                mMainPresenter.onBottomNavItemSelected(mBottomNavPosition);
+                return true;
             }
+            return false;
         });
 
-        navigation.setOnNavigationItemReselectedListener(new BottomNavigationView.OnNavigationItemReselectedListener() {
-            @Override
-            public void onNavigationItemReselected(@NonNull MenuItem item) {
-                int position = getNavPositionFromMenuItem(item);
-                mMainPresenter.onBottomNavItemReselected(position);
-            }
+        mNavigation.setOnNavigationItemReselectedListener(item -> {
+            mItem=item;
+            mBottomNavPosition = getNavPositionFromMenuItem(mItem);
+            if (mBottomNavPosition != -1)
+                mMainPresenter.onBottomNavItemReselected(mBottomNavPosition);
         });
 
+    }
+
+    @Override
+    public AndroidInjector<Fragment> supportFragmentInjector() {
+        return fragmentDispatchingAndroidInjector;
     }
 
     @Override
@@ -89,14 +95,15 @@ public class MainActivity extends BaseActivity implements MainView, HasSupportFr
         mMainPresenter.onCheckInternetConnection();
     }
 
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+        mMainPresenter.onReturnNavigation(mItem, mBottomNavPosition);
+    }
+
     @OnClick(R.id.fab_add_shot)
     public void goToEdition() {
         mMainPresenter.onAddFabclicked();
-    }
-
-    @Override
-    public AndroidInjector<Fragment> supportFragmentInjector() {
-        return fragmentDispatchingAndroidInjector;
     }
 
     @Override
@@ -105,8 +112,18 @@ public class MainActivity extends BaseActivity implements MainView, HasSupportFr
     }
 
     @Override
+    public void closeActivity() {
+        finish();
+    }
+
+    @Override
     public void showFragment(int pos) {
         mFragmentStateManager.changeFragment(pos);
+    }
+
+    @Override
+    public void goBackOnPrevItem(int position) {
+        mNavigation.setSelectedItemId(mNavigation.getMenu().getItem(position).getItemId());
     }
 
     @Override
