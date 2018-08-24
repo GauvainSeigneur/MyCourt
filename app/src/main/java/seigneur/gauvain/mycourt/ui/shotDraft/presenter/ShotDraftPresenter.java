@@ -8,7 +8,7 @@ public interface ShotDraftPresenter extends BasePresenter {
    /**
     * Swipe refresh layout onRefresh called
     */
-   void onRefresh();
+   void onRefresh(boolean fromSwipeRefresh);
 
    /**
     * User has clicked on a ShotDraft item in the draft list

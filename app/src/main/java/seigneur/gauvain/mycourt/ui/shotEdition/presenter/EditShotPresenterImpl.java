@@ -442,26 +442,6 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         if (mEditShotView!=null)
             mEditShotView.stopActivity();
     }
-
-    /**
-     * Delete draft after has been published or updated on Dribbble
-     */
-    private void deleteDraft() {
-        compositeDisposable.add(
-                mShotDraftRepository.deleteDraft(mShotDraft.getId())
-                        .subscribeOn(Schedulers.computation())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .doOnError(t->{
-                            //todo notify user that we can't delete the item
-                        })
-                        .doOnComplete(()->{
-                            if (mEditShotView!=null)
-                                mEditShotView.stopActivity();
-                        })
-                        .subscribe()
-        );
-    }
-
     /*
      *************************************************************************
      * MANAGE NETWORK EXCEPTION
@@ -588,6 +568,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      * Draft has been saved/updated in DB
      */
     private void onDraftSaved() {
+        mTempDataRepository.setDraftsChanged(true);
         if (mEditShotView!=null)
             mEditShotView.notifyPostSaved();
     }
@@ -597,6 +578,36 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      * @param t - throwable
      */
     private void onDraftSavingError(Throwable t) {
+        Timber.d(t);
+    }
+
+    /**
+     * Delete draft after has been published or updated on Dribbble
+     */
+    private void deleteDraft() {
+        compositeDisposable.add(
+                mShotDraftRepository.deleteDraft(mShotDraft.getId())
+                        .subscribe(
+                                this::onDraftDeleted,
+                                this::onDeleteDraftFailed
+                        )
+        );
+    }
+
+    /**
+     * Draft has been deleted correctly
+     */
+    private void onDraftDeleted() {
+        mTempDataRepository.setDraftsChanged(true);
+        if (mEditShotView!=null)
+            mEditShotView.stopActivity();
+    }
+
+    /**
+     * An error happened during delete process
+     * @param t - error description
+     */
+    private void onDeleteDraftFailed(Throwable t) {
         Timber.d(t);
     }
 

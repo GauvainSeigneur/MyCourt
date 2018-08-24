@@ -85,7 +85,7 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
         mRefreshDraftLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mShotDraftPresenter.onRefresh();
+                mShotDraftPresenter.onRefresh(true);
             }
         });
 
@@ -133,7 +133,13 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
     public void onResume() {
         super.onResume();
         Timber.d("onResume called");
-        //mShotDraftPresenter.refreshListOfDraft();
+        mShotDraftPresenter.onRefresh(false);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Timber.d("onPause called");
     }
 
     @Override

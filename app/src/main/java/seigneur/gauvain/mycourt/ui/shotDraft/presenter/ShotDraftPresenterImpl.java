@@ -58,13 +58,17 @@ public class ShotDraftPresenterImpl implements ShotDraftPresenter {
     }
 
     @Override
-    public void onRefresh() {
-        isRefreshing=true;
-        compositeDisposable.add(getShotDrafts()
-                .subscribe(
-                        this::doOnDraftFound,
-                        this::doOnError,
-                        this::doOnNothingFound));
+    public void onRefresh(boolean fromSwipeRefresh) {
+        if (fromSwipeRefresh || mTempDataRepository.isDraftsChanged()) {
+            isRefreshing=true;
+            compositeDisposable.add(getShotDrafts()
+                    .subscribe(
+                            this::doOnDraftFound,
+                            this::doOnError,
+                            this::doOnNothingFound));
+        } else {
+            Timber.d("not refreshing, nothing happened");
+        }
     }
 
     @Override
@@ -90,6 +94,7 @@ public class ShotDraftPresenterImpl implements ShotDraftPresenter {
      * @param shotDrafts - list Found in DB
      */
     private void doOnDraftFound(List<ShotDraft> shotDrafts){
+        mTempDataRepository.setDraftsChanged(false); //Consume the event
         Timber.d("list loaded"+shotDrafts.toString());
         if (mShotDraftView!=null) {
             mShotDraftView.stopRefresh();
@@ -106,6 +111,7 @@ public class ShotDraftPresenterImpl implements ShotDraftPresenter {
      * When nothing found in DB, stop refreshing and set up a dedicated view
      */
     private void doOnNothingFound(){
+        mTempDataRepository.setDraftsChanged(false);
         if (mShotDraftView!=null && isRefreshing)
             mShotDraftView.stopRefresh();
     }
