@@ -65,7 +65,7 @@ public class MainActivity extends BaseActivity implements MainView, HasSupportFr
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int position = getNavPositionFromMenuItem(item);
                 if (position != -1) {
-                    mMainPresenter.onBottomNavItemSelected(item);
+                    mMainPresenter.onBottomNavItemSelected(position);
                     return true;
                 }
                 return false;
@@ -105,8 +105,8 @@ public class MainActivity extends BaseActivity implements MainView, HasSupportFr
     }
 
     @Override
-    public void showFragment(MenuItem item) {
-        mFragmentStateManager.changeFragment(getNavPositionFromMenuItem(item));
+    public void showFragment(int pos) {
+        mFragmentStateManager.changeFragment(pos);
     }
 
     @Override

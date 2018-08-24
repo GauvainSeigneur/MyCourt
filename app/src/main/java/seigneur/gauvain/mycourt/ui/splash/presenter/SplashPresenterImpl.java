@@ -165,8 +165,7 @@ public class SplashPresenterImpl implements SplashPresenter {
      * @param user - User fetched
      */
     private void saveUser(User user) {
-       compositeDisposable.add(
-               mUserRepository.insertUser(user)
+       compositeDisposable.add(mUserRepository.insertUser(user)
                .subscribe(
                        this::onUserSaved,
                        this::onUserSavingError

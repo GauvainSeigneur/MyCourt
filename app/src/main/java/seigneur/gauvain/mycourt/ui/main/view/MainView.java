@@ -12,9 +12,9 @@ public interface MainView {
 
     /**
      * Show dedicated fragment when user click on the dedicated item in the menu
-     * @param item -  item of bottom nav menu
+     * @param pos -  item of bottom nav menu
      */
-    void showFragment(MenuItem item);
+    void showFragment(int pos);
 
     /**
      * Go to EditShotActivity

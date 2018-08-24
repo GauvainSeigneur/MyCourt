@@ -51,8 +51,8 @@ public class MainPresenterImpl implements MainPresenter {
     }
 
     @Override
-    public void onBottomNavItemSelected(MenuItem item) {
-        mMainview.showFragment(item);
+    public void onBottomNavItemSelected(int pos) {
+        mMainview.showFragment(pos);
     }
 
     @Override

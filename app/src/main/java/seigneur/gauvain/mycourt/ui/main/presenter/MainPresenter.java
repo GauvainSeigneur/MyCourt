@@ -9,9 +9,9 @@ public interface MainPresenter extends BasePresenter {
 
     /**
      * User has clicked on item
-     * @param item - item in the menu
+     * @param pos - item in the menu
      */
-    void onBottomNavItemSelected(MenuItem item);
+    void onBottomNavItemSelected(int pos);
 
     /**
      * User has clicked on item already selected
