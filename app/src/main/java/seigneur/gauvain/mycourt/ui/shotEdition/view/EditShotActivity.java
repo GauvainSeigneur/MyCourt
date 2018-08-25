@@ -217,7 +217,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
                     )
                     .into(croppedImagepreview);
         } else {
-            croppedImagepreview.setImageResource(R.drawable.ic_my_shot_black_24dp);
+            croppedImagepreview.setImageResource(R.drawable.add_image_illustration);
         }
     }
 
@@ -478,7 +478,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
      * UI - CREATION MODE
      *******************************************************************/
     private void setUpCreationModeUI() {
-        croppedImagepreview.setImageResource(R.drawable.dribbble_ball_intro);
+        croppedImagepreview.setImageResource(R.drawable.add_image_illustration);
     }
 
     /********************************************************************
