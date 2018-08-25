@@ -1,6 +1,5 @@
 package seigneur.gauvain.mycourt.ui.main.view;
 
-import android.view.MenuItem;
 
 public interface MainView {
 

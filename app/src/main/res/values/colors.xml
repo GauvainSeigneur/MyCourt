@@ -10,11 +10,20 @@
     <color name="colorOnSurface"></color>-->
 
     <!--Dark theme -->
-    <color name="colorPrimaryLight">#292B33</color>
+    <!--<color name="colorPrimaryLight">#292B33</color>
     <color name="colorPrimary">#1E1E24</color>
     <color name="colorPrimaryDark">#1E1E24</color>
     <color name="colorStatusBar">#1E1E24</color>
     <color name="colorAccent">#FB6794</color>
+    <color name="colorBackground">@color/colorPrimary</color>
+    <color name="colorError">#FF6859</color>
+    <color name="colorSurface">@color/colorPrimaryLight</color>-->
+
+    <color name="colorPrimaryLight">#363643</color>
+    <color name="colorPrimary">#2b2b35</color>
+    <color name="colorPrimaryDark">#26262f</color>
+    <color name="colorStatusBar">@color/colorPrimary</color>
+    <color name="colorAccent">#F47DB1</color>
     <color name="colorBackground">@color/colorPrimary</color>
     <color name="colorError">#FF6859</color>
     <color name="colorSurface">@color/colorPrimaryLight</color>-->
@@ -25,7 +34,7 @@
     <color name="colorPrimaryTitle">#E6FFFFFF</color><!-- 90% opacity-->
     <color name="colorSecondaryTitle">#BFFFFFFF</color><!-- 75% opacity-->
     <color name="colorTextBody">#A6FFFFFF</color><!-- 65% opacity-->
-    <color name="colorDraftHint">#A6FFFFFF</color><!-- 65% opacity-->
+    <color name="colorDraftHint">#66FFFFFF</color><!-- 40% opacity-->
     <color name="colorDraftContent">#E6FFFFFF</color><!-- 65% opacity-->
 
     <!--Light theme -->

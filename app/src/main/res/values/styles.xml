@@ -59,27 +59,31 @@
     </style>
 
     <style name="Widget.MyCourt.TextInputLayoutStyle" parent="Widget.Design.TextInputLayout">
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
         <item name="android:textColorHint">@color/colorDraftHint</item>
-        <item name="boxBackgroundMode">filled</item>
-        <item name="boxBackgroundColor">@color/colorSurface</item>
-        <!--<item name="boxStrokeColor">@color/colorSurface</item>-->
-        <item name="boxCornerRadiusTopEnd">@dimen/padding_4</item>
-        <item name="boxCornerRadiusTopStart">@dimen/padding_4</item>
-        <item name="boxCollapsedPaddingTop">@dimen/padding_4</item>
+        <item name="helperTextTextAppearance">@style/Widget.MyCourt.HelperTextStyle</item>
     </style>
 
-    <style name="Widget.MyCourt.TextInputEditTextStyle">
+    <style name="Widget.MyCourt.EditTextStyle">
         <item name="android:textColor">@color/colorDraftContent</item>
-        <item name="android:paddingStart">@dimen/padding_8</item>
-        <item name="android:paddingEnd">@dimen/padding_8</item>
+        <item name="android:background">@drawable/round_input_background</item>
+        <item name="android:paddingLeft">@dimen/custom_edit_padding</item>
+        <item name="android:paddingTop">@dimen/custom_edit_padding_top</item>
+        <item name="android:paddingRight">@dimen/custom_edit_padding</item>
+        <item name="android:paddingBottom">@dimen/custom_edit_padding</item>
     </style>
 
-    <style name="hintTextStye" parent="TextAppearance.Design.Hint">
+    <style name="Widget.MyCourt.HintTextStyle" parent="TextAppearance.Design.Hint">
+        <item name="android:textColorHint">@color/colorDraftHint</item>
+    </style>
 
+    <style name="Widget.MyCourt.HelperTextStyle" parent="TextAppearance.Design.HelperText">
+        <item name="android:textColor">@color/colorDraftHint</item>
+        <item name="android:layout_marginTop">@dimen/padding_8</item>
     </style>
 
     <!--Activity Theming-->
-
     <style name="MyCourt.MainActivityTheme">
         <!--<item name="android:windowLightStatusBar" tools:targetApi="23">true</item>-->
         <!--<item name="android:windowExitTransition">@transition/main_exit</item>
