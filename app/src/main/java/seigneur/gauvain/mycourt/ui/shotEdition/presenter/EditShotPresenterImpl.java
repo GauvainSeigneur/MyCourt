@@ -2,13 +2,17 @@ package seigneur.gauvain.mycourt.ui.shotEdition.presenter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.support.annotation.Nullable;
 import android.text.style.TtsSpan;
+import android.util.Log;
 import android.widget.Toast;
 import com.yalantis.ucrop.UCrop;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -67,16 +71,16 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     //Manage Image picking and cropping
     private Uri imagePickedUriSource = null;
-    private String imagePickedFileName = null; //todo - must define a way to keep the original file name
+    private String imagePickedFileName = null;
     private String imagePickedFormat = null;
     private Uri imageCroppedUri = null;
     private boolean isImageChanged=false;
     //Manage data
     private int mSource;
     private String mTags;
-    private ArrayList<String> tagList;
-    private String shotTitle;
-    private String shotDescription;
+    private ArrayList<String> mTagList;
+    private String mShotTitle;
+    private String mShotDescription;
     private ShotDraft mShotDraft;
     private Shot mShot;
     private int mEditionMode;
@@ -110,16 +114,17 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     public void onImagePicked(Context context, int requestCode, int resultCode, Intent data) {
         if (requestCode==Constants.PICK_IMAGE_REQUEST) {
             if (mEditShotView!=null) {
-                imagePickedFileName = ImagePicker.getImageNameFromResult(context, resultCode);
                 imagePickedUriSource = ImagePicker.getImageUriFromResult(context, resultCode, data);
-                imagePickedFormat= ImageUtils.getImageExtension(imagePickedUriSource, context);
-                int[] imageSize= ImageUtils.imagePickedWidthHeight(context, imagePickedUriSource,
-                        0);
+                imagePickedFileName = ImagePicker.getPickedImageName(context, imagePickedUriSource);
+                Timber.tag("007bond").d(imagePickedFileName);
+                imagePickedFormat= ImageUtils.getImageExtension(context, imagePickedUriSource);
+                int[] imageSize= ImageUtils.imagePickedWidthHeight(context, imagePickedUriSource, 0);
                 mEditShotView.goToUCropActivity(imagePickedFormat, imagePickedUriSource,
                          imagePickedFileName, imageSize);
             }
         }
     }
+
 
     @Override
     public void onImageCropped(int requestCode, int resultCode, Intent data) {
@@ -153,7 +158,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     @Override
     public void onConfirmEditionClicked(boolean isFromFab) {
-        createTagList();
+        createTagList(tempTagList());
         if (mEditShotView!=null && isFromFab) //else is from the dialog called from onAbort method.
             mEditShotView.openConfirmMenu();
     }
@@ -214,15 +219,15 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     @Override
     public void onTitleChanged(String title) {
         if (title.length()>0)
-            shotTitle= title;
+            mShotTitle= title;
         else
-            shotTitle="";
+            mShotTitle="";
     }
 
     @Override
     public void onDescriptionChanged(String description) {
         if (description.length()>0)
-            shotDescription= description;
+            mShotDescription= description;
     }
 
     @Override
@@ -290,7 +295,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     private void manageShotInfo(Shot shot) {
         mShot=shot;
         if (mEditShotView!=null)
-            mEditShotView.setUpShotEditionUI(shot,null, getEditMode());
+            mEditShotView.setUpShotEditionUI(shot, getEditMode());
     }
 
     private void doOngetShotError(Throwable throwable) {
@@ -314,7 +319,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         setShotDraft(shotDraft);
         setEditionMode(shotDraft.getDraftType());
         if (mEditShotView!=null)
-            mEditShotView.setUpShotEditionUI(null,shotDraft,getEditMode());
+            mEditShotView.setUpShotEditionUI(shotDraft,getEditMode());
     }
 
     private void doOnGetShotDraftError(Throwable throwable) {
@@ -391,7 +396,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      */
     private void onPostFailed(Throwable t) {
         Timber.e(t);
-        handleNetworkOperationError(t);
+        handleNetworkOperationError(t,-1);
     }
 
     /*
@@ -429,7 +434,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      */
     private void onUpdateShotError(Throwable throwable) {
         //todo - manage UI
-        handleNetworkOperationError(throwable);
+        handleNetworkOperationError(throwable,-1);
     }
 
     /**
@@ -446,8 +451,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      *************************************************************************
      * MANAGE NETWORK EXCEPTION
      *************************************************************************/
-    private void handleNetworkOperationError(final Throwable error) {
-        mNetworkErrorHandler.handleNetworkErrors(error,new NetworkErrorHandler.onRXErrorListener() {
+    private void handleNetworkOperationError(final Throwable error, int eventID) {
+        mNetworkErrorHandler.handleNetworkErrors(error,eventID, new NetworkErrorHandler.onRXErrorListener() {
             @Override
             public void onUnexpectedException(Throwable throwable) {
                 Timber.d("unexpected error happened, don't know what to do...");
@@ -642,36 +647,51 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      * to create shot or draft and perform network and DB operation
      *************************************************************************/
     public String getTitle() {
-        return shotTitle;
+        return mShotTitle;
     }
 
     public ArrayList<String> getTagList() {
-        return tagList;
+        return mTagList;
     }
 
     //Create taglist according to Dribbble pattern
-    private void createTagList() {
+    private ArrayList<String> tempTagList() {
+        ArrayList<String> tempList = new ArrayList<>();
         //create the list just one time, not any time the tags changed
         if (mTags!=null && !mTags.isEmpty()) {
             Pattern p = Pattern.compile(MyTextUtils.tagRegex);
             Matcher m = p.matcher(mTags);
             if (MyTextUtils.isDoubleQuoteCountEven(mTags)) {
                 // number is even or 0
-                tagList = new ArrayList<>();
                 while (m.find()) {
-                    //add to list the matched values and remove double quotes
-                    tagList.add(m.group(0));//replace("\"", ""));
+                    tempList.add(m.group(0));
                 }
-
             }
             else {
-                // number is odd: warn user and stop
+                //todo-  number is odd: warn user and stop
             }
         }
+        return tempList;
+    }
+
+    private static ArrayList<String> tagListWithoutQuote(ArrayList<String> list){
+        String[] output = new String[list.size()];
+        StringBuilder builder;
+        for(int i=0;i<list.size();i++){
+            builder = new StringBuilder();
+            output[i] = builder.toString();
+            output[i]= list.get(i).replaceAll("\"", "");
+        }
+
+        return new ArrayList<>(Arrays.asList(output));
+    }
+
+    private void createTagList(ArrayList<String> tempList){
+        mTagList = tagListWithoutQuote(tempList);
     }
 
     public String getShotDescription() {
-        return shotDescription;
+        return mShotDescription;
     }
 
     private int getEditMode() {
@@ -679,10 +699,19 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     }
 
     private Uri getImageUri() {
-        if(!isImageChanged && mShotDraft!=null && mShotDraft.getImageUrl()!=null)
-                return Uri.parse(mShotDraft.getImageUrl());
-            else
-                return imageCroppedUri;
+        if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
+            if(mShotDraft!=null && mShotDraft.getImageUrl()!=null) {
+                if (!isImageChanged)
+                    return Uri.parse(mShotDraft.getImageUrl());
+                else
+                    return imageCroppedUri;
+            } else {
+                //if it is not a ShotDraft it is a shot
+                return Uri.parse(mShot.getImageUrl());
+            }
+        } else {
+            return imageCroppedUri;
+        }
     }
 
     private String getImageFormat() {
@@ -746,25 +775,5 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     private boolean isAuthorizedToPublish() {
         return getTitle()!=null && !getTitle().isEmpty() && getImageUri()!=null;
     }
-
-    /*
-     *************************************************************************
-     * to delete
-     ************************************************************************/
-    /*public String[] getTagArray() {
-        if (getTagList()!=null && !getTagList().isEmpty()) {
-            String[] array = new String[getTagList().size()];
-            for (int i = 0; i < getTagList().size(); i++) {
-                array[i] = getTagList().get(i);
-                Timber.d(array[i]);
-            }
-            Timber.d(array.toString());
-            return array;
-        }
-        else {
-            Timber.d("taglist null");
-            return null;
-        }
-    }*/
 
 }

@@ -108,7 +108,8 @@ public class ImageUtils {
         File myCourtDraftFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath(), appDirectoryName);
         myCourtDraftFolder.mkdirs();
         //2: give to image a name
-        String filename = String.format("%d_%s", Calendar.getInstance().getTimeInMillis(), croppedFileUri.getLastPathSegment())+"."+ImageCroppedFormat;
+        //String filename = String.format("%d_%s", Calendar.getInstance().getTimeInMillis(), croppedFileUri.getLastPathSegment())+"."+ImageCroppedFormat;
+        String filename = croppedFileUri.getLastPathSegment()+"."+ImageCroppedFormat;
         //3: create a file with the path of myCourtDraftFolder and the given name
         File saveFile = new File(myCourtDraftFolder.getAbsolutePath(), filename);
         //4: Copy file and close process
@@ -132,7 +133,7 @@ public class ImageUtils {
      * @param uri - uri the image selected by user
      * @return the format. must be JPG, PNG or GIF. Nothing else
      */
-    public static String getImageExtension(Uri uri, Context context) {
+    public static String getImageExtension(Context context, Uri uri) {
         ContentResolver contentResolver=context.getContentResolver();
         MimeTypeMap mimeTypeMap=MimeTypeMap.getSingleton();
         // Return file Extension

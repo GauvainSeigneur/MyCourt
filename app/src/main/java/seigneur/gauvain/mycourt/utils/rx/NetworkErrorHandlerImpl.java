@@ -10,55 +10,37 @@ import io.reactivex.plugins.RxJavaPlugins;
 import retrofit2.HttpException;
 import timber.log.Timber;
 
+/**
+ * Implementation of NetworkErrorHandler using RxJavaPlugins to catch IO errors
+ * and not stop application
+ * see : https://github.com/ReactiveX/RxJava/wiki/What%27s-different-in-2.0
+ */
 public class NetworkErrorHandlerImpl implements NetworkErrorHandler {
 
     @Inject
     public NetworkErrorHandlerImpl() {}
 
     @Override
-    public void handleNetworkErrors(final Throwable error, NetworkErrorHandler.onRXErrorListener listener) {
+    public void handleNetworkErrors(final Throwable error, int eventID, NetworkErrorHandler.onRXErrorListener listener) {
         RxJavaPlugins.setErrorHandler(e ->{
             if (error instanceof UndeliverableException) {
+                //Unknown error, rx cannot attribute this error to a class
                 Timber.e(error.getMessage()+error.getCause());
-                listener.onUnexpectedException(error);
+                listener.onUnexpectedException(e);
+                return;
             }
-            //SocketException: Timeout
             if ((error instanceof SocketException) || (error instanceof IOException)) {
-                Timber.e(error.getMessage()+error.getCause());
-                listener.onNetworkException(error);
                 // fine, irrelevant network problem or API that throws on cancellation
+                Timber.e(error.getMessage()+error.getCause());
+                listener.onNetworkException(e);
                 return;
             }
             if ((error instanceof HttpException)) {
+                //non-2xx HTTP response
                 Timber.e(error.getMessage()+error.getCause());
-                // fine, irrelevant network problem or API that throws on cancellation
-                listener.onHttpException(error);
-                return;
+                listener.onHttpException(e);
             }
-            //todo - manage it and reactivate for relase with firebase log
-            // for now I don't want to manage it for debugging...
-            /*if (error instanceof UndeliverableException) {
-                Timber.e(error.getMessage()+error.getCause());
-                listener.onUnexpectedException(error);
-            }
-            if (error instanceof InterruptedException) {
-                // fine, some blocking code was interrupted by a dispose call
-                return;
-            }
-            if ((error instanceof NullPointerException) || (error instanceof IllegalArgumentException)) {
-                // that's likely a bug in the application
-                //Thread.currentThread().getUncaughtExceptionHandler().handleException(Thread.currentThread(), e);
-                return;
-            }
-            if (error instanceof IllegalStateException) {
-                // that's a bug in RxJava or in a custom operator
-                //Thread.currentThread().getUncaughtExceptionHandler().handleException(Thread.currentThread(), e);
-                return;
-            }*/
-            //Timber.w("Undeliverable exception received, not sure what to do", e);
-            }
-        );
-
+        });
     }
 
 }

@@ -120,7 +120,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
                         .subscribe(
                                 this::doOnFirstPageNext,
                                 error -> {
-                                    handleRetrofitError(error);
+                                    handleRetrofitError(error,-1);
                                     doOnFirstPageError(error);
                                 }
                         )
@@ -173,7 +173,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
                         .subscribe(
                                 this::doOnNextPageNext,
                                 error -> {
-                                    handleRetrofitError(error);
+                                    handleRetrofitError(error,-1);
                                     doOnNextPageError(error);
                                 }
                                 )
@@ -237,7 +237,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
                         .subscribe(
                                 this::doOnRefreshNext, //success
                                 error -> {
-                                    handleRetrofitError(error);
+                                    handleRetrofitError(error,-1);
                                     doOnRefreshError(error);
                                 }
                         )
@@ -277,8 +277,8 @@ public class ShotsPresenterImpl implements ShotsPresenter {
      * Manage Retrofit error
      * Implementation of NetworkErrorHandler.onRXErrorListener()
      *************************************************************************/
-    private void handleRetrofitError(final Throwable error) {
-        mNetworkErrorHandler.handleNetworkErrors(error,new NetworkErrorHandler.onRXErrorListener() {
+    private void handleRetrofitError(final Throwable error, int eventID) {
+        mNetworkErrorHandler.handleNetworkErrors(error, eventID, new NetworkErrorHandler.onRXErrorListener() {
             @Override
             public void onUnexpectedException(Throwable throwable) {
                 Timber.d("unexpected error happened, don't know what to do...");

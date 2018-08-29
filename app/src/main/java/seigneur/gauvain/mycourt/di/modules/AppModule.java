@@ -15,7 +15,8 @@ import seigneur.gauvain.mycourt.ui.splash.view.SplashActivityModule;
 import seigneur.gauvain.mycourt.ui.splash.view.SplashActivity;
 import seigneur.gauvain.mycourt.di.scope.PerActivity;
 /**
- * Created by gse on 26/03/2018.
+ * Created by Gauvain on 26/03/2018.
+ * Module which allows activities to have access to injected dependencies
  */
 @Module(includes = {
         AndroidSupportInjectionModule.class

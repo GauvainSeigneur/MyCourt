@@ -20,12 +20,10 @@ public interface EditShotView {
 
     /**
      * set up UI according to date source
-     * @param shot      - if the source is a shot
-     * @param shotDraft - if the source is a draft
+     * @param o         - Shot or ShotDraft
      * @param editMode  - see Constants file
      */
-    void setUpShotEditionUI(@Nullable Shot shot,
-                           @Nullable ShotDraft shotDraft,
+    void setUpShotEditionUI(Object o,
                            int editMode);
 
     /**

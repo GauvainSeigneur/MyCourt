@@ -1,5 +1,7 @@
 package seigneur.gauvain.mycourt.utils;
 
+import java.util.regex.Pattern;
+
 public class MyTextUtils {
 
     public MyTextUtils(){}
@@ -25,10 +27,9 @@ public class MyTextUtils {
     //if true, don't split them if they are separated by space or comma
     //if false, split them if they are separated by space or comma
     public static String tagRegex = "(\"([^\"]*)\"|[^, ]+)";
-
     //for checking single quote too
     //String tagRegex = "(\"([^\"]*)\"|'([^']*)|[^, ]+)";
-
+    public static String multipleWordtagRegex = ("\\w+");
     private static char doublequote= '\"';
 
     /**

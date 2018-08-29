@@ -20,6 +20,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -36,7 +37,11 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 
 import java.io.File;
-import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -61,18 +66,6 @@ import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import timber.log.Timber;
 
 public class EditShotActivity extends BaseActivity implements EditShotView {
-
-    @Inject
-    PostDao postDao;
-
-    @Inject
-    NetworkErrorHandler mNetworkErrorHandler;
-
-    @Inject
-    DribbbleService mDribbbleService;
-
-    @Inject
-    ShotRepository mShotRepository;
 
     @Inject
     EditShotPresenter mEditShotPresenter;
@@ -245,9 +238,9 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     }
 
     @Override
-    public void setUpShotEditionUI(Shot shot, ShotDraft shotDraft, int source) {
+    public void setUpShotEditionUI(Object object, int source) {
         mToolbar.setTitle("Edit a shot");
-        setUpShotEditionUI(true, shot, shotDraft, source);
+        setUpEditionUI(true, object, source);
     }
 
     @Override
@@ -374,9 +367,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     /********************************************************************
      * UI - EDITION MODE
      *******************************************************************/
-    private void setUpShotEditionUI(final boolean isTransactionPostponed,
-                                    @Nullable Shot shot,
-                                    @Nullable  ShotDraft shotDraft, int source) {
+    private void setUpEditionUI(final boolean isTransactionPostponed,Object object, int source) {
 
         if (isTransactionPostponed)
             postponeEnterTransition();
@@ -388,7 +379,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
         Glide
                 .with(this)
                 .asBitmap()
-                .load(getImageUrl(shot, shotDraft, source))
+                .load(getImageUrl(object, source))
                 .apply(new RequestOptions()
                         .error(R.drawable.ic_my_shot_black_24dp)
                 )
@@ -408,67 +399,91 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
                 })
                 .into(croppedImagepreview);
 
-        mTagEditor.setText(getTagList(shot, shotDraft));
-        mShotTitleEditor.setText(getTitle(shot, shotDraft));
-        String description = getDescription(shot, shotDraft);
+        mTagEditor.setText(getTagList(object));
+        mShotTitleEditor.setText(getTitle(object));
+        String description = getDescription(object);
         if (description!=null)
             mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description));
     }
 
 
     //get title from data sent by presenter
-    public String getTitle(Shot shot, ShotDraft shotDraft){
-        if (shot!=null)
+    public String getTitle(Object object){
+        if (object instanceof Shot) {
+            Shot shot = (Shot) object;
             return shot.getTitle();
-        else if(shotDraft!=null && shotDraft.getTitle()!=null)
+        } else if(object instanceof ShotDraft) {
+            ShotDraft shotDraft = (ShotDraft) object;
             return shotDraft.getTitle();
-        else
+        } else {
             return null;
+        }
     }
 
     //get image uri from data sent by presenter
-    public Uri getImageUrl(Shot shot, ShotDraft shotDraft, int source) {
-        if (shot!=null)
+    public Uri getImageUrl(Object object, int source) {
+        if (object instanceof Shot){
+            Shot shot = (Shot) object;
             return Uri.parse(shot.getImageUrl());
-        else if(shotDraft!=null && shotDraft.getImageUrl()!=null)
-            if (source==Constants.EDIT_MODE_NEW_SHOT)
-            return FileProvider.getUriForFile(this,
-                    this.getString(R.string.file_provider_authorities),
-                    new File(shotDraft.getImageUrl()));
+        }
+        else if(object instanceof ShotDraft) {
+            ShotDraft shotDraft = (ShotDraft) object;
+            if (shotDraft.getImageUrl()!=null) {
+                if (source==Constants.EDIT_MODE_NEW_SHOT)
+                    return FileProvider.getUriForFile(this,
+                            this.getString(R.string.file_provider_authorities),
+                            new File(shotDraft.getImageUrl()));
+                else
+                    return Uri.parse(shotDraft.getImageUrl());
+            }
             else
-                return Uri.parse(shotDraft.getImageUrl());
+                return null;
+        }
         else
             return null;
     }
 
     //get tags from data sent by presenter
-    public StringBuilder getTagList(Shot shot, ShotDraft shotDraft){
+    public StringBuilder getTagList(Object object){
+        StringBuilder stringBuilder = new StringBuilder();
+        if (object instanceof Shot) {
+            Shot shot = (Shot) object;
+            stringBuilder = adaptTagListToEditText(shot.getTagList());
+        } else if(object instanceof ShotDraft) {
+            ShotDraft shotDraft = (ShotDraft) object;
+            stringBuilder =adaptTagListToEditText(shotDraft.getTagList());
+        }
+        return stringBuilder;
+    }
+
+    /**
+     * Check if a tag contains more than one word, if true, add double quote to it,
+     * @param tagList - list from Shot or ShotDraft
+     * @return string from list with each item separated by a comma
+     */
+    private StringBuilder adaptTagListToEditText (ArrayList<String> tagList) {
         StringBuilder listString = new StringBuilder();
-        if (shot!=null)
-            for (String s : shot.getTagList()) {
-                listString.append(s+", ");
+        Pattern multipleWordTagPattern = Pattern.compile(MyTextUtils.multipleWordtagRegex);
+        for (String s : tagList) {
+            Matcher wordMatcher = multipleWordTagPattern.matcher(s);
+            if (!wordMatcher.matches()) {
+                s = "\""+ s +"\"";
             }
-        else if(shotDraft!=null && shotDraft.getTagList()!=null)
-            for (String s : shotDraft.getTagList()) {
-                listString.append(s+", ");
-            }
+            listString.append(s+", ");
+        }
         return listString;
     }
 
-    public String getDescription(Shot shot, ShotDraft shotDraft){
-        String htmlFormatDescription;
-        if (shot!=null) {
-            if (shot.getDescription()!=null) {
-                htmlFormatDescription= Html.fromHtml(shot.getDescription()).toString();
-                return htmlFormatDescription;
-            } else {
-                return null;
-            }
+    public String getDescription(Object object){
+        String desc = null;
+        if (object instanceof Shot) {
+            Shot shot = (Shot) object;
+            desc= Html.fromHtml(shot.getDescription()).toString();
+        } else if(object instanceof ShotDraft) {
+            ShotDraft shotDraft = (ShotDraft) object;
+            desc =  shotDraft.getDescription();
         }
-        else if(shotDraft!=null)
-            return shotDraft.getDescription();
-        else
-            return null;
+        return desc;
     }
 
     public void showMessageEmptyTitle() {

@@ -1,5 +1,8 @@
 package seigneur.gauvain.mycourt.utils.rx;
 
+/**
+ * Interface which allows to treat all IO errors in one place when injected in Presenter
+ */
 public interface NetworkErrorHandler {
 
         interface onRXErrorListener {
@@ -21,6 +24,6 @@ public interface NetworkErrorHandler {
 
         }
 
-        void handleNetworkErrors(Throwable error, onRXErrorListener listener);
+        void handleNetworkErrors(Throwable error,int eventID, onRXErrorListener listener);
 
 }
