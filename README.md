@@ -15,7 +15,7 @@ It is based on MVP pattern, Dependency injection, RXJava, Retrofit, Architecture
 * Save in drafts your current work
 
 ## State
-Not stable yet.
+Stable -  UI must be finalized  
 
 ## Todo
 * Convert to Kotlin
