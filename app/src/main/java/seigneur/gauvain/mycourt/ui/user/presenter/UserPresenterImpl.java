@@ -37,6 +37,7 @@ public class UserPresenterImpl implements UserPresenter {
     public void onAttach() {
         mCompositeDisposable = new CompositeDisposable();
         getUserAndDisplayIt(mConnectivityReceiver.isOnline());
+        //getUserAndDisplayItOnlyFromDB(false);
     }
 
     @Override
@@ -109,6 +110,43 @@ public class UserPresenterImpl implements UserPresenter {
         } else {
             mUserView.showNoLinksView(true);
         }
+    }
+
+    /*
+     *******************************************************************************
+     * ONLY FOR TESTS
+     *******************************************************************************/
+
+    private void getUserAndDisplayItOnlyFromDB(boolean applyResponseCache) {
+        mCompositeDisposable.add(mUserRepository.getUserFromDB()
+                .subscribe(
+                        this::onUserFoundTest,              //User found - display info
+                        t -> Timber.tag("lololol").d(t) ,         //Error happened during the request
+                        () ->Timber.tag("lololol").d("oncomplete")   //Manage UI according to data source
+                )
+        );
+    }
+
+    private void onUserFoundTest(User user) {
+        if(mUserView!=null) {
+            mUserView.setUpUserAccountInfo(user);
+            mUserView.setUserPicture(user);
+            showUserLink(user);
+            if(user.getCryptedPwd()!=null)
+                Timber.tag("lololol").d(user.getCryptedPwd());
+            else {
+                updateUserPWD("passwordTest");
+            }
+        }
+    }
+
+    private void updateUserPWD(String pwd) {
+        mCompositeDisposable.add(mUserRepository.updateUserPWD(pwd)
+                .subscribe(
+                        () ->Timber.tag("lololol").d("user pwd updated"),
+                        t -> Timber.tag("lololol").d(t) //Manage UI according to data source
+                )
+        );
     }
 
 

@@ -50,6 +50,14 @@ public class UserRepository {
                 .dematerialize();
     }
 
+    public Completable updateUserPWD(String pwd) {
+        return Completable.fromAction(() ->
+                mUserDao.updateCryptedPwd(pwd)
+        )
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public Maybe<User> getUserFromDB() {
         Timber.d("getUserFromDB called");
         return mUserDao.getUser()

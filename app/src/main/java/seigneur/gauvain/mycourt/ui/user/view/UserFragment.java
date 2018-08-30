@@ -84,6 +84,7 @@ public class UserFragment extends BaseFragment implements UserView {
     RecyclerView mUserLinksList;
 
     private UserLinksAdapter mUserLinksAdapter;
+
     private int screenWidth;
 
     @Override
@@ -186,7 +187,6 @@ public class UserFragment extends BaseFragment implements UserView {
     public void showNoTeamsView(boolean visible) {
 
     }
-
 
     @Override
     public void showUserLinks(User user) {
