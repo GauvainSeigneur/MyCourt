@@ -68,6 +68,8 @@ public class Constants {
     public static final int REQUEST_OK                      = 200 ;
     public static final int ACCEPTED                        = 202 ; //for post request
 
+    public static final String SECRET_PWD_ALIAS             = "SecretPwdAlias";
+
     /**
      * Social
      */
