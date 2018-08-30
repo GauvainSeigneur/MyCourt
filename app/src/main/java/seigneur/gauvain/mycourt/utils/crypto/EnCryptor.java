@@ -21,13 +21,16 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * From : JosiasSena: https://gist.github.com/JosiasSena/3bf4ca59777f7dedcaf41a495d96d984
  * Great article: https://medium.com/@josiassena/using-the-android-keystore-system-to-store-sensitive-information-3a56175a454b
  */
 @TargetApi(23)
-class EnCryptor {
+@Singleton
+public class EnCryptor {
 
     private static final String TRANSFORMATION = "AES/GCM/NoPadding";
     private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
@@ -35,10 +38,11 @@ class EnCryptor {
     private byte[] encryption;
     private byte[] iv;
 
+    @Inject
     EnCryptor() {
     }
 
-    byte[] encryptText(final String alias, final String textToEncrypt)
+    public byte[] encryptText(final String alias, final String textToEncrypt)
             throws UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException,
             NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IOException,
             InvalidAlgorithmParameterException, SignatureException, BadPaddingException,

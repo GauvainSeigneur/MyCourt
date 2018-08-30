@@ -1,5 +1,20 @@
 package seigneur.gauvain.mycourt.ui.user.presenter;
 
+import android.util.Base64;
+import android.util.Log;
+
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.UnrecoverableEntryException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.inject.Inject;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -12,7 +27,13 @@ import seigneur.gauvain.mycourt.data.model.User;
 import seigneur.gauvain.mycourt.di.scope.PerFragment;
 import seigneur.gauvain.mycourt.ui.user.view.UserView;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
+import seigneur.gauvain.mycourt.utils.Constants;
+import seigneur.gauvain.mycourt.utils.crypto.DeCryptor;
+import seigneur.gauvain.mycourt.utils.crypto.EnCryptor;
+import seigneur.gauvain.mycourt.utils.crypto.EnCryptor_Factory;
 import timber.log.Timber;
+
+import static com.yalantis.ucrop.UCropFragment.TAG;
 
 @PerFragment
 public class UserPresenterImpl implements UserPresenter {
@@ -26,6 +47,13 @@ public class UserPresenterImpl implements UserPresenter {
     @Inject
     UserRepository mUserRepository;
 
+    @Inject
+    EnCryptor mEnCryptor;
+
+    @Inject
+    DeCryptor mDeCryptor;
+
+
     private CompositeDisposable mCompositeDisposable;
 
     @Inject
@@ -37,7 +65,9 @@ public class UserPresenterImpl implements UserPresenter {
     public void onAttach() {
         mCompositeDisposable = new CompositeDisposable();
         getUserAndDisplayIt(mConnectivityReceiver.isOnline());
+        //encryptPwd("myCustomPassword");
         //getUserAndDisplayItOnlyFromDB(false);
+
     }
 
     @Override
@@ -116,7 +146,6 @@ public class UserPresenterImpl implements UserPresenter {
      *******************************************************************************
      * ONLY FOR TESTS
      *******************************************************************************/
-
     private void getUserAndDisplayItOnlyFromDB(boolean applyResponseCache) {
         mCompositeDisposable.add(mUserRepository.getUserFromDB()
                 .subscribe(
@@ -135,7 +164,7 @@ public class UserPresenterImpl implements UserPresenter {
             if(user.getCryptedPwd()!=null)
                 Timber.tag("lololol").d(user.getCryptedPwd());
             else {
-                updateUserPWD("passwordTest");
+                //updateUserPWD("passwordTest");
             }
         }
     }
@@ -147,6 +176,20 @@ public class UserPresenterImpl implements UserPresenter {
                         t -> Timber.tag("lololol").d(t) //Manage UI according to data source
                 )
         );
+    }
+
+    private void encryptPwd(String pwd) {
+        try {
+            final byte[] encryptedText = mEnCryptor.encryptText(Constants.SECRET_PWD_ALIAS, pwd);
+            updateUserPWD(Base64.encodeToString(encryptedText, Base64.DEFAULT));
+            //tvEncryptedText.setText(Base64.encodeToString(encryptedText, Base64.DEFAULT));
+        } catch (UnrecoverableEntryException | NoSuchAlgorithmException | NoSuchProviderException |
+                KeyStoreException | IOException | NoSuchPaddingException | InvalidKeyException e) {
+            Log.e(TAG, "onClick() called with: " + e.getMessage(), e);
+        } catch (InvalidAlgorithmParameterException | SignatureException |
+                IllegalBlockSizeException | BadPaddingException e) {
+            e.printStackTrace();
+        }
     }
 
 

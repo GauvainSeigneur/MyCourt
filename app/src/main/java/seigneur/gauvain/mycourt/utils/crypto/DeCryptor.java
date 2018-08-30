@@ -16,22 +16,29 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * From : JosiasSena: https://gist.github.com/JosiasSena/3bf4ca59777f7dedcaf41a495d96d984
  * Great article: https://medium.com/@josiassena/using-the-android-keystore-system-to-store-sensitive-information-3a56175a454b
  */
-class DeCryptor {
+@Singleton
+public class DeCryptor {
 
     private static final String TRANSFORMATION = "AES/GCM/NoPadding";
     private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
 
     private KeyStore keyStore;
 
+    @Inject
+    public DeCryptor() {}
+
+    /*
     DeCryptor() throws CertificateException, NoSuchAlgorithmException, KeyStoreException,
             IOException {
         initKeyStore();
-    }
+    }*/
 
     private void initKeyStore() throws KeyStoreException, CertificateException,
             NoSuchAlgorithmException, IOException {
