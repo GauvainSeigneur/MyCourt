@@ -11,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -188,6 +189,30 @@ public class UserPresenterImpl implements UserPresenter {
             Log.e(TAG, "onClick() called with: " + e.getMessage(), e);
         } catch (InvalidAlgorithmParameterException | SignatureException |
                 IllegalBlockSizeException | BadPaddingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Decryptor
+     */
+    private void initDeCryptor() {
+        try {
+            mDeCryptor.initKeyStore();
+        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException |
+                IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void decryptText() {
+        try {
+            Timber.d(mDeCryptor.decryptData(Constants.SECRET_PWD_ALIAS, mEnCryptor.getEncryption(), mEnCryptor.getIv()));
+        } catch (UnrecoverableEntryException | NoSuchAlgorithmException |
+                KeyStoreException | NoSuchPaddingException | NoSuchProviderException |
+                IOException | InvalidKeyException e) {
+            Log.e(TAG, "decryptData() called with: " + e.getMessage(), e);
+        } catch (IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }
     }

@@ -57,7 +57,7 @@ public class EnCryptor {
     }
 
     @NonNull
-    private SecretKey getSecretKey(final String alias) throws NoSuchAlgorithmException,
+    public SecretKey getSecretKey(final String alias) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidAlgorithmParameterException {
 
         final KeyGenerator keyGenerator = KeyGenerator
@@ -73,11 +73,11 @@ public class EnCryptor {
     }
 
 
-    byte[] getEncryption() {
+    public byte[] getEncryption() {
         return encryption;
     }
 
-    byte[] getIv() {
+    public byte[] getIv() {
         return iv;
     }
 }

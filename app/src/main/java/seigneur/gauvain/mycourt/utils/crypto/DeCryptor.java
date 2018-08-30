@@ -40,13 +40,13 @@ public class DeCryptor {
         initKeyStore();
     }*/
 
-    private void initKeyStore() throws KeyStoreException, CertificateException,
+    public void initKeyStore() throws KeyStoreException, CertificateException,
             NoSuchAlgorithmException, IOException {
         keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
         keyStore.load(null);
     }
 
-    String decryptData(final String alias, final byte[] encryptedData, final byte[] encryptionIv)
+    public String decryptData(final String alias, final byte[] encryptedData, final byte[] encryptionIv)
             throws UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException,
             NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IOException,
             BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
@@ -58,7 +58,7 @@ public class DeCryptor {
         return new String(cipher.doFinal(encryptedData), "UTF-8");
     }
 
-    private SecretKey getSecretKey(final String alias) throws NoSuchAlgorithmException,
+    public SecretKey getSecretKey(final String alias) throws NoSuchAlgorithmException,
             UnrecoverableEntryException, KeyStoreException {
         return ((KeyStore.SecretKeyEntry) keyStore.getEntry(alias, null)).getSecretKey();
     }
