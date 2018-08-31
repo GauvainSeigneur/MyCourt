@@ -13,7 +13,9 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.api.DribbbleService;
+import seigneur.gauvain.mycourt.data.local.dao.PinDao;
 import seigneur.gauvain.mycourt.data.local.dao.UserDao;
+import seigneur.gauvain.mycourt.data.model.Pin;
 import seigneur.gauvain.mycourt.data.model.User;
 import timber.log.Timber;
 
@@ -22,6 +24,9 @@ public class UserRepository {
 
     @Inject
     UserDao mUserDao;
+
+    @Inject
+    PinDao mPinDao;
 
     @Inject
     DribbbleService mDribbbleService;
@@ -50,9 +55,17 @@ public class UserRepository {
                 .dematerialize();
     }
 
+    public Completable insertPin(Pin pin) {
+        return Completable.fromAction(() ->
+                mPinDao.insertPIN(pin)
+        )
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public Completable updateUserPWD(String pwd) {
         return Completable.fromAction(() ->
-                mUserDao.updateCryptedPwd(pwd)
+                mPinDao.updateCryptedPwd(pwd)
         )
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -61,7 +74,7 @@ public class UserRepository {
     public Maybe<User> getUserFromDB() {
         Timber.d("getUserFromDB called");
         return mUserDao.getUser()
-                .subscribeOn(Schedulers.io())
+                .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSuccess(user -> {
                     isFetchFromDBSuccess = true;
@@ -82,6 +95,12 @@ public class UserRepository {
         return Completable.fromAction(() ->
                 mUserDao.insertUser(user)
         )
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Maybe<Pin> getPin() {
+        return mPinDao.getPin()
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread());
     }

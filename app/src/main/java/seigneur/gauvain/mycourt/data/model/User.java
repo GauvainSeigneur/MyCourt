@@ -31,7 +31,6 @@ public class User {
     public int followers_count;
     public String type;
     public String created_at;
-    public String cryptedPwd;
 
     //todo - for phase 3: manage teams
 
@@ -141,11 +140,4 @@ public class User {
         this.created_at = created_at;
     }
 
-    public String getCryptedPwd() {
-        return cryptedPwd;
-    }
-
-    public void setCryptedPwd(String cryptedPwd) {
-        this.cryptedPwd = cryptedPwd;
-    }
 }

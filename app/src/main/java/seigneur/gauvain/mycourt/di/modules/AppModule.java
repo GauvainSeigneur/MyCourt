@@ -3,6 +3,8 @@ package seigneur.gauvain.mycourt.di.modules;
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
 import dagger.android.support.AndroidSupportInjectionModule;
+import seigneur.gauvain.mycourt.ui.pin.view.PinActivity;
+import seigneur.gauvain.mycourt.ui.pin.view.PinActivityModule;
 import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotActivity;
 import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotActivityModule;
 import seigneur.gauvain.mycourt.ui.main.view.MainActivity;
@@ -69,5 +71,15 @@ public abstract class AppModule {
             EditShotActivityModule.class
     })
     abstract EditShotActivity createShotActivityInjector();
+
+    /**
+     * Provides the injector for the {@link PinActivity}, which has access to the dependencies
+     * provided by this application instance (singleton scoped objects).
+     */
+    @PerActivity
+    @ContributesAndroidInjector(modules = {
+            PinActivityModule.class
+    })
+    abstract PinActivity createPinActivityInjector();
 
 }

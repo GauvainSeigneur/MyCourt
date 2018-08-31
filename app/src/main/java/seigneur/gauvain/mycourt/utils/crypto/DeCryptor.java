@@ -1,5 +1,7 @@
 package seigneur.gauvain.mycourt.utils.crypto;
 
+
+
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -18,10 +20,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 /**
  * From : JosiasSena: https://gist.github.com/JosiasSena/3bf4ca59777f7dedcaf41a495d96d984
  * Great article: https://medium.com/@josiassena/using-the-android-keystore-system-to-store-sensitive-information-3a56175a454b
+ * Made some modifications in order to handle it with RxJava2
  */
 @Singleton
 public class DeCryptor {
@@ -34,13 +36,8 @@ public class DeCryptor {
     @Inject
     public DeCryptor() {}
 
-    /*
-    DeCryptor() throws CertificateException, NoSuchAlgorithmException, KeyStoreException,
-            IOException {
-        initKeyStore();
-    }*/
 
-    public void initKeyStore() throws KeyStoreException, CertificateException,
+     public void initKeyStore() throws KeyStoreException, CertificateException,
             NoSuchAlgorithmException, IOException {
         keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
         keyStore.load(null);
@@ -57,6 +54,7 @@ public class DeCryptor {
 
         return new String(cipher.doFinal(encryptedData), "UTF-8");
     }
+
 
     public SecretKey getSecretKey(final String alias) throws NoSuchAlgorithmException,
             UnrecoverableEntryException, KeyStoreException {

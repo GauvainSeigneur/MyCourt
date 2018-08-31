@@ -31,7 +31,6 @@ import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.crypto.DeCryptor;
 import seigneur.gauvain.mycourt.utils.crypto.EnCryptor;
-import seigneur.gauvain.mycourt.utils.crypto.EnCryptor_Factory;
 import timber.log.Timber;
 
 import static com.yalantis.ucrop.UCropFragment.TAG;
@@ -54,7 +53,6 @@ public class UserPresenterImpl implements UserPresenter {
     @Inject
     DeCryptor mDeCryptor;
 
-
     private CompositeDisposable mCompositeDisposable;
 
     @Inject
@@ -66,9 +64,6 @@ public class UserPresenterImpl implements UserPresenter {
     public void onAttach() {
         mCompositeDisposable = new CompositeDisposable();
         getUserAndDisplayIt(mConnectivityReceiver.isOnline());
-        //encryptPwd("myCustomPassword");
-        //getUserAndDisplayItOnlyFromDB(false);
-
     }
 
     @Override
@@ -142,80 +137,5 @@ public class UserPresenterImpl implements UserPresenter {
             mUserView.showNoLinksView(true);
         }
     }
-
-    /*
-     *******************************************************************************
-     * ONLY FOR TESTS
-     *******************************************************************************/
-    private void getUserAndDisplayItOnlyFromDB(boolean applyResponseCache) {
-        mCompositeDisposable.add(mUserRepository.getUserFromDB()
-                .subscribe(
-                        this::onUserFoundTest,              //User found - display info
-                        t -> Timber.tag("lololol").d(t) ,         //Error happened during the request
-                        () ->Timber.tag("lololol").d("oncomplete")   //Manage UI according to data source
-                )
-        );
-    }
-
-    private void onUserFoundTest(User user) {
-        if(mUserView!=null) {
-            mUserView.setUpUserAccountInfo(user);
-            mUserView.setUserPicture(user);
-            showUserLink(user);
-            if(user.getCryptedPwd()!=null)
-                Timber.tag("lololol").d(user.getCryptedPwd());
-            else {
-                //updateUserPWD("passwordTest");
-            }
-        }
-    }
-
-    private void updateUserPWD(String pwd) {
-        mCompositeDisposable.add(mUserRepository.updateUserPWD(pwd)
-                .subscribe(
-                        () ->Timber.tag("lololol").d("user pwd updated"),
-                        t -> Timber.tag("lololol").d(t) //Manage UI according to data source
-                )
-        );
-    }
-
-    private void encryptPwd(String pwd) {
-        try {
-            final byte[] encryptedText = mEnCryptor.encryptText(Constants.SECRET_PWD_ALIAS, pwd);
-            updateUserPWD(Base64.encodeToString(encryptedText, Base64.DEFAULT));
-            //tvEncryptedText.setText(Base64.encodeToString(encryptedText, Base64.DEFAULT));
-        } catch (UnrecoverableEntryException | NoSuchAlgorithmException | NoSuchProviderException |
-                KeyStoreException | IOException | NoSuchPaddingException | InvalidKeyException e) {
-            Log.e(TAG, "onClick() called with: " + e.getMessage(), e);
-        } catch (InvalidAlgorithmParameterException | SignatureException |
-                IllegalBlockSizeException | BadPaddingException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Decryptor
-     */
-    private void initDeCryptor() {
-        try {
-            mDeCryptor.initKeyStore();
-        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException |
-                IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void decryptText() {
-        try {
-            Timber.d(mDeCryptor.decryptData(Constants.SECRET_PWD_ALIAS, mEnCryptor.getEncryption(), mEnCryptor.getIv()));
-        } catch (UnrecoverableEntryException | NoSuchAlgorithmException |
-                KeyStoreException | NoSuchPaddingException | NoSuchProviderException |
-                IOException | InvalidKeyException e) {
-            Log.e(TAG, "decryptData() called with: " + e.getMessage(), e);
-        } catch (IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        }
-    }
-
 
 }

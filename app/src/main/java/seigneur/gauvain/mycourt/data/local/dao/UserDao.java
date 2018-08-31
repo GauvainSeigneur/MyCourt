@@ -20,9 +20,6 @@ public interface UserDao {
     @Query("SELECT * FROM user")
     Maybe<User> getUser();
 
-    @Query("UPDATE user SET cryptedPwd = :pwd")
-    void updateCryptedPwd(String pwd);
-
     @Query("SELECT * FROM user WHERE isAllowedToUpload")
     boolean checkIfUserIsAllowedToUpload();
 

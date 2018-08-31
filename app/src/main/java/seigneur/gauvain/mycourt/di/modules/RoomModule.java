@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import seigneur.gauvain.mycourt.data.local.MyCourtDatabase;
+import seigneur.gauvain.mycourt.data.local.dao.PinDao;
 import seigneur.gauvain.mycourt.data.local.dao.PostDao;
 import seigneur.gauvain.mycourt.data.local.dao.TokenDao;
 import seigneur.gauvain.mycourt.data.local.dao.UserDao;
@@ -35,4 +36,9 @@ public class RoomModule {
     @Provides
     @Singleton
     TokenDao provideTokenDao(MyCourtDatabase database) { return database.tokenDao(); }
+
+
+    @Provides
+    @Singleton
+    PinDao providePinDao(MyCourtDatabase database) { return database.pinDao(); }
 }

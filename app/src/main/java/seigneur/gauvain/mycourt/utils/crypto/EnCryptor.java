@@ -5,8 +5,10 @@ import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.support.annotation.NonNull;
+import android.util.Base64;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
@@ -27,6 +29,7 @@ import javax.inject.Singleton;
 /**
  * From : JosiasSena: https://gist.github.com/JosiasSena/3bf4ca59777f7dedcaf41a495d96d984
  * Great article: https://medium.com/@josiassena/using-the-android-keystore-system-to-store-sensitive-information-3a56175a454b
+ * Made some modifications in order to handle it with RxJava2
  */
 @TargetApi(23)
 @Singleton
@@ -35,25 +38,24 @@ public class EnCryptor {
     private static final String TRANSFORMATION = "AES/GCM/NoPadding";
     private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
 
-    private byte[] encryption;
-    private byte[] iv;
-
     @Inject
     EnCryptor() {
     }
 
-    public byte[] encryptText(final String alias, final String textToEncrypt)
-            throws UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException,
-            NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IOException,
-            InvalidAlgorithmParameterException, SignatureException, BadPaddingException,
+    public Cipher initCiper(final String alias) throws  NoSuchAlgorithmException,
+            NoSuchProviderException, NoSuchPaddingException, InvalidKeyException,
+            InvalidAlgorithmParameterException {
+        Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+        cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(alias));
+        return cipher;
+    }
+
+    public byte[] encryptedPin(Cipher cipher, final String pinEdited) throws
+            IOException,
+            BadPaddingException,
             IllegalBlockSizeException {
 
-        final Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-        cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(alias));
-
-        iv = cipher.getIV();
-
-        return (encryption = cipher.doFinal(textToEncrypt.getBytes("UTF-8")));
+        return cipher.doFinal(pinEdited.getBytes("UTF-8"));
     }
 
     @NonNull
@@ -72,12 +74,4 @@ public class EnCryptor {
         return keyGenerator.generateKey();
     }
 
-
-    public byte[] getEncryption() {
-        return encryption;
-    }
-
-    public byte[] getIv() {
-        return iv;
-    }
 }
