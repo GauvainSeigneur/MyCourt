@@ -1,39 +1,16 @@
 package seigneur.gauvain.mycourt.ui.user.presenter;
 
-import android.util.Base64;
-import android.util.Log;
 
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.inject.Inject;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.repository.UserRepository;
-import seigneur.gauvain.mycourt.data.api.DribbbleService;
 import seigneur.gauvain.mycourt.data.model.User;
 import seigneur.gauvain.mycourt.di.scope.PerFragment;
 import seigneur.gauvain.mycourt.ui.user.view.UserView;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
-import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.crypto.DeCryptor;
 import seigneur.gauvain.mycourt.utils.crypto.EnCryptor;
 import timber.log.Timber;
-
-import static com.yalantis.ucrop.UCropFragment.TAG;
 
 @PerFragment
 public class UserPresenterImpl implements UserPresenter {

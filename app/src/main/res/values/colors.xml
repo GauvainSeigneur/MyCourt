@@ -71,6 +71,7 @@
     <color name="colorInstagramThree">#EC7AC1</color>
     <color name="colorFacebook">#3B5998</color>
     <color name="colorGithub">#e36209 </color>
+    <color name="colorTwitter">#00aced</color>
 
 
 </resources>

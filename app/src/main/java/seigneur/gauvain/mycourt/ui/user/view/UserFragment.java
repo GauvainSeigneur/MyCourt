@@ -197,14 +197,8 @@ public class UserFragment extends BaseFragment implements UserView {
         layoutManager.setFlexDirection(FlexDirection.ROW);
         layoutManager.setJustifyContent(JustifyContent.FLEX_START);
         mUserLinksList.setLayoutManager(layoutManager);
-
-
         mUserLinksAdapter = new UserLinksAdapter(getContext(), user.getLinks());
         mUserLinksList.setAdapter(mUserLinksAdapter);
-        Toast.makeText(activity, ""+userLinks, Toast.LENGTH_SHORT).show();
-        /*Toast.makeText(activity, ""+user.getArrayListLinkKey(), Toast.LENGTH_SHORT).show();
-        Toast.makeText(activity, ""+user.getArrayListLinkValues(), Toast.LENGTH_SHORT).show();
-        Toast.makeText(activity, ""+user.getArrayListLinkEntrySet(), Toast.LENGTH_SHORT).show();*/
     }
 
     @Override

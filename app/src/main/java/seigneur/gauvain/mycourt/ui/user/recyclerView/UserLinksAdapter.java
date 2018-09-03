@@ -62,12 +62,16 @@ public class UserLinksAdapter extends RecyclerView.Adapter<LinksViewHolder> {
                 break;
             case TWITTER:
                 holder.linkIcon.setImageResource(R.drawable.ic_twitter);
+                holder.linklayout.setBackgroundTintList(ColorStateList.valueOf(
+                        mContext.getResources().getColor(R.color.colorTwitter)));
                 break;
             case BEHANCE:
                 holder.linkIcon.setImageResource(R.drawable.ic_behance);
                 break;
             case MEDIUM:
                 holder.linkIcon.setImageResource(R.drawable.ic_medium);
+                holder.linklayout.setBackgroundTintList(ColorStateList.valueOf(
+                        mContext.getResources().getColor(R.color.colorPrimaryLight)));
                 break;
              case LINKEDIN:
                 holder.linkIcon.setImageResource(R.drawable.ic_linkedin);
