@@ -4,13 +4,16 @@ import seigneur.gauvain.mycourt.ui.base.BasePresenter;
 
 public interface PinPresenter extends BasePresenter {
 
-    void onPinConfirmed(String pin);
+    void onFirstPinDefined(String pin);
+
+    void onNewPinConfirmed(String pin);
+
+    void onCurrentPinConfirmed(String pinInput);
 
     void onCheckPinSuccess();
 
     void onCheckPinFailed();
 
-    void onPinReady();
 
 }
 

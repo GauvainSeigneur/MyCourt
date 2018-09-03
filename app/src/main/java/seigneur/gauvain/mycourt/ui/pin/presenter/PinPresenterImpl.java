@@ -1,25 +1,8 @@
 package seigneur.gauvain.mycourt.ui.pin.presenter;
 
-import android.service.quicksettings.Tile;
+
 import android.util.Base64;
-import android.util.Log;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateException;
-import java.util.Optional;
-
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.inject.Inject;
 
 import io.reactivex.Completable;
@@ -54,23 +37,20 @@ public class PinPresenterImpl implements PinPresenter {
 
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
-    byte[] iV;
+    private byte[] iV;
+    private Pin mTempPin=null;
+    private boolean isDeCryptorEnabled=false;
 
-    boolean isDeCryptorEnabled=false;
 
-    Pin mTempPin=null;
+
 
     @Inject
     public PinPresenterImpl() {
     }
 
-
     @Override
     public void onAttach() {
         checkIfPinAlreadyExists();
-
-        //cryptAndSavepPin("password");
-        //initDeCryptor();
     }
 
     @Override
@@ -79,19 +59,31 @@ public class PinPresenterImpl implements PinPresenter {
         mPinView=null;
     }
 
-
     @Override
-    public void  onPinConfirmed(String pin) {
+    public void onFirstPinDefined(String pin) {
+        if (mPinView!=null) {
+            mPinView.showCreationPinStep(1);
+        }
     }
 
     @Override
-    public void  onCheckPinSuccess() {}
+    public void  onNewPinConfirmed(String pin) {
+        cryptAndStorePin(pin);
+    }
+
+    @Override
+    public void onCurrentPinConfirmed(String pinInput) {
+        comparePinAndInput(pinInput);
+    }
+
+    @Override
+    public void  onCheckPinSuccess() {
+        if (mPinView!=null)
+            mPinView.showCreationPinStep(0);
+    }
 
     @Override
     public void  onCheckPinFailed() {}
-
-    @Override
-    public void  onPinReady() {}
 
     /*
      *******************************************************************************
@@ -103,30 +95,40 @@ public class PinPresenterImpl implements PinPresenter {
         mCompositeDisposable.add(mUserRepository.getPin()
                 .subscribe(
                         this::onPinAlreadyExists,
-                        this::onCheckPinFailed,
+                        this::onCheckPinExistsFailed,
                         this::onNoPinFound
                 )
         );
     }
 
     private void onPinAlreadyExists(Pin pin) {
-        mTempPin = pin;
-        //todo - make view call to show a dialog to user ask him to confirm current pin
+        if (mPinView!=null) {
+            if (pin.getCryptedPIN()!=null && !pin.getCryptedPIN().toString().isEmpty()) {
+                mTempPin = pin;
+                mPinView.showConfirmCurrentPinView(true);
+            } else {
+                onNoPinFound();
+            }
+        }
+
     }
 
-    private void onCheckPinFailed(Throwable t) {
-
+    private void onCheckPinExistsFailed(Throwable t) {
+        Timber.d(t);
+        //todo - what todo ? perform again and if the errors persists, delete the table ?
     }
 
     private void onNoPinFound() {
-
+        if (mPinView!=null)
+            mPinView.showCreationPinStep(0);
     }
 
     /*
      *******************************************************************************
-     * Crypt and save pin
+     * Crypt and save pin defined by user in EdiText
      *******************************************************************************/
     public void cryptAndStorePin(String pin) {
+        Timber.tag("cryptoTest").d("cryptAndStorePin called");
         mCompositeDisposable.add(Single.fromCallable(() -> {
             return  mEnCryptor.initCiper(Constants.SECRET_PWD_ALIAS);
         })
@@ -142,11 +144,13 @@ public class PinPresenterImpl implements PinPresenter {
     }
 
     private void onCipherInit(Cipher cipher, String pin) {
+        Timber.tag("cryptoTest").d("onCipherInit succeed");
         iV = cipher.getIV();
         cryptPin(cipher, pin);
     }
 
     private void cryptPin(Cipher cipher, String pin) {
+        Timber.tag("cryptoTest").d("cryptPin called");
         mCompositeDisposable.add(Single.fromCallable(() -> {
             return  mEnCryptor.encryptedPin(cipher, pin);
         })
@@ -160,8 +164,12 @@ public class PinPresenterImpl implements PinPresenter {
     }
 
     private void onEncrypted(byte[] crypted) {
-        Timber.d("Success crypto: " + Base64.encodeToString(crypted, Base64.DEFAULT));
-        storePIN(createPin(0,crypted, iV));
+        Timber.tag("cryptoTest").d("Success crypto: " + Base64.encodeToString(crypted, Base64.DEFAULT) + " iv: " + Base64.encodeToString(iV, Base64.DEFAULT));
+        storePIN(createPin(0,
+                Base64.encodeToString(crypted, Base64.DEFAULT),
+                Base64.encodeToString(iV, Base64.DEFAULT)
+                )
+        );
     }
 
     /**
@@ -171,8 +179,8 @@ public class PinPresenterImpl implements PinPresenter {
     private void storePIN(Pin pin) {
         mCompositeDisposable.add(mUserRepository.insertPin(pin)
                 .subscribe(
-                        () ->Timber.tag("kaaris").d("user pwd updated"),
-                        t -> Timber.tag("kaaris").d(t) //Manage UI according to data source
+                        () ->Timber.tag("cryptoTest").d("user pin stored"),
+                        t -> Timber.tag("cryptoTest").d(t) //Manage UI according to data source
                 )
         );
     }
@@ -184,7 +192,7 @@ public class PinPresenterImpl implements PinPresenter {
      * @param initVector
      * @return pin
      */
-    private Pin createPin(int primaryKey, byte[]  cryptedPin, byte[]  initVector) {
+    private Pin createPin(int primaryKey, String  cryptedPin, String  initVector) {
         return new Pin(
                 primaryKey,
                 cryptedPin,
@@ -194,48 +202,73 @@ public class PinPresenterImpl implements PinPresenter {
 
     /*
      *******************************************************************************
-     * init DecCryptor and decrypt pin code
+     * init DecCryptor and decrypt pin code to perform checking
      *******************************************************************************/
+    private void comparePinAndInput(String pinInput) {
+        if (mTempPin!=null) {
+            initDeCryptorAndDecrypt(mTempPin, pinInput);
+        } else {
+            //get the current again and perform compare
+        }
+    }
+
+
     /**
      * Initialize Decryptor in order to call decryptText()
      */
-    private void initDeCryptor() {
+    private void initDeCryptorAndDecrypt(Pin pin, String pinInput) {
         mCompositeDisposable.add(Completable.fromAction(() -> {
             mDeCryptor.initKeyStore();
         })
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        this::onDeCryptorInitialized,
+                        () -> onDeCryptorInitialized(pin, pinInput),
                         this::onDeCryptorInitFailed
                 )
         );
     }
 
-    private void onDeCryptorInitialized() {
+    private void onDeCryptorInitialized(Pin pin, String pinInput) {
         isDeCryptorEnabled=true;
+        deCryptPinAndCheckinput(pin, pinInput);
     }
 
     private void onDeCryptorInitFailed(Throwable t) {
         isDeCryptorEnabled=false;
     }
 
-    private void deCryptPin(Pin pin) {
+    private void deCryptPinAndCheckinput(Pin pin, String pinInput) {
+        Timber.tag("cryptoTest").d(pin.getCryptedPIN().toString());
+
         if (isDeCryptorEnabled) {
             mCompositeDisposable.add(Single.fromCallable(() -> {
-                return  mDeCryptor.decryptData(Constants.SECRET_PWD_ALIAS, pin.getCryptedPIN(), pin.getInitVector());
+                return  mDeCryptor.decryptData(Constants.SECRET_PWD_ALIAS,
+                       Base64.decode( pin.getCryptedPIN(),Base64.DEFAULT),
+                        Base64.decode( pin.getInitVector(),Base64.DEFAULT)
+                        );
             })
                     .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
-                            s -> Timber.tag("kaaris").d(s),
-                            t -> Timber.tag("kaaris").d(t)
+                            s  -> onCurrentPinDecrypted(s, pinInput),
+                            t -> Timber.tag("cryptoTest").d(t)
                     )
             );
         } else {
             //todo - make a view call
         }
     }
+
+    private void onCurrentPinDecrypted(String pinStored, String pinInput) {
+        if (pinStored.equals(pinInput)) {
+          Timber.tag("cryptoTest").d("good pin: " +pinStored);
+        } else {
+            Timber.tag("cryptoTest").d("wrong pin: " +pinStored);
+        }
+    }
+
+
 
 
 }

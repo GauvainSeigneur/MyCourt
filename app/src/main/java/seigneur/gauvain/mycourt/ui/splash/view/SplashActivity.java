@@ -26,6 +26,7 @@ import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.ui.base.BaseActivity;
 import seigneur.gauvain.mycourt.ui.main.view.MainActivity;
 import seigneur.gauvain.mycourt.data.model.User;
+import seigneur.gauvain.mycourt.ui.pin.view.PinActivity;
 import seigneur.gauvain.mycourt.ui.splash.presenter.SplashPresenter;
 import timber.log.Timber;
 

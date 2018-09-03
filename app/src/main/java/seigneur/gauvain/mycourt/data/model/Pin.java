@@ -10,10 +10,11 @@ public class Pin {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
-    public byte[] cryptedPIN;
-    public byte[] initVector;
+    public String cryptedPIN;
 
-    public Pin(int id, byte[] cryptedPIN, byte[] initVector) {
+    public String initVector;
+
+    public Pin(int id, String cryptedPIN, String initVector) {
         this.id =id;
         this.cryptedPIN=cryptedPIN;
         this.initVector=initVector;
@@ -27,20 +28,20 @@ public class Pin {
         this.id = id;
     }
 
-    public byte[] getCryptedPIN() {
+    public String getCryptedPIN() {
         return cryptedPIN;
     }
 
-    public void setCryptedPIN(byte[] cryptedPIN) {
+    public void setCryptedPIN(String cryptedPIN) {
         this.cryptedPIN = cryptedPIN;
     }
 
 
-    public byte[]  getInitVector() {
+    public String  getInitVector() {
         return initVector;
     }
 
-    public void setInitVector(byte[] initVector) {
+    public void setInitVector(String initVector) {
         this.initVector = initVector;
     }
 
