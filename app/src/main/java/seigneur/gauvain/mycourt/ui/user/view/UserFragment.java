@@ -156,15 +156,15 @@ public class UserFragment extends BaseFragment implements UserView {
 
     @Override
     public void setUpUserAccountInfo(User user){
-        name.setText(user.name);
-        login.setText(user.login);
+        name.setText(user.getName());
+        login.setText(user.getLogin());
         userLocation.setText(user.getLocation());
-        if(user.followers_count>0)
+        if(user.getFollowers_count() >0)
             userFollowers.setText(user.getFollowers_count()+" followers");
         else
             userFollowers.setText("no follower");
-        if (!user.bio.isEmpty()) {
-            bio.setText(Html.fromHtml(user.bio));
+        if (!user.getBio().isEmpty()) {
+            bio.setText(Html.fromHtml(user.getBio()));
         } else
             bio.setText("You didn't defined your bio");
         if (user.isPro())
@@ -174,7 +174,7 @@ public class UserFragment extends BaseFragment implements UserView {
     @Override
     public void setUserPicture(User user) {
         Glide.with(getContext())
-                .load(Uri.parse(user.avatar_url))
+                .load(Uri.parse(user.getAvatar_url()))
                 .apply(new RequestOptions()
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .placeholder(R.drawable.avatar_place_holder)
