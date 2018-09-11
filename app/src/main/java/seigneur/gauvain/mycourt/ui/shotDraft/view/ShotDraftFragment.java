@@ -1,6 +1,7 @@
 package seigneur.gauvain.mycourt.ui.shotDraft.view;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -22,6 +23,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import dagger.android.support.AndroidSupportInjection;
+import seigneur.gauvain.mycourt.MyCourtApp;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.ui.base.BaseFragment;
@@ -38,6 +40,9 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
 
     @Inject
     ShotDraftPresenter mShotDraftPresenter;
+
+    @Inject
+    Application mApplication;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -72,7 +77,7 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
                 mShotDraftPresenter.onShotDraftClicked(shotDraft, position);
             }
         };
-        mShotDraftsListAdapter= new ShotDraftsListAdapter(getContext(), shotDraftsSaved, mcallabck);
+        mShotDraftsListAdapter= new ShotDraftsListAdapter(mApplication, shotDraftsSaved, mcallabck);
     }
 
      // Overridden from BaseFragment
