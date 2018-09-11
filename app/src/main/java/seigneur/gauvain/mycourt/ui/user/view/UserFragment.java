@@ -90,6 +90,8 @@ public class UserFragment extends BaseFragment implements UserView {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+        AndroidSupportInjection.inject(this);
     }
 
      //Overridden from BaseFragment

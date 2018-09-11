@@ -63,6 +63,8 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //new instance
+        setRetainInstance(true);
+        AndroidSupportInjection.inject(this);
         Timber.d("onCreate new instance");
         mcallabck = new ShotDraftListCallback() {
             @Override
@@ -78,6 +80,8 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
     public void onCreateView(View rootView, Bundle savedInstanceState) {
         //bindView here
         ButterKnife.bind(this, rootView);
+        mShotDraftPresenter.onAttach();
+
         toolbar.inflateMenu(R.menu.menu_shot_detail);
         toolbar.setOnMenuItemClickListener(this);
         shotDraftRV.setLayoutManager(new GridLayoutManager(getContext(),2));
@@ -109,8 +113,6 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
     @Override
     public void onAttach(Activity activity) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            AndroidSupportInjection.inject(this);
-            mShotDraftPresenter.onAttach();
         }
         super.onAttach(activity);
     }
@@ -118,8 +120,6 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
     @Override
     public void onAttach(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            AndroidSupportInjection.inject(this);
-            mShotDraftPresenter.onAttach();
         }
         super.onAttach(context);
     }
