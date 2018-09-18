@@ -46,6 +46,11 @@ public class SplashActivity extends BaseActivity implements SplashView {
         AndroidInjection.inject(this);
         ButterKnife.bind(this);
         splashPresenter.onAttach(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         splashPresenter.onViewReady();
     }
 

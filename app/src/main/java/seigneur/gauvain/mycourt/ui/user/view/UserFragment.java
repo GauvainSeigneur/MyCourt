@@ -110,12 +110,19 @@ public class UserFragment extends BaseRetainedFragment implements UserViewTest {
         initMathData();
         appBarLayout.addOnOffsetChangedListener(appBarOffsetListener);
         mUserPresenter.onAttach(this);
-        mUserPresenter.onViewReady();
     }
     /*
      ************************************************************************************
      * Fragment lifecycle methods
      * **********************************************************************************/
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Timber.d("onStart");
+        mUserPresenter.onViewReady();
+    }
+
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
