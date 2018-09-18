@@ -1,6 +1,11 @@
 package seigneur.gauvain.mycourt.ui.user.presenter;
 
 
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.OnLifecycleEvent;
+
 import javax.inject.Inject;
 import io.reactivex.disposables.CompositeDisposable;
 import seigneur.gauvain.mycourt.data.repository.UserRepository;
@@ -13,7 +18,7 @@ import seigneur.gauvain.mycourt.utils.crypto.EnCryptor;
 import timber.log.Timber;
 
 @PerFragment
-public class UserPresenterImpl implements UserPresenter {
+public class UserPresenterImpl implements UserPresenter, LifecycleObserver {
 
     @Inject
     UserView mUserView;
@@ -30,23 +35,45 @@ public class UserPresenterImpl implements UserPresenter {
     @Inject
     DeCryptor mDeCryptor;
 
+    private LifecycleObserver mLifecycleObserver;
     private CompositeDisposable mCompositeDisposable;
 
-    @Inject
-    public UserPresenterImpl() {
-    }
+    //data managed by the presenter
+    User mUser;
 
+    @Inject
+    public UserPresenterImpl() {}
 
     @Override
     public void onAttach() {
-        mCompositeDisposable = new CompositeDisposable();
-        getUserAndDisplayIt(mConnectivityReceiver.isOnline());
+        if (mUserView instanceof LifecycleOwner && mLifecycleObserver==null) {
+            ((LifecycleOwner) mUserView).getLifecycle().addObserver(this);
+            Timber.d("addObserver");
+            mLifecycleObserver=this;
+        }
+        if (mCompositeDisposable==null)
+            mCompositeDisposable = new CompositeDisposable();
+
+       if (mUser==null)
+           getUserAndDisplayIt(mConnectivityReceiver.isOnline());
+       else
+           onUserFound(mUser);
     }
 
     @Override
+    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    public void onViewReady() {
+        Timber.d("onViewReady");
+    }
+
+    @Override
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     public void onDetach() {
-        mCompositeDisposable.dispose();
+        // Clean up any no-longer-use resources here
         mUserView=null;
+        mCompositeDisposable.dispose();
+        ((LifecycleOwner) mUserView).getLifecycle().removeObserver(this);
+        mLifecycleObserver=null;
     }
 
     /**
@@ -72,6 +99,7 @@ public class UserPresenterImpl implements UserPresenter {
      */
     private void onUserFound(User user) {
         if(mUserView!=null) {
+            mUser=user;
             mUserView.setUpUserAccountInfo(user);
             mUserView.setUserPicture(user);
             showUserLink(user);
