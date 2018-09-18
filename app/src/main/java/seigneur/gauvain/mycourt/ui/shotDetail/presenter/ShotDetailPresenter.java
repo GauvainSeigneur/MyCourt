@@ -3,11 +3,10 @@ package seigneur.gauvain.mycourt.ui.shotDetail.presenter;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 
-import seigneur.gauvain.mycourt.ui.base.BaseMVPView;
-import seigneur.gauvain.mycourt.ui.base.BasePresenter;
-import seigneur.gauvain.mycourt.ui.base.BasePresenterTest;
+import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
+import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenter;
 
-public interface ShotDetailPresenter<V extends BaseMVPView> extends BasePresenterTest<V>  {
+public interface ShotDetailPresenter<V extends BaseMVPView> extends BasePresenter<V> {
 
     void onViewReady();
 

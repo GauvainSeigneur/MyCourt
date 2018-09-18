@@ -1,10 +1,9 @@
 package seigneur.gauvain.mycourt.ui.pin.presenter;
 
-import seigneur.gauvain.mycourt.ui.base.BaseMVPView;
-import seigneur.gauvain.mycourt.ui.base.BasePresenter;
-import seigneur.gauvain.mycourt.ui.base.BasePresenterTest;
+import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
+import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenter;
 
-public interface PinPresenter<V extends BaseMVPView> extends BasePresenterTest<V> {
+public interface PinPresenter<V extends BaseMVPView> extends BasePresenter<V> {
 
     void onViewReady();
 

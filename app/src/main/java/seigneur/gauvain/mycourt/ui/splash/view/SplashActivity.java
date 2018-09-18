@@ -33,7 +33,7 @@ import timber.log.Timber;
 public class SplashActivity extends BaseActivity implements SplashView {
 
     @Inject
-    SplashPresenter splashPresenter;
+    SplashPresenter<SplashView> splashPresenter;
 
     @BindView(R.id.activity_login_btn)
     Button loginBtn;
@@ -45,7 +45,8 @@ public class SplashActivity extends BaseActivity implements SplashView {
         setContentView(R.layout.activity_login);
         AndroidInjection.inject(this);
         ButterKnife.bind(this);
-        splashPresenter.onAttach();
+        splashPresenter.onAttach(this);
+        splashPresenter.onViewReady();
     }
 
     @Override

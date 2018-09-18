@@ -1,10 +1,9 @@
-package seigneur.gauvain.mycourt.ui.base;
+package seigneur.gauvain.mycourt.ui.base.mvp;
 
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.OnLifecycleEvent;
-import android.view.View;
 
 import io.reactivex.disposables.CompositeDisposable;
 import timber.log.Timber;
@@ -13,8 +12,8 @@ import timber.log.Timber;
  * Base presenter to not duplicate some global methods
  * ONLY UI, NOT DI
  */
-public class BasePresenterImplTest<V extends  BaseMVPView>
-        implements BasePresenterTest<V>, LifecycleObserver {
+public class BasePresenterImpl<V extends  BaseMVPView>
+        implements BasePresenter<V>, LifecycleObserver {
 
     private LifecycleObserver mLifecycleObserver;
     private CompositeDisposable mCompositeDisposable;

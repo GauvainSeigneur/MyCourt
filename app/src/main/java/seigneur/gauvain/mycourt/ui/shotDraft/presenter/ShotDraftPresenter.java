@@ -1,9 +1,12 @@
 package seigneur.gauvain.mycourt.ui.shotDraft.presenter;
 
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
-import seigneur.gauvain.mycourt.ui.base.BasePresenter;
+import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
+import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenter;
 
-public interface ShotDraftPresenter extends BasePresenter {
+public interface ShotDraftPresenter<V extends BaseMVPView> extends BasePresenter<V> {
+
+   void onViewReady();
 
    /**
     * Swipe refresh layout onRefresh called

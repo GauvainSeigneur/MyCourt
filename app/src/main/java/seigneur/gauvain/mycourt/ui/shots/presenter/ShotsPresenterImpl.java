@@ -3,14 +3,13 @@ package seigneur.gauvain.mycourt.ui.shots.presenter;
 import java.util.List;
 import javax.inject.Inject;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.HttpException;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.repository.ShotRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.di.scope.PerFragment;
+import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenterImpl;
 import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import seigneur.gauvain.mycourt.ui.shots.view.ShotsView;
@@ -18,13 +17,11 @@ import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import timber.log.Timber;
 
 @PerFragment
-public class ShotsPresenterImpl implements ShotsPresenter {
+public class ShotsPresenterImpl<V extends ShotsView> extends BasePresenterImpl<V> implements
+        ShotsPresenter<V> {
 
     @Inject
     NetworkErrorHandler mNetworkErrorHandler;
-
-    @Inject
-    ShotsView mShotsView;
 
     @Inject
     ConnectivityReceiver mConnectivityReceiver;
@@ -34,9 +31,6 @@ public class ShotsPresenterImpl implements ShotsPresenter {
 
     @Inject
     ShotRepository mShotRepository;
-
-    //Observer
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     //pagination
     private boolean isLoading = false;
@@ -52,16 +46,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
     public ShotsPresenterImpl() {
     }
 
-    @Override
-    public void onAttach() {
 
-    }
-
-    @Override
-    public void onDetach() {
-        compositeDisposable.dispose();
-        mShotsView =null;
-    }
 
     @Override
     public void onLoadFirstPage(int page) {
@@ -95,9 +80,9 @@ public class ShotsPresenterImpl implements ShotsPresenter {
 
     @Override
     public void onShotClicked(Shot shot, int position) {
-        if(mShotsView !=null) {
+        if(getMvpView() !=null) {
             mTempDataRepository.setShot(shot); //store the current shot clicked in a dedicated file
-            mShotsView.goToShotDetail(shot, position);
+            getMvpView() .goToShotDetail(shot, position);
             Timber.d(shot.id) ;
         }
     }
@@ -108,11 +93,11 @@ public class ShotsPresenterImpl implements ShotsPresenter {
         Timber.d("loadFirstPage: ");
         isReachedLastPage = false;
         // To ensure list is visible when retry button in error view is clicked
-        if (mShotsView!=null) {
-            mShotsView.showFirstFecthErrorView(false);
-            mShotsView.showEndListReached(false);
+        if (getMvpView() !=null) {
+            getMvpView().showFirstFecthErrorView(false);
+            getMvpView().showEndListReached(false);
         }
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 mShotRepository.getShotsFromAPI(0, page,
                         Constants.PER_PAGE+1) //+1 in order to not finish with one item empty
                         .subscribeOn(Schedulers.io())
@@ -135,10 +120,10 @@ public class ShotsPresenterImpl implements ShotsPresenter {
     private void doOnFirstPageNext(List<Shot> shots) {
         oldList =shots;
         Timber.d("list added first time");
-        if (mShotsView!=null) {
+        if (getMvpView()!=null) {
             //progressBar.setVisibility(View.GONE); //todo
-            mShotsView.showFirstFecthErrorView(false);
-            mShotsView.addShots(shots);
+            getMvpView().showFirstFecthErrorView(false);
+            getMvpView().addShots(shots);
         }
     }
 
@@ -147,9 +132,9 @@ public class ShotsPresenterImpl implements ShotsPresenter {
      * @param error - error received by Observer
      */
     private void doOnFirstPageError(Throwable error) {
-        if (mShotsView!=null) {
-            mShotsView.stopRefreshing();
-            mShotsView.showFirstFecthErrorView(true);
+        if (getMvpView()!=null) {
+            getMvpView().stopRefreshing();
+            getMvpView().showFirstFecthErrorView(true);
         }
     }
 
@@ -160,13 +145,13 @@ public class ShotsPresenterImpl implements ShotsPresenter {
         Timber.tag("newrequest").d("load next page: "+page);
         isLoading = true;
         isReachedLastPage = false;
-        if (mShotsView!=null) {
+        if (getMvpView()!=null) {
             //todo - reorganize in dedicated void
-            mShotsView.showFirstFecthErrorView(false);
-            mShotsView.showEndListReached(false);
-            mShotsView.showNextFetchError(false, null);
+            getMvpView().showFirstFecthErrorView(false);
+            getMvpView().showEndListReached(false);
+            getMvpView().showNextFetchError(false, null);
         }
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 mShotRepository.getShotsFromAPI(responsCacheDelay, page, Constants.PER_PAGE)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -191,9 +176,9 @@ public class ShotsPresenterImpl implements ShotsPresenter {
         // if true, we have reached the end : stop request
         if (shots.size()<Constants.PER_PAGE) {
             isReachedLastPage =true; //stop request on scroll
-            if (mShotsView!=null) {
-                mShotsView.addShots(shots);
-                mShotsView.showEndListReached(true);
+            if (getMvpView()!=null) {
+                getMvpView().addShots(shots);
+                getMvpView().showEndListReached(true);
             }
         } else {
             //if the list size equals 30 items, check the first id,
@@ -201,15 +186,15 @@ public class ShotsPresenterImpl implements ShotsPresenter {
             // if true, we have reached the end : stop request
             if (oldList.get(0).getId().equals(shots.get(0).getId())){
                 isReachedLastPage = true; //stop request on scroll
-                if (mShotsView!=null) {
-                    mShotsView.showEndListReached(true);
+                if (getMvpView()!=null) {
+                    getMvpView().showEndListReached(true);
                 }
                 //if false, we didn't reach the end : continue request
             } else {
                 oldList=shots;
                 isReachedLastPage =false; //continue request on scroll
-                if (mShotsView!=null) {
-                    mShotsView.addShots(shots);
+                if (getMvpView()!=null) {
+                    getMvpView().addShots(shots);
                 }
             }
         }
@@ -220,8 +205,8 @@ public class ShotsPresenterImpl implements ShotsPresenter {
      * @param error - error received by Observer
      */
     private void doOnNextPageError(Throwable error) {
-        if (mShotsView!=null)
-            mShotsView.showNextFetchError(true, error.toString()); //--> todo : mange it in handleRetrofitError
+        if (getMvpView()!=null)
+            getMvpView().showNextFetchError(true, error.toString()); //--> todo : mange it in handleRetrofitError
     }
 
     /**************************************************************************
@@ -229,7 +214,7 @@ public class ShotsPresenterImpl implements ShotsPresenter {
      *************************************************************************/
     private void loadRefresh(int page) {
         isReachedLastPage = false;
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 mShotRepository.getShotsFromAPI(0, page,
                         Constants.PER_PAGE+1) //+1 in order to not finish with one item empty
                         .subscribeOn(Schedulers.io())
@@ -252,11 +237,11 @@ public class ShotsPresenterImpl implements ShotsPresenter {
     private void doOnRefreshNext(List<Shot> shots) {
         oldList =shots;
         Timber.d("list refreshing");
-        if (mShotsView!=null) {
-            mShotsView.showFirstFecthErrorView(false);
-            mShotsView.stopRefreshing();
-            mShotsView.clearShots(); // todo - use diffutils in order to not use clear all the list
-            mShotsView.addShots(shots); // todo - use diffutils in order
+        if (getMvpView()!=null) {
+            getMvpView().showFirstFecthErrorView(false);
+            getMvpView().stopRefreshing();
+            getMvpView().clearShots(); // todo - use diffutils in order to not use clear all the list
+            getMvpView().addShots(shots); // todo - use diffutils in order
             //mShotsView.showLoadingFooter(true);
         }
     }
@@ -266,10 +251,10 @@ public class ShotsPresenterImpl implements ShotsPresenter {
      * @param error - error received by Observer
      */
     private void doOnRefreshError(Throwable error) {
-        if (mShotsView!=null) {
-            mShotsView.stopRefreshing();
+        if (getMvpView()!=null) {
+            getMvpView().stopRefreshing();
             //todo - only if the list is already empty!
-            mShotsView.showFirstFecthErrorView(true);
+            getMvpView().showFirstFecthErrorView(true);
         }
     }
 

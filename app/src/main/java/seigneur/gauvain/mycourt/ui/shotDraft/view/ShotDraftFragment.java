@@ -39,7 +39,7 @@ import timber.log.Timber;
 public class ShotDraftFragment extends BaseFragment implements ShotDraftView, Toolbar.OnMenuItemClickListener {
 
     @Inject
-    ShotDraftPresenter mShotDraftPresenter;
+    ShotDraftPresenter<ShotDraftView> mShotDraftPresenter;
 
     @Inject
     Application mApplication;
@@ -85,7 +85,8 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
     public void onCreateView(View rootView, Bundle savedInstanceState) {
         //bindView here
         ButterKnife.bind(this, rootView);
-        mShotDraftPresenter.onAttach();
+        mShotDraftPresenter.onAttach(this);
+        mShotDraftPresenter.onViewReady();
 
         toolbar.inflateMenu(R.menu.menu_shot_detail);
         toolbar.setOnMenuItemClickListener(this);

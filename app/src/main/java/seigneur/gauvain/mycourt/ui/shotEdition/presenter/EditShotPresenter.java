@@ -2,16 +2,13 @@ package seigneur.gauvain.mycourt.ui.shotEdition.presenter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 
-import java.util.ArrayList;
-import java.util.List;
+import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
+import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenter;
 
-import seigneur.gauvain.mycourt.data.model.Shot;
-import seigneur.gauvain.mycourt.data.model.ShotDraft;
-import seigneur.gauvain.mycourt.ui.base.BasePresenter;
+public interface EditShotPresenter<V extends BaseMVPView> extends BasePresenter<V> {
 
-public interface EditShotPresenter extends BasePresenter {
+    void onViewReady();
 
     /**
      * User has clicked on image preview to change it

@@ -37,7 +37,7 @@ import timber.log.Timber;
 public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCallback {
 
     @Inject
-    ShotsPresenter mShotsPresenter;
+    ShotsPresenter<ShotsView> mShotsPresenter;
     @BindView(R.id.swipe_refresh_shots)
     SwipeRefreshLayout swipeRefreshLayout;
 
@@ -83,7 +83,7 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
     public void onCreateView(View rootView, Bundle savedInstanceState) {
         //bindView here
         ButterKnife.bind(this, rootView);
-        mShotsPresenter.onAttach();
+        mShotsPresenter.onAttach(this);
         DefaultItemAnimator animator = new DefaultItemAnimator() {
             @Override
             public boolean canReuseUpdatedViewHolder(RecyclerView.ViewHolder viewHolder) {

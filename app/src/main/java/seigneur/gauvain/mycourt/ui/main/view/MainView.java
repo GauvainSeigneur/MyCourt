@@ -1,7 +1,7 @@
 package seigneur.gauvain.mycourt.ui.main.view;
 
 
-import seigneur.gauvain.mycourt.ui.base.BaseMVPView;
+import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
 
 public interface MainView extends BaseMVPView {
 

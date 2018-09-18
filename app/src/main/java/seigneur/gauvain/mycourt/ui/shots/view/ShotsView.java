@@ -3,8 +3,9 @@ package seigneur.gauvain.mycourt.ui.shots.view;
 import java.util.List;
 
 import seigneur.gauvain.mycourt.data.model.Shot;
+import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
 
-public interface ShotsView {
+public interface ShotsView extends BaseMVPView {
 
     void showFirstFecthErrorView(boolean isVisible);
 

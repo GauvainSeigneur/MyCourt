@@ -1,9 +1,10 @@
 package seigneur.gauvain.mycourt.ui.shots.presenter;
 
 import seigneur.gauvain.mycourt.data.model.Shot;
-import seigneur.gauvain.mycourt.ui.base.BasePresenter;
+import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
+import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenter;
 
-public interface ShotsPresenter extends BasePresenter {
+public interface ShotsPresenter<V extends BaseMVPView> extends BasePresenter<V> {
 
     void onLoadFirstPage(int page);
 

@@ -4,23 +4,18 @@ import android.view.MenuItem;
 
 import javax.inject.Inject;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.model.Token;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.data.repository.TokenRepository;
-import seigneur.gauvain.mycourt.ui.base.BasePresenterImplTest;
+import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenterImpl;
 import seigneur.gauvain.mycourt.ui.main.view.MainView;
-import seigneur.gauvain.mycourt.ui.user.presenter.UserPresenterTest;
-import seigneur.gauvain.mycourt.ui.user.view.UserViewTest;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
 import timber.log.Timber;
 
-public class MainPresenterImpl<V extends MainView> extends BasePresenterImplTest<V> implements
+public class MainPresenterImpl<V extends MainView> extends BasePresenterImpl<V> implements
         MainPresenter<V> {
 
     @Inject

@@ -32,7 +32,7 @@ import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.User;
 import seigneur.gauvain.mycourt.ui.base.BaseRetainedFragment;
-import seigneur.gauvain.mycourt.ui.user.presenter.UserPresenterTest;
+import seigneur.gauvain.mycourt.ui.user.presenter.UserPresenter;
 import seigneur.gauvain.mycourt.ui.user.recyclerView.UserLinksAdapter;
 import timber.log.Timber;
 
@@ -45,7 +45,7 @@ import static seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp;
 public class UserFragment extends BaseRetainedFragment implements UserViewTest {
 
     @Inject
-    UserPresenterTest<UserViewTest> mUserPresenter;
+    UserPresenter<UserViewTest> mUserPresenter;
 
     @BindView(R.id.name)
     TextView name;

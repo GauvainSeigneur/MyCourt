@@ -3,7 +3,6 @@ package seigneur.gauvain.mycourt.ui.splash.presenter;
 import com.google.gson.Gson;
 import javax.inject.Inject;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
@@ -16,14 +15,14 @@ import seigneur.gauvain.mycourt.data.model.User;
 import seigneur.gauvain.mycourt.data.repository.TokenRepository;
 import seigneur.gauvain.mycourt.data.repository.UserRepository;
 import seigneur.gauvain.mycourt.di.scope.PerActivity;
+import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenterImpl;
 import seigneur.gauvain.mycourt.ui.splash.view.SplashView;
 import timber.log.Timber;
 
 @PerActivity
-public class SplashPresenterImpl implements SplashPresenter {
+public class SplashPresenterImpl<V extends SplashView> extends BasePresenterImpl<V> implements
+        SplashPresenter<V> {
 
-    @Inject
-    SplashView mSplashView;
 
     @Inject
     Gson gson;
@@ -41,27 +40,19 @@ public class SplashPresenterImpl implements SplashPresenter {
 
     private AuthUtils.AuthService mAuthService;
 
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
-
     @Inject
     public SplashPresenterImpl() {
     }
 
     @Override
-    public void onAttach() {
+    public void onViewReady() {
         checkIfUserIsLoggedIn();
     }
 
     @Override
-    public void onDetach() {
-        compositeDisposable.dispose();
-        mSplashView=null;
-    }
-
-    @Override
     public void onSignInClicked() {
-        if(mSplashView!=null) {
-            mSplashView.goToAuthActivity();
+        if(getMvpView()!=null) {
+            getMvpView().goToAuthActivity();
         }
     }
 
@@ -75,13 +66,13 @@ public class SplashPresenterImpl implements SplashPresenter {
      * Todo - check api if we need user too to perfrom request
      */
     private void checkIfUserIsLoggedIn() {
-        compositeDisposable.add(mTokenRepository.getAccessTokenFromDB()
+        getCompositeDisposable().add(mTokenRepository.getAccessTokenFromDB()
                 .subscribe(
                         token -> {
-                            if (mSplashView!=null) {
+                            if (getMvpView()!=null) {
                                 Timber.tag("jonh").d("token found");
                                 TokenRepository.accessToken = String.valueOf(token.getAccessToken());
-                                mSplashView.goToHome();
+                                getMvpView().goToHome();
                             }
                           },
                         t-> {
@@ -120,7 +111,7 @@ public class SplashPresenterImpl implements SplashPresenter {
      * @param authCode - authCode received from intent from WebView - See activity
      */
     private void fetchToken(String authCode) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 mAuthService.getToken(AuthUtils.CLIENT_ID,
                         AuthUtils.CLIENT_SECRET,
                         authCode,
@@ -148,7 +139,7 @@ public class SplashPresenterImpl implements SplashPresenter {
      */
     private void getUserAndStoreIt() {
         Timber.d("get user called");
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 mUserRepository.getUserFromAPI(false)
                 .subscribe(
                         this::saveUser,
@@ -165,7 +156,7 @@ public class SplashPresenterImpl implements SplashPresenter {
      * @param user - User fetched
      */
     private void saveUser(User user) {
-       compositeDisposable.add(mUserRepository.insertUser(user)
+       getCompositeDisposable().add(mUserRepository.insertUser(user)
                .subscribe(
                        this::onUserSaved,
                        this::onUserSavingError
@@ -177,7 +168,7 @@ public class SplashPresenterImpl implements SplashPresenter {
      * User has been successfully saved in DB, go to home
      */
     private void onUserSaved() {
-        mSplashView.goToHome();
+        getMvpView().goToHome();
     }
 
     /**
@@ -194,7 +185,7 @@ public class SplashPresenterImpl implements SplashPresenter {
      * @param token - token fetch after successful auth
      */
     private void insertToken(Token token) {
-        compositeDisposable.add(mTokenRepository.insertToken(token)
+        getCompositeDisposable().add(mTokenRepository.insertToken(token)
                         .subscribe(
                                 ()-> {
                                     Timber.d("insert completed");

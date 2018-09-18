@@ -13,9 +13,7 @@ import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.model.Pin;
 import seigneur.gauvain.mycourt.data.repository.UserRepository;
 import seigneur.gauvain.mycourt.di.scope.PerActivity;
-import seigneur.gauvain.mycourt.ui.base.BasePresenterImplTest;
-import seigneur.gauvain.mycourt.ui.main.presenter.MainPresenter;
-import seigneur.gauvain.mycourt.ui.main.view.MainView;
+import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenterImpl;
 import seigneur.gauvain.mycourt.ui.pin.view.PinView;
 import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.crypto.DeCryptor;
@@ -24,7 +22,7 @@ import timber.log.Timber;
 
 
 @PerActivity
-public class PinPresenterImpl<V extends PinView> extends BasePresenterImplTest<V> implements
+public class PinPresenterImpl<V extends PinView> extends BasePresenterImpl<V> implements
         PinPresenter<V> {
 
 
