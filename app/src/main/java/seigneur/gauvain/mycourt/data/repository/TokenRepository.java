@@ -47,25 +47,4 @@ public class TokenRepository {
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread());
     }
-    /************************************
-     * Manage Access token
-     * Saved in sharedPrefs
-     ***********************************/
-    /*public void saveAccessToken(@NonNull String token)  {
-        accessToken = token;
-        storeAccessToken(accessToken);
-    }
-
-    public void checkAccessToken() {
-        accessToken = loadAccessToken();
-    }
-
-    public void storeAccessToken(@Nullable String token) {
-        sharedPrefs.putString(SharedPrefs.kAccessToken, token);
-    }
-
-    public String loadAccessToken() {
-        return sharedPrefs.getString(SharedPrefs.kAccessToken);
-    }
-    */
 }

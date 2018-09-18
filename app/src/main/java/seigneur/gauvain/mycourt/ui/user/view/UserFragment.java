@@ -36,8 +36,10 @@ import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.User;
 import seigneur.gauvain.mycourt.ui.base.BaseFragment;
+import seigneur.gauvain.mycourt.ui.base.BaseRetainedFragment;
 import seigneur.gauvain.mycourt.ui.user.presenter.UserPresenter;
 import seigneur.gauvain.mycourt.ui.user.recyclerView.UserLinksAdapter;
+import timber.log.Timber;
 
 import static seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp;
 
@@ -45,7 +47,7 @@ import static seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp;
 /**
  * Created by gse on 22/11/2017.
  */
-public class UserFragment extends BaseFragment implements UserView {
+public class UserFragment extends BaseRetainedFragment implements UserView {
 
     @Inject
     UserPresenter mUserPresenter;
@@ -87,48 +89,41 @@ public class UserFragment extends BaseFragment implements UserView {
 
     private int screenWidth;
 
+    /*
+     ************************************************************************************
+     * BaseRetainedFragment methods
+     * **********************************************************************************/
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-        AndroidSupportInjection.inject(this);
+    protected boolean onInjectView() throws IllegalStateException {
+        //inject dependencies here
+        try {
+            Timber.d("onInjectView called");
+            AndroidSupportInjection.inject(this);
+            return true;
+        } catch(IllegalStateException e) {
+            Timber.d("onInjectView exception");
+            //if return false it will ask again
+            return false;
+        }
     }
 
-     //Overridden from BaseFragment
+    // View is ready, context is defined and dependencies are ready
     @Override
-    public void onCreateView(View rootView, Bundle savedInstanceState) {
-        //bindView here
-        ButterKnife.bind(this, rootView);
-        mUserPresenter.onAttach();
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onViewInjected(View inRootView, Bundle inSavedInstanceState) {
+        super.onViewInjected(inRootView, inSavedInstanceState);
+        Timber.d("onViewInjected");
         initMathData();
         appBarLayout.addOnOffsetChangedListener(appBarOffsetListener);
+        mUserPresenter.onAttach();
     }
-
+    /*
+     ************************************************************************************
+     * Fragment lifecycle methods
+     * **********************************************************************************/
     @Override
-    public void onPause() {
-        super.onPause();
-    }
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public void onAttach(Activity activity) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            AndroidSupportInjection.inject(this);
-        }
-        super.onAttach(activity);
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            AndroidSupportInjection.inject(this);
-        }
-        super.onAttach(context);
     }
 
     @Override
@@ -139,7 +134,7 @@ public class UserFragment extends BaseFragment implements UserView {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mUserPresenter.onDetach();
+       // mUserPresenter.onDetach();
     }
     /**
      * BASE FRAGMENT METHODS
