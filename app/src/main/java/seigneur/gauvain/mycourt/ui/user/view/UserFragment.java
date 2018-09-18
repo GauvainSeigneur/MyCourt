@@ -38,6 +38,7 @@ import seigneur.gauvain.mycourt.data.model.User;
 import seigneur.gauvain.mycourt.ui.base.BaseFragment;
 import seigneur.gauvain.mycourt.ui.base.BaseRetainedFragment;
 import seigneur.gauvain.mycourt.ui.user.presenter.UserPresenter;
+import seigneur.gauvain.mycourt.ui.user.presenter.UserPresenterTest;
 import seigneur.gauvain.mycourt.ui.user.recyclerView.UserLinksAdapter;
 import timber.log.Timber;
 
@@ -47,10 +48,10 @@ import static seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp;
 /**
  * Created by gse on 22/11/2017.
  */
-public class UserFragment extends BaseRetainedFragment implements UserView {
+public class UserFragment extends BaseRetainedFragment implements UserViewTest {
 
     @Inject
-    UserPresenter mUserPresenter;
+    UserPresenterTest<UserViewTest> mUserPresenter;
 
     @BindView(R.id.name)
     TextView name;
@@ -114,7 +115,8 @@ public class UserFragment extends BaseRetainedFragment implements UserView {
         Timber.d("onViewInjected");
         initMathData();
         appBarLayout.addOnOffsetChangedListener(appBarOffsetListener);
-        mUserPresenter.onAttach();
+        mUserPresenter.onAttach(this);
+        mUserPresenter.onViewReady();
     }
     /*
      ************************************************************************************

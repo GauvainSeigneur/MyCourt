@@ -7,73 +7,52 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.OnLifecycleEvent;
 
 import javax.inject.Inject;
+
 import io.reactivex.disposables.CompositeDisposable;
-import seigneur.gauvain.mycourt.data.repository.UserRepository;
 import seigneur.gauvain.mycourt.data.model.User;
+import seigneur.gauvain.mycourt.data.repository.UserRepository;
 import seigneur.gauvain.mycourt.di.scope.PerFragment;
+import seigneur.gauvain.mycourt.ui.base.BaseMVPView;
+import seigneur.gauvain.mycourt.ui.base.BasePresenterImplTest;
+import seigneur.gauvain.mycourt.ui.base.BasePresenterTest;
 import seigneur.gauvain.mycourt.ui.user.view.UserView;
+import seigneur.gauvain.mycourt.ui.user.view.UserViewTest;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.crypto.DeCryptor;
 import seigneur.gauvain.mycourt.utils.crypto.EnCryptor;
 import timber.log.Timber;
 
 @PerFragment
-public class UserPresenterImpl implements UserPresenter, LifecycleObserver {
+public class UserPresenterImplTest<V extends UserViewTest> extends BasePresenterImplTest<V> implements
+        UserPresenterTest<V> {
 
-    //@Inject
-    UserView mUserView;
-
-   // @Inject
+    @Inject
     ConnectivityReceiver mConnectivityReceiver;
 
-   // @Inject
+    @Inject
     UserRepository mUserRepository;
 
-    //@Inject
+    @Inject
     EnCryptor mEnCryptor;
 
-    //@Inject
+    @Inject
     DeCryptor mDeCryptor;
-
-    private LifecycleObserver mLifecycleObserver;
-    private CompositeDisposable mCompositeDisposable;
 
     //data managed by the presenter
     User mUser;
 
     @Inject
-    public UserPresenterImpl() {}
+    public UserPresenterImplTest() {}
 
     @Override
-    public void onAttach() {
-        if (mUserView instanceof LifecycleOwner && mLifecycleObserver==null) {
-            ((LifecycleOwner) mUserView).getLifecycle().addObserver(this);
-            Timber.d("addObserver");
-            mLifecycleObserver=this;
-        }
-        if (mCompositeDisposable==null)
-            mCompositeDisposable = new CompositeDisposable();
-
-       if (mUser==null)
-           getUserAndDisplayIt(mConnectivityReceiver.isOnline());
-       else
-           onUserFound(mUser);
-    }
-
-    @Override
-    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    //@OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     public void onViewReady() {
         Timber.d("onViewReady");
-    }
 
-    @Override
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    public void onDetach() {
-        // Clean up any no-longer-use resources here
-        mUserView=null;
-        mCompositeDisposable.dispose();
-        ((LifecycleOwner) mUserView).getLifecycle().removeObserver(this);
-        mLifecycleObserver=null;
+        if (mUser==null)
+            getUserAndDisplayIt(mConnectivityReceiver.isOnline());
+        else
+            onUserFound(mUser);
     }
 
     /**
@@ -81,7 +60,7 @@ public class UserPresenterImpl implements UserPresenter, LifecycleObserver {
      * @param applyResponseCache - managed by internet connection state
      */
     private void getUserAndDisplayIt(boolean applyResponseCache) {
-        mCompositeDisposable.add(mUserRepository.getUser(applyResponseCache)
+        getCompositeDisposable().add(mUserRepository.getUser(applyResponseCache)
                 .subscribe(
                         this::onUserFound,              //User found - display info
                         this::onErrorHappened,          //Error happened during the request
@@ -98,12 +77,10 @@ public class UserPresenterImpl implements UserPresenter, LifecycleObserver {
      * @param user object
      */
     private void onUserFound(User user) {
-        if(mUserView!=null) {
             mUser=user;
-            mUserView.setUpUserAccountInfo(user);
-            mUserView.setUserPicture(user);
+            getMvpView().setUpUserAccountInfo(user);
+            getMvpView().setUserPicture(user);
             showUserLink(user);
-        }
     }
 
     /**
@@ -120,7 +97,7 @@ public class UserPresenterImpl implements UserPresenter, LifecycleObserver {
      */
     private void manageUIFromDataSource() {
         if (!mUserRepository.isFetchFromDBSuccess && !mUserRepository.isFetchFromAPISuccess) {
-            mUserView.showNoUserFoundView(true);
+            getMvpView().showNoUserFoundView(true);
         } else if (!mUserRepository.isFetchFromDBSuccess) {
             Timber.d("user fetch from api only");
         } else if (!mUserRepository.isFetchFromAPISuccess){
@@ -136,10 +113,10 @@ public class UserPresenterImpl implements UserPresenter, LifecycleObserver {
      */
     private void showUserLink(User user) {
         if (!user.getLinks().isEmpty()) {
-            mUserView.showUserLinks(user);
-            mUserView.showNoLinksView(false);
+            getMvpView().showUserLinks(user);
+            getMvpView().showNoLinksView(false);
         } else {
-            mUserView.showNoLinksView(true);
+            getMvpView().showNoLinksView(true);
         }
     }
 

@@ -31,9 +31,13 @@ public abstract class UserFragmentModule {
      * @param userFragment
      * @return userView
      */
+    /*@Binds
+    @PerFragment
+    abstract UserView userView(UserFragment userFragment);*/
+
     @Binds
     @PerFragment
-    abstract UserView userView(UserFragment userFragment);
+    abstract UserViewTest userView(UserFragment userFragment);
 
 
 }
