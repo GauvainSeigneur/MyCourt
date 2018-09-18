@@ -12,15 +12,16 @@ import seigneur.gauvain.mycourt.data.model.Token;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.data.repository.TokenRepository;
+import seigneur.gauvain.mycourt.ui.base.BasePresenterImplTest;
 import seigneur.gauvain.mycourt.ui.main.view.MainView;
+import seigneur.gauvain.mycourt.ui.user.presenter.UserPresenterTest;
+import seigneur.gauvain.mycourt.ui.user.view.UserViewTest;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
 import timber.log.Timber;
 
-public class MainPresenterImpl implements MainPresenter {
-
-    @Inject
-    MainView mMainview;
+public class MainPresenterImpl<V extends MainView> extends BasePresenterImplTest<V> implements
+        MainPresenter<V> {
 
     @Inject
     ConnectivityReceiver mConnectivityReceiver;
@@ -41,40 +42,41 @@ public class MainPresenterImpl implements MainPresenter {
     @Inject
     public MainPresenterImpl(){}
 
-    @Override
+   /* @Override
     public void onAttach() {
     }
+
     @Override
     public void onDetach() {
         compositeDisposable.dispose();
         mMainview=null;
-    }
+    }*/
 
     @Override
     public void onBottomNavItemSelected(int pos) {
-        mMainview.showFragment(pos);
+        getMvpView().showFragment(pos);
     }
 
     @Override
     public void onBottomNavItemReselected(int position) {
         //here - manage back on top, refresh ?
-        mMainview.goBackAtStart(position);
+        getMvpView().goBackAtStart(position);
     }
 
     @Override
     public void onAddFabclicked() {
         mTempDataRepository.setDraftCallingSource(Constants.SOURCE_FAB);
-        mMainview.goToShotEdition();
+        getMvpView().goToShotEdition();
     }
 
     @Override
     public void onReturnShotDrafted() {
-       mMainview.showMessageShotDrafted();
+        getMvpView().showMessageShotDrafted();
     }
 
     @Override
     public void onReturnShotPublished() {
-        mMainview.showMessageShotPublished();
+        getMvpView().showMessageShotPublished();
     }
 
     @Override
@@ -85,9 +87,9 @@ public class MainPresenterImpl implements MainPresenter {
     @Override
     public void onReturnNavigation(MenuItem item, int position) {
         if (item!=null &&position!=-1 && position>0)
-            mMainview.goBackOnPrevItem(position-1);
+            getMvpView().goBackOnPrevItem(position-1);
         else
-            mMainview.closeActivity();
+            getMvpView().closeActivity();
     }
 
     private void checkInternetConnection() {
@@ -132,7 +134,7 @@ public class MainPresenterImpl implements MainPresenter {
      * @param token - Token object
      */
     private void onTokenFetched(Token token) {
-        if (mMainview!=null) {
+        if (getMvpView()!=null) {
             Timber.d("token found");
             TokenRepository.accessToken = String.valueOf(token.getAccessToken());
         }

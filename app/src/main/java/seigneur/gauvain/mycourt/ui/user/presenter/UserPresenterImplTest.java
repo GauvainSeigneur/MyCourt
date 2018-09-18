@@ -1,21 +1,12 @@
 package seigneur.gauvain.mycourt.ui.user.presenter;
 
 
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.OnLifecycleEvent;
-
 import javax.inject.Inject;
 
-import io.reactivex.disposables.CompositeDisposable;
 import seigneur.gauvain.mycourt.data.model.User;
 import seigneur.gauvain.mycourt.data.repository.UserRepository;
 import seigneur.gauvain.mycourt.di.scope.PerFragment;
-import seigneur.gauvain.mycourt.ui.base.BaseMVPView;
 import seigneur.gauvain.mycourt.ui.base.BasePresenterImplTest;
-import seigneur.gauvain.mycourt.ui.base.BasePresenterTest;
-import seigneur.gauvain.mycourt.ui.user.view.UserView;
 import seigneur.gauvain.mycourt.ui.user.view.UserViewTest;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.crypto.DeCryptor;

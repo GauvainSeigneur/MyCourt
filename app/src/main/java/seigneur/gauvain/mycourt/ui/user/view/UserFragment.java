@@ -1,9 +1,6 @@
 package seigneur.gauvain.mycourt.ui.user.view;
 
-import android.app.Activity;
-import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.RecyclerView;
@@ -31,13 +28,10 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.User;
-import seigneur.gauvain.mycourt.ui.base.BaseFragment;
 import seigneur.gauvain.mycourt.ui.base.BaseRetainedFragment;
-import seigneur.gauvain.mycourt.ui.user.presenter.UserPresenter;
 import seigneur.gauvain.mycourt.ui.user.presenter.UserPresenterTest;
 import seigneur.gauvain.mycourt.ui.user.recyclerView.UserLinksAdapter;
 import timber.log.Timber;

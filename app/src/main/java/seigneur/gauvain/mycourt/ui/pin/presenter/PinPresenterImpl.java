@@ -13,6 +13,9 @@ import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.model.Pin;
 import seigneur.gauvain.mycourt.data.repository.UserRepository;
 import seigneur.gauvain.mycourt.di.scope.PerActivity;
+import seigneur.gauvain.mycourt.ui.base.BasePresenterImplTest;
+import seigneur.gauvain.mycourt.ui.main.presenter.MainPresenter;
+import seigneur.gauvain.mycourt.ui.main.view.MainView;
 import seigneur.gauvain.mycourt.ui.pin.view.PinView;
 import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.crypto.DeCryptor;
@@ -21,10 +24,9 @@ import timber.log.Timber;
 
 
 @PerActivity
-public class PinPresenterImpl implements PinPresenter {
+public class PinPresenterImpl<V extends PinView> extends BasePresenterImplTest<V> implements
+        PinPresenter<V> {
 
-    @Inject
-    PinView mPinView;
 
     @Inject
     UserRepository mUserRepository;
@@ -41,14 +43,11 @@ public class PinPresenterImpl implements PinPresenter {
     private Pin mTempPin=null;
     private boolean isDeCryptorEnabled=false;
 
-
-
-
     @Inject
     public PinPresenterImpl() {
     }
 
-    @Override
+    /*@Override
     public void onAttach() {
         checkIfPinAlreadyExists();
     }
@@ -57,12 +56,17 @@ public class PinPresenterImpl implements PinPresenter {
     public void onDetach() {
         mCompositeDisposable.dispose();
         mPinView=null;
+    }*/
+
+    @Override
+    public void onViewReady() {
+        checkIfPinAlreadyExists();
     }
 
     @Override
     public void onFirstPinDefined(String pin) {
-        if (mPinView!=null) {
-            mPinView.showCreationPinStep(1);
+        if (getMvpView()!=null) {
+            getMvpView().showCreationPinStep(1);
         }
     }
 
@@ -78,8 +82,8 @@ public class PinPresenterImpl implements PinPresenter {
 
     @Override
     public void  onCheckPinSuccess() {
-        if (mPinView!=null)
-            mPinView.showCreationPinStep(0);
+        if (getMvpView()!=null)
+            getMvpView().showCreationPinStep(0);
     }
 
     @Override
@@ -102,10 +106,10 @@ public class PinPresenterImpl implements PinPresenter {
     }
 
     private void onPinAlreadyExists(Pin pin) {
-        if (mPinView!=null) {
+        if (getMvpView()!=null) {
             if (pin.getCryptedPIN()!=null && !pin.getCryptedPIN().toString().isEmpty()) {
                 mTempPin = pin;
-                mPinView.showConfirmCurrentPinView(true);
+                getMvpView().showConfirmCurrentPinView(true);
             } else {
                 onNoPinFound();
             }
@@ -119,8 +123,8 @@ public class PinPresenterImpl implements PinPresenter {
     }
 
     private void onNoPinFound() {
-        if (mPinView!=null)
-            mPinView.showCreationPinStep(0);
+        if (getMvpView()!=null)
+            getMvpView().showCreationPinStep(0);
     }
 
     /*

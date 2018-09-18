@@ -3,7 +3,7 @@ package seigneur.gauvain.mycourt.ui.user.view;
 import seigneur.gauvain.mycourt.data.model.User;
 import seigneur.gauvain.mycourt.ui.base.BaseMVPView;
 
-public interface UserViewTest extends BaseMVPView{
+public interface UserViewTest extends BaseMVPView {
 
     /**
      * Show a view when app lost internet connection

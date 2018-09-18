@@ -19,7 +19,7 @@ import seigneur.gauvain.mycourt.ui.pin.presenter.PinPresenter;
 public class PinActivity extends BaseActivity implements PinView {
 
     @Inject
-    PinPresenter mPinPresenter;
+    PinPresenter<PinView> mPinPresenter;
 
     @BindView(R.id.pinEditor)
     PinEntryEditText mPinEditor;
@@ -37,8 +37,8 @@ public class PinActivity extends BaseActivity implements PinView {
         AndroidInjection.inject(this);
         setContentView(R.layout.activity_pin);
         ButterKnife.bind(this);
-        mPinPresenter.onAttach();
-
+        mPinPresenter.onAttach(this);
+        mPinPresenter.onViewReady();
         if (mPinEditor != null) {
             mPinEditor.setOnPinEnteredListener(new PinEntryEditText.OnPinEnteredListener() {
                 @Override

@@ -3,9 +3,11 @@ package seigneur.gauvain.mycourt.ui.main.presenter;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import seigneur.gauvain.mycourt.ui.base.BaseMVPView;
 import seigneur.gauvain.mycourt.ui.base.BasePresenter;
+import seigneur.gauvain.mycourt.ui.base.BasePresenterTest;
 
-public interface MainPresenter extends BasePresenter {
+public interface MainPresenter<V extends BaseMVPView> extends BasePresenterTest<V> {
 
     /**
      * User has clicked on item

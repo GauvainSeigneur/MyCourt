@@ -36,7 +36,7 @@ public class BasePresenterImplTest<V extends  BaseMVPView>
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     public void onDetach() {
         // Clean up any no-longer-use resources here
-        ((LifecycleOwner) mBaseMVPView).getLifecycle().removeObserver(this);
+//        ((LifecycleOwner) mBaseMVPView).getLifecycle().removeObserver(this);
         mLifecycleObserver = null;
         mBaseMVPView = null;
         mCompositeDisposable.dispose();

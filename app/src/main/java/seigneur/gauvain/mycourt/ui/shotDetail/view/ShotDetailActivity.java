@@ -60,7 +60,7 @@ public class ShotDetailActivity extends BaseActivity implements ShotDetailView {
     private float ratioBigShotMiniShot;
     private Float mTargetElevation;
     @Inject
-    ShotDetailPresenter mShotDetailPresenter;
+    ShotDetailPresenter<ShotDetailView> mShotDetailPresenter;
 
     @BindView(R.id.app_bar)
     AppBarLayout appBarLayout;
@@ -111,7 +111,8 @@ public class ShotDetailActivity extends BaseActivity implements ShotDetailView {
         view = window.getDecorView();
         twentyFourDip = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, this.getResources().getDisplayMetrics());
         ButterKnife.bind(this);
-        mShotDetailPresenter.onAttach();
+        mShotDetailPresenter.onAttach(this);
+        mShotDetailPresenter.onViewReady();
     }
 
     @Override

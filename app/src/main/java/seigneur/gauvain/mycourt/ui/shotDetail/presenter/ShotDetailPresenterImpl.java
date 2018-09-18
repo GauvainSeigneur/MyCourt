@@ -18,12 +18,16 @@ import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.di.scope.PerActivity;
+import seigneur.gauvain.mycourt.ui.base.BasePresenterImplTest;
+import seigneur.gauvain.mycourt.ui.pin.presenter.PinPresenter;
+import seigneur.gauvain.mycourt.ui.pin.view.PinView;
 import seigneur.gauvain.mycourt.ui.shotDetail.view.ShotDetailView;
 import seigneur.gauvain.mycourt.utils.Constants;
 import timber.log.Timber;
 
 @PerActivity
-public class ShotDetailPresenterImpl implements ShotDetailPresenter {
+public class ShotDetailPresenterImpl<V extends ShotDetailView> extends BasePresenterImplTest<V> implements
+        ShotDetailPresenter<V> {
 
     @Inject
     ShotDetailView mShotDetailView;
@@ -43,14 +47,8 @@ public class ShotDetailPresenterImpl implements ShotDetailPresenter {
     }
 
     @Override
-    public void onAttach() {
+    public void onViewReady() {
         getShot();
-    }
-
-    @Override
-    public void onDetach() {
-        compositeDisposable.dispose();
-        mShotDetailView=null;
     }
 
     @Override
