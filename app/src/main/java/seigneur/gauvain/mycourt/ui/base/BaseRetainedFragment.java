@@ -1,6 +1,5 @@
 package seigneur.gauvain.mycourt.ui.base;
 
-
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -11,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  * Base {@link android.app.Fragment} class for every fragment in this application.
@@ -86,6 +86,7 @@ public abstract class BaseRetainedFragment extends Fragment
         public void onActivityCreated(Bundle savedInstanceState)
         {
             super.onActivityCreated(savedInstanceState);
+            Timber.d("onActivityCreated");
             if (!mIsInjected)
             {
                 mIsInjected = onInjectView();
