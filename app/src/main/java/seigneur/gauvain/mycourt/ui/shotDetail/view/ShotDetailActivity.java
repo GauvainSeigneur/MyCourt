@@ -111,14 +111,8 @@ public class ShotDetailActivity extends BaseActivity implements ShotDetailView {
         view = window.getDecorView();
         twentyFourDip = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, this.getResources().getDisplayMetrics());
         ButterKnife.bind(this);
-        mShotDetailPresenter.onAttach(this);
+        //mShotDetailPresenter.onAttach(this);
         mShotDetailPresenter.onViewReady();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mShotDetailPresenter.onDetach();
     }
 
     @Override

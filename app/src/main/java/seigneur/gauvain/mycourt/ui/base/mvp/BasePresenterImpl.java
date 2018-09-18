@@ -20,6 +20,7 @@ public class BasePresenterImpl<V extends  BaseMVPView>
     private V mBaseMVPView;
 
     @Override
+    //@OnLifecycleEvent(Lifecycle.Event.ON_START)
     public void onAttach(V view) {
         mBaseMVPView =view;
         if (mBaseMVPView instanceof LifecycleOwner && mLifecycleObserver == null) {
