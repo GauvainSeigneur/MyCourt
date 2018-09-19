@@ -28,16 +28,25 @@ public abstract class BaseRetainedFragment extends Fragment
         * Fragment Lifecycle
         *****************************************************************************************/
         @Override
-        public void onCreate(Bundle savedInstanceState)
-            {
-                super.onCreate(savedInstanceState);
-                setRetainInstance(true); //allows presenterImpl to keep alive data though fragment lifecycle even onConfiguration thanks to FragmentScope set to presenter module
-                /**
-                 * DO NOT INJECT DEPENDENCIES HERE AS ACTIVITY MAY BE DESTROYED AND THE CONTEXT SET AS NULL
-                 * OTHERWISE DEPENDENCIES WILL NOT BE GARBAGE COLLECTED and parent activity too
-                 */
-            }
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setRetainInstance(true); //allows presenterImpl to keep alive data though fragment lifecycle even onConfiguration thanks to FragmentScope set to presenter module
+            /**
+             * DO NOT INJECT DEPENDENCIES HERE AS ACTIVITY MAY BE DESTROYED AND THE CONTEXT SET AS NULL
+             * OTHERWISE DEPENDENCIES WILL NOT BE GARBAGE COLLECTED and parent activity too
+             */
+        }
 
+        @Override
+        public void onAttach(Context context) {
+            super.onAttach(context);
+            Timber.d("onAttach");
+            activity = getActivity();
+            if (!mIsInjected)
+            {
+                mIsInjected = onInjectView();
+            }
+        }
 
         /**
          * View is inflating, bind views and define rootViews
@@ -51,6 +60,17 @@ public abstract class BaseRetainedFragment extends Fragment
             super.onCreateView(inflater,container, savedInstanceState);
             mRootview = inflater.inflate(getFragmentLayout(), container, false);
             ButterKnife.bind(this, mRootview);
+            Timber.d("onCreateView");
+            if (!mIsInjected)
+            {
+                mIsInjected = onInjectView();
+                if (mIsInjected)
+                    onViewInjected(mRootview, savedInstanceState);
+            }
+            else
+            {
+                onViewInjected(mRootview, savedInstanceState);
+            }
             return mRootview;
         }
 
@@ -62,51 +82,28 @@ public abstract class BaseRetainedFragment extends Fragment
          * @param savedInstanceState
          */
         @Override
-        public void onViewCreated(View view, Bundle savedInstanceState)
-            {
-                super.onViewCreated(view, savedInstanceState);
-                if (!mIsInjected)
-                {
-                    mIsInjected = onInjectView();
-                    if (mIsInjected)
-                        onViewInjected(view, savedInstanceState);
-                }
-                else
-                {
-                    onViewInjected(view, savedInstanceState);
-                }
-
-            }
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+            Timber.d("onViewCreated");
+        }
 
         /**
          * If activity is recreated, dependencies may have been recycled, so inject it again
          * @param savedInstanceState
          */
         @Override
-        public void onActivityCreated(Bundle savedInstanceState)
-        {
+        public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
             Timber.d("onActivityCreated");
-            if (!mIsInjected)
-            {
-                mIsInjected = onInjectView();
-            }
+
         }
 
 
         @Override
-        public void onDestroy()
-            {
+        public void onDestroy() {
              super.onDestroy();
              mRootview=null; //Allows garbage collector to recycle view of the fragment
             }
-
-        @Override
-        public void onAttach(Context context)
-        {
-            super.onAttach(context);
-            activity = getActivity();
-        }
 
         /*
          *****************************************************************************************

@@ -115,13 +115,13 @@ public class UserFragment extends BaseRetainedFragment implements UserViewTest {
      ************************************************************************************
      * Fragment lifecycle methods
      * **********************************************************************************/
-
     @Override
-    public void onStart() {
-        super.onStart();
-        Timber.d("onStart");
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        Timber.d("onViewCreated");
         mUserPresenter.onViewReady();
     }
+
 
     @Override
     public void onHiddenChanged(boolean hidden) {
