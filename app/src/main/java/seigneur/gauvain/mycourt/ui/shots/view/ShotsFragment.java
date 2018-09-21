@@ -37,7 +37,7 @@ import timber.log.Timber;
 public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCallback {
 
     @Inject
-    ShotsPresenter<ShotsView> mShotsPresenter;
+    ShotsPresenter mShotsPresenter;
     @BindView(R.id.swipe_refresh_shots)
     SwipeRefreshLayout swipeRefreshLayout;
 
@@ -58,8 +58,6 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-        AndroidSupportInjection.inject(this);
         adapter = new ShotListAdapter(getContext(), this);
         mGridLayoutManager = new GridLayoutManager(getContext(),2);
         mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -83,7 +81,7 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
     public void onCreateView(View rootView, Bundle savedInstanceState) {
         //bindView here
         ButterKnife.bind(this, rootView);
-        mShotsPresenter.onAttach(this);
+        mShotsPresenter.onAttach();
         DefaultItemAnimator animator = new DefaultItemAnimator() {
             @Override
             public boolean canReuseUpdatedViewHolder(RecyclerView.ViewHolder viewHolder) {
@@ -142,6 +140,7 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            AndroidSupportInjection.inject(this);
         }
     }
 
@@ -149,6 +148,7 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
     public void onAttach(Context context) {
         super.onAttach(context);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            AndroidSupportInjection.inject(this);
         }
     }
 

@@ -3,12 +3,9 @@ package seigneur.gauvain.mycourt.ui.shotDetail.presenter;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 
-import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
-import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenter;
+import seigneur.gauvain.mycourt.ui.base.BasePresenter;
 
-public interface ShotDetailPresenter<V extends BaseMVPView> extends BasePresenter<V> {
-
-    void onViewReady();
+public interface ShotDetailPresenter extends BasePresenter {
 
     /**
      * User has clicked on button to modify the shot

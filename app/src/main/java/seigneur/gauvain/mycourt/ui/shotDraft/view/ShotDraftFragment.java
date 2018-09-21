@@ -1,7 +1,6 @@
 package seigneur.gauvain.mycourt.ui.shotDraft.view;
 
 import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -23,7 +22,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import dagger.android.support.AndroidSupportInjection;
-import seigneur.gauvain.mycourt.MyCourtApp;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.ui.base.BaseFragment;
@@ -39,10 +37,7 @@ import timber.log.Timber;
 public class ShotDraftFragment extends BaseFragment implements ShotDraftView, Toolbar.OnMenuItemClickListener {
 
     @Inject
-    ShotDraftPresenter<ShotDraftView> mShotDraftPresenter;
-
-    @Inject
-    Application mApplication;
+    ShotDraftPresenter mShotDraftPresenter;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -68,8 +63,6 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //new instance
-        setRetainInstance(true);
-        AndroidSupportInjection.inject(this);
         Timber.d("onCreate new instance");
         mcallabck = new ShotDraftListCallback() {
             @Override
@@ -77,7 +70,7 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
                 mShotDraftPresenter.onShotDraftClicked(shotDraft, position);
             }
         };
-        mShotDraftsListAdapter= new ShotDraftsListAdapter(mApplication, shotDraftsSaved, mcallabck);
+        mShotDraftsListAdapter= new ShotDraftsListAdapter(getContext(), shotDraftsSaved, mcallabck);
     }
 
      // Overridden from BaseFragment
@@ -85,9 +78,6 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
     public void onCreateView(View rootView, Bundle savedInstanceState) {
         //bindView here
         ButterKnife.bind(this, rootView);
-        mShotDraftPresenter.onAttach(this);
-        mShotDraftPresenter.onViewReady();
-
         toolbar.inflateMenu(R.menu.menu_shot_detail);
         toolbar.setOnMenuItemClickListener(this);
         shotDraftRV.setLayoutManager(new GridLayoutManager(getContext(),2));
@@ -119,6 +109,8 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
     @Override
     public void onAttach(Activity activity) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            AndroidSupportInjection.inject(this);
+            mShotDraftPresenter.onAttach();
         }
         super.onAttach(activity);
     }
@@ -126,6 +118,8 @@ public class ShotDraftFragment extends BaseFragment implements ShotDraftView, To
     @Override
     public void onAttach(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            AndroidSupportInjection.inject(this);
+            mShotDraftPresenter.onAttach();
         }
         super.onAttach(context);
     }

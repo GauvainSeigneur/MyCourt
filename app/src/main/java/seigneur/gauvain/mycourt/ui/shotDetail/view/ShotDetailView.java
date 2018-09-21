@@ -3,9 +3,8 @@ package seigneur.gauvain.mycourt.ui.shotDetail.view;
 import android.graphics.drawable.Drawable;
 
 import seigneur.gauvain.mycourt.data.model.Shot;
-import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
 
-public interface ShotDetailView extends BaseMVPView {
+public interface ShotDetailView {
 
    /**
     * An error happened while trying to get shot object, show a message to user during

@@ -13,7 +13,6 @@ import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.model.Pin;
 import seigneur.gauvain.mycourt.data.repository.UserRepository;
 import seigneur.gauvain.mycourt.di.scope.PerActivity;
-import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenterImpl;
 import seigneur.gauvain.mycourt.ui.pin.view.PinView;
 import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.crypto.DeCryptor;
@@ -22,9 +21,10 @@ import timber.log.Timber;
 
 
 @PerActivity
-public class PinPresenterImpl<V extends PinView> extends BasePresenterImpl<V> implements
-        PinPresenter<V> {
+public class PinPresenterImpl implements PinPresenter {
 
+    @Inject
+    PinView mPinView;
 
     @Inject
     UserRepository mUserRepository;
@@ -41,11 +41,14 @@ public class PinPresenterImpl<V extends PinView> extends BasePresenterImpl<V> im
     private Pin mTempPin=null;
     private boolean isDeCryptorEnabled=false;
 
+
+
+
     @Inject
     public PinPresenterImpl() {
     }
 
-    /*@Override
+    @Override
     public void onAttach() {
         checkIfPinAlreadyExists();
     }
@@ -54,17 +57,12 @@ public class PinPresenterImpl<V extends PinView> extends BasePresenterImpl<V> im
     public void onDetach() {
         mCompositeDisposable.dispose();
         mPinView=null;
-    }*/
-
-    @Override
-    public void onViewReady() {
-        checkIfPinAlreadyExists();
     }
 
     @Override
     public void onFirstPinDefined(String pin) {
-        if (getMvpView()!=null) {
-            getMvpView().showCreationPinStep(1);
+        if (mPinView!=null) {
+            mPinView.showCreationPinStep(1);
         }
     }
 
@@ -80,8 +78,8 @@ public class PinPresenterImpl<V extends PinView> extends BasePresenterImpl<V> im
 
     @Override
     public void  onCheckPinSuccess() {
-        if (getMvpView()!=null)
-            getMvpView().showCreationPinStep(0);
+        if (mPinView!=null)
+            mPinView.showCreationPinStep(0);
     }
 
     @Override
@@ -104,10 +102,10 @@ public class PinPresenterImpl<V extends PinView> extends BasePresenterImpl<V> im
     }
 
     private void onPinAlreadyExists(Pin pin) {
-        if (getMvpView()!=null) {
+        if (mPinView!=null) {
             if (pin.getCryptedPIN()!=null && !pin.getCryptedPIN().toString().isEmpty()) {
                 mTempPin = pin;
-                getMvpView().showConfirmCurrentPinView(true);
+                mPinView.showConfirmCurrentPinView(true);
             } else {
                 onNoPinFound();
             }
@@ -121,8 +119,8 @@ public class PinPresenterImpl<V extends PinView> extends BasePresenterImpl<V> im
     }
 
     private void onNoPinFound() {
-        if (getMvpView()!=null)
-            getMvpView().showCreationPinStep(0);
+        if (mPinView!=null)
+            mPinView.showCreationPinStep(0);
     }
 
     /*

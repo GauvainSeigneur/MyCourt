@@ -3,20 +3,27 @@ package seigneur.gauvain.mycourt.ui.shotDraft.presenter;
 import java.util.List;
 import javax.inject.Inject;
 
+import io.reactivex.Flowable;
 import io.reactivex.Maybe;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.di.scope.PerFragment;
-import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenterImpl;
 import seigneur.gauvain.mycourt.ui.shotDraft.view.ShotDraftView;
 import seigneur.gauvain.mycourt.utils.Constants;
 import timber.log.Timber;
 
 @PerFragment
-public class ShotDraftPresenterImpl<V extends ShotDraftView> extends BasePresenterImpl<V> implements
-        ShotDraftPresenter<V> {
+public class ShotDraftPresenterImpl implements ShotDraftPresenter {
+
+    @Inject
+    ShotDraftView mShotDraftView;
 
     @Inject
     ShotDraftRepository mShotDraftRepository;
@@ -33,7 +40,7 @@ public class ShotDraftPresenterImpl<V extends ShotDraftView> extends BasePresent
     }
 
     @Override
-    public void onViewReady() {
+    public void onAttach() {
         isRefreshing=false;
         compositeDisposable.add(getShotDrafts()
                 .subscribe(
@@ -44,11 +51,11 @@ public class ShotDraftPresenterImpl<V extends ShotDraftView> extends BasePresent
         );
     }
 
-    /*@Override
+    @Override
     public void onDetach() {
         compositeDisposable.dispose();
         mShotDraftView =null;
-    }*/
+    }
 
     @Override
     public void onRefresh(boolean fromSwipeRefresh) {
@@ -66,10 +73,10 @@ public class ShotDraftPresenterImpl<V extends ShotDraftView> extends BasePresent
 
     @Override
     public void onShotDraftClicked(ShotDraft shotDraft, int position) {
-        if (getMvpView()!=null) {
+        if (mShotDraftView!=null) {
             mTempDataRepository.setDraftCallingSource(Constants.SOURCE_DRAFT);
             mTempDataRepository.setShotDraft(shotDraft);
-            getMvpView().goToShotEdition();
+            mShotDraftView.goToShotEdition();
         }
     }
 
@@ -89,13 +96,13 @@ public class ShotDraftPresenterImpl<V extends ShotDraftView> extends BasePresent
     private void doOnDraftFound(List<ShotDraft> shotDrafts){
         mTempDataRepository.setDraftsChanged(false); //Consume the event
         Timber.d("list loaded"+shotDrafts.toString());
-        if (getMvpView()!=null) {
-            getMvpView().stopRefresh();
+        if (mShotDraftView!=null) {
+            mShotDraftView.stopRefresh();
             if (!shotDrafts.isEmpty()) {
-                getMvpView().showEmptyView(false);
-                getMvpView().showDraftList(shotDrafts, isRefreshing);
+                mShotDraftView.showEmptyView(false);
+                mShotDraftView.showDraftList(shotDrafts, isRefreshing);
             } else {
-                getMvpView().showEmptyView(true);
+                mShotDraftView.showEmptyView(true);
             }
         }
     }
@@ -105,8 +112,8 @@ public class ShotDraftPresenterImpl<V extends ShotDraftView> extends BasePresent
      */
     private void doOnNothingFound(){
         mTempDataRepository.setDraftsChanged(false);
-        if (getMvpView()!=null && isRefreshing)
-            getMvpView().stopRefresh();
+        if (mShotDraftView!=null && isRefreshing)
+            mShotDraftView.stopRefresh();
     }
 
     /**
@@ -115,8 +122,8 @@ public class ShotDraftPresenterImpl<V extends ShotDraftView> extends BasePresent
      */
     private void doOnError(Throwable throwable){
         Timber.e(throwable);
-        if (getMvpView()!=null)
-            getMvpView().stopRefresh();
+        if (mShotDraftView!=null)
+            mShotDraftView.stopRefresh();
     }
 
 }

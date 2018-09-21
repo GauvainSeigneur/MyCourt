@@ -1,21 +1,24 @@
 package seigneur.gauvain.mycourt.ui.user.presenter;
 
 
-import javax.inject.Inject;
+import android.arch.lifecycle.LifecycleOwner;
 
-import seigneur.gauvain.mycourt.data.model.User;
+import javax.inject.Inject;
+import io.reactivex.disposables.CompositeDisposable;
 import seigneur.gauvain.mycourt.data.repository.UserRepository;
+import seigneur.gauvain.mycourt.data.model.User;
+import seigneur.gauvain.mycourt.data.viewModel.UserViewModel;
 import seigneur.gauvain.mycourt.di.scope.PerFragment;
-import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenterImpl;
-import seigneur.gauvain.mycourt.ui.user.view.UserViewTest;
+import seigneur.gauvain.mycourt.ui.user.view.UserView;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.crypto.DeCryptor;
 import seigneur.gauvain.mycourt.utils.crypto.EnCryptor;
 import timber.log.Timber;
 
 @PerFragment
-public class UserPresenterImpl<V extends UserViewTest> extends BasePresenterImpl<V> implements
-        UserPresenter<V> {
+public class UserPresenterImpl implements UserPresenter {
+
+    UserView mUserView;
 
     @Inject
     ConnectivityReceiver mConnectivityReceiver;
@@ -29,29 +32,64 @@ public class UserPresenterImpl<V extends UserViewTest> extends BasePresenterImpl
     @Inject
     DeCryptor mDeCryptor;
 
-    //data managed by the presenter
-    User mUser;
+    private CompositeDisposable mCompositeDisposable;
+
+    private UserViewModel mUserViewModel;
+
+    private LifecycleOwner mLifecycleOwner;
 
     @Inject
-    public UserPresenterImpl() {}
+    public UserPresenterImpl(
+            UserView userView,
+             UserViewModel userViewModel,
+             LifecycleOwner lifecycleOwner) {
+        this.mUserView=userView;
+        this.mUserViewModel=userViewModel;
+        this.mLifecycleOwner=lifecycleOwner;
+    }
+
 
     @Override
-    //@OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    public void onViewReady() {
-        Timber.d("onViewReady");
-
-        if (mUser==null)
-            getUserAndDisplayIt(mConnectivityReceiver.isOnline());
-        else
-            onUserFound(mUser);
+    public void onAttach() {
+        mUserViewModel.init(); //get info from repository
+        mCompositeDisposable = new CompositeDisposable();
+        //getUserAndDisplayIt(mConnectivityReceiver.isOnline());
     }
+
+    @Override
+    public void getUser() {
+        getUserFromViewModel();
+    }
+
+    @Override
+    public void onDetach() {
+        mCompositeDisposable.dispose();
+        mUserView=null;
+    }
+
+    private void getUserFromViewModel() {
+        Timber.d("getUserFromViewModel");
+        //good result
+        mUserViewModel.getUserMutableLiveDatas() //
+                .observe(
+                        mLifecycleOwner,
+                        this::onUserFound
+                );
+        //error result
+        mUserViewModel.getErrorMutableLiveData() //
+                .observe(
+                        mLifecycleOwner,
+                        this::onErrorHappened
+                );
+            }
 
     /**
      * get user from both source and display info
      * @param applyResponseCache - managed by internet connection state
      */
     private void getUserAndDisplayIt(boolean applyResponseCache) {
-        getCompositeDisposable().add(mUserRepository.getUser(applyResponseCache)
+        mCompositeDisposable.add(
+                mUserRepository.getUser(applyResponseCache)
                 .subscribe(
                         this::onUserFound,              //User found - display info
                         this::onErrorHappened,          //Error happened during the request
@@ -68,10 +106,12 @@ public class UserPresenterImpl<V extends UserViewTest> extends BasePresenterImpl
      * @param user object
      */
     private void onUserFound(User user) {
-            mUser=user;
-            getMvpView().setUpUserAccountInfo(user);
-            getMvpView().setUserPicture(user);
+        Timber.d("user found "+user.getName());
+
+            mUserView.setUpUserAccountInfo(user);
+            mUserView.setUserPicture(user);
             showUserLink(user);
+
     }
 
     /**
@@ -88,7 +128,7 @@ public class UserPresenterImpl<V extends UserViewTest> extends BasePresenterImpl
      */
     private void manageUIFromDataSource() {
         if (!mUserRepository.isFetchFromDBSuccess && !mUserRepository.isFetchFromAPISuccess) {
-            getMvpView().showNoUserFoundView(true);
+            mUserView.showNoUserFoundView(true);
         } else if (!mUserRepository.isFetchFromDBSuccess) {
             Timber.d("user fetch from api only");
         } else if (!mUserRepository.isFetchFromAPISuccess){
@@ -104,10 +144,10 @@ public class UserPresenterImpl<V extends UserViewTest> extends BasePresenterImpl
      */
     private void showUserLink(User user) {
         if (!user.getLinks().isEmpty()) {
-            getMvpView().showUserLinks(user);
-            getMvpView().showNoLinksView(false);
+            mUserView.showUserLinks(user);
+            mUserView.showNoLinksView(false);
         } else {
-            getMvpView().showNoLinksView(true);
+            mUserView.showNoLinksView(true);
         }
     }
 

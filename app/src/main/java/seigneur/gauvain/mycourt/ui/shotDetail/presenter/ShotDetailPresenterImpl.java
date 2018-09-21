@@ -2,25 +2,28 @@ package seigneur.gauvain.mycourt.ui.shotDetail.presenter;
 
 import android.graphics.drawable.Drawable;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
+import io.reactivex.Maybe;
 import io.reactivex.Single;
+import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.di.scope.PerActivity;
-import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenterImpl;
 import seigneur.gauvain.mycourt.ui.shotDetail.view.ShotDetailView;
 import seigneur.gauvain.mycourt.utils.Constants;
 import timber.log.Timber;
 
 @PerActivity
-public class ShotDetailPresenterImpl<V extends ShotDetailView> extends BasePresenterImpl<V> implements
-        ShotDetailPresenter<V> {
+public class ShotDetailPresenterImpl implements ShotDetailPresenter {
 
     @Inject
     ShotDetailView mShotDetailView;
@@ -40,8 +43,14 @@ public class ShotDetailPresenterImpl<V extends ShotDetailView> extends BasePrese
     }
 
     @Override
-    public void onViewReady() {
+    public void onAttach() {
         getShot();
+    }
+
+    @Override
+    public void onDetach() {
+        compositeDisposable.dispose();
+        mShotDetailView=null;
     }
 
     @Override

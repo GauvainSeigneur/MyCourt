@@ -1,5 +1,8 @@
 package seigneur.gauvain.mycourt.data.repository;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
+
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -8,9 +11,11 @@ import javax.inject.Singleton;
 
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
+import io.reactivex.Notification;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.api.DribbbleService;
 import seigneur.gauvain.mycourt.data.local.dao.PinDao;
@@ -31,12 +36,19 @@ public class UserRepository {
     @Inject
     DribbbleService mDribbbleService;
 
+
+
     //used to manage UI -- see presenter
     public boolean isFetchFromDBSuccess=false;
     public boolean isFetchFromAPISuccess=false;
 
     @Inject
     public UserRepository(){}
+
+    //test
+    public LiveData<User> getUserLive() {
+        return mUserDao.getUserLive();
+    }
 
     public Observable<User> getUser(boolean applyResponseCache) {
         return Observable.concat(
@@ -46,6 +58,8 @@ public class UserRepository {
                 getUserFromAPI(applyResponseCache).
                         toObservable()
         )
+
+
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .materialize()

@@ -3,9 +3,8 @@ package seigneur.gauvain.mycourt.ui.shotDraft.view;
 import java.util.List;
 
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
-import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
 
-public interface ShotDraftView extends BaseMVPView {
+public interface ShotDraftView {
 
     /**
      * Stop refreshing UI

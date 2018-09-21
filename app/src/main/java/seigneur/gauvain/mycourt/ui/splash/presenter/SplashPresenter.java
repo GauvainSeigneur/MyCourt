@@ -1,11 +1,8 @@
 package seigneur.gauvain.mycourt.ui.splash.presenter;
 
-import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
-import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenter;
+import seigneur.gauvain.mycourt.ui.base.BasePresenter;
 
-public interface SplashPresenter<V extends BaseMVPView> extends BasePresenter<V> {
-
-    void onViewReady();
+public interface SplashPresenter extends BasePresenter {
 
     void onSignInClicked();
 

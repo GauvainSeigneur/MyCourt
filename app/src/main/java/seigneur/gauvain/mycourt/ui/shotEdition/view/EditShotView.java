@@ -1,10 +1,12 @@
 package seigneur.gauvain.mycourt.ui.shotEdition.view;
 
 import android.net.Uri;
+import android.support.annotation.Nullable;
 
-import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
+import seigneur.gauvain.mycourt.data.model.Shot;
+import seigneur.gauvain.mycourt.data.model.ShotDraft;
 
-public interface EditShotView extends BaseMVPView {
+public interface EditShotView {
 
     /**
      * show a menu which to publish or register the draft

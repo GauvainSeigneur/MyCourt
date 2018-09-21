@@ -4,19 +4,23 @@ import android.view.MenuItem;
 
 import javax.inject.Inject;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.model.Token;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.data.repository.TokenRepository;
-import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenterImpl;
 import seigneur.gauvain.mycourt.ui.main.view.MainView;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
 import timber.log.Timber;
 
-public class MainPresenterImpl<V extends MainView> extends BasePresenterImpl<V> implements
-        MainPresenter<V> {
+public class MainPresenterImpl implements MainPresenter {
+
+    @Inject
+    MainView mMainview;
 
     @Inject
     ConnectivityReceiver mConnectivityReceiver;
@@ -37,41 +41,40 @@ public class MainPresenterImpl<V extends MainView> extends BasePresenterImpl<V> 
     @Inject
     public MainPresenterImpl(){}
 
-   /* @Override
+    @Override
     public void onAttach() {
     }
-
     @Override
     public void onDetach() {
         compositeDisposable.dispose();
         mMainview=null;
-    }*/
+    }
 
     @Override
     public void onBottomNavItemSelected(int pos) {
-        getMvpView().showFragment(pos);
+        mMainview.showFragment(pos);
     }
 
     @Override
     public void onBottomNavItemReselected(int position) {
         //here - manage back on top, refresh ?
-        getMvpView().goBackAtStart(position);
+        mMainview.goBackAtStart(position);
     }
 
     @Override
     public void onAddFabclicked() {
         mTempDataRepository.setDraftCallingSource(Constants.SOURCE_FAB);
-        getMvpView().goToShotEdition();
+        mMainview.goToShotEdition();
     }
 
     @Override
     public void onReturnShotDrafted() {
-        getMvpView().showMessageShotDrafted();
+       mMainview.showMessageShotDrafted();
     }
 
     @Override
     public void onReturnShotPublished() {
-        getMvpView().showMessageShotPublished();
+        mMainview.showMessageShotPublished();
     }
 
     @Override
@@ -82,9 +85,9 @@ public class MainPresenterImpl<V extends MainView> extends BasePresenterImpl<V> 
     @Override
     public void onReturnNavigation(MenuItem item, int position) {
         if (item!=null &&position!=-1 && position>0)
-            getMvpView().goBackOnPrevItem(position-1);
+            mMainview.goBackOnPrevItem(position-1);
         else
-            getMvpView().closeActivity();
+            mMainview.closeActivity();
     }
 
     private void checkInternetConnection() {
@@ -129,7 +132,7 @@ public class MainPresenterImpl<V extends MainView> extends BasePresenterImpl<V> 
      * @param token - Token object
      */
     private void onTokenFetched(Token token) {
-        if (getMvpView()!=null) {
+        if (mMainview!=null) {
             Timber.d("token found");
             TokenRepository.accessToken = String.valueOf(token.getAccessToken());
         }

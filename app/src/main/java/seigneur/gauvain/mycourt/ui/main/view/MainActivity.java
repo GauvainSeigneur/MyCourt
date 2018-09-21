@@ -35,7 +35,7 @@ import seigneur.gauvain.mycourt.utils.FragmentStateManager;
 public class MainActivity extends BaseActivity implements MainView, HasSupportFragmentInjector {
 
     @Inject
-    MainPresenter<MainView> mMainPresenter;
+    MainPresenter mMainPresenter;
 
     @BindView(R.id.fragment_place_holder)
     FrameLayout mFragmentContainer;
@@ -63,7 +63,6 @@ public class MainActivity extends BaseActivity implements MainView, HasSupportFr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        mMainPresenter.onAttach(this);
         initFragmentManager(savedInstanceState);
         mNavigation.setOnNavigationItemSelectedListener(item -> {
             mItem=item;

@@ -53,6 +53,11 @@
         <activity
             android:name=".ui.pin.view.PinActivity"/>
 
+
+        <activity
+            android:name=".test.TestActivity">
+        </activity>
+
     </application>
 
 </manifest>

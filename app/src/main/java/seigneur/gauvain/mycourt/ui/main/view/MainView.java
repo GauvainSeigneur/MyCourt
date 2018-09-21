@@ -1,9 +1,7 @@
 package seigneur.gauvain.mycourt.ui.main.view;
 
 
-import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
-
-public interface MainView extends BaseMVPView {
+public interface MainView {
 
     /**
      * go back at the top of the fragment

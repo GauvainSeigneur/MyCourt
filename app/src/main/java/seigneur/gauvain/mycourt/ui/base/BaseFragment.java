@@ -27,6 +27,7 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        //use this sucks...
         if (mRootview == null) {
             mRootview = inflater.inflate(getFragmentLayout(), container, false );
             onCreateView(mRootview,savedInstanceState);

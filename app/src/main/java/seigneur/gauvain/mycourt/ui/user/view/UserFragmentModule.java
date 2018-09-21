@@ -26,18 +26,11 @@ public abstract class UserFragmentModule {
     @PerFragment
     abstract Fragment fragment(UserFragment userFragment);
 
-    /**
-     * Binds TestView into MainActivity
-     * @param userFragment
-     * @return userView
-     */
+
+    //as we do not injetc View inside presenter, we don't need to inject it.. thought the fragment
     /*@Binds
     @PerFragment
     abstract UserView userView(UserFragment userFragment);*/
-
-    @Binds
-    @PerFragment
-    abstract UserViewTest userView(UserFragment userFragment);
 
 
 }

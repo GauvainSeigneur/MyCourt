@@ -1,12 +1,11 @@
 package seigneur.gauvain.mycourt.ui.user.presenter;
 
-import seigneur.gauvain.mycourt.ui.base.mvp.BaseMVPView;
-import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenter;
+import seigneur.gauvain.mycourt.data.model.User;
+import seigneur.gauvain.mycourt.ui.base.BasePresenter;
 
-public interface UserPresenter<V extends BaseMVPView> extends BasePresenter<V> {
+public interface UserPresenter extends BasePresenter {
 
-    //Move inside BasePresenter after testing it
-    void onViewReady();
+    void getUser();
 
 }
 

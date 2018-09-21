@@ -1,14 +1,23 @@
 package seigneur.gauvain.mycourt.ui.user.view;
 
+import android.app.Activity;
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -28,11 +37,14 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.User;
-import seigneur.gauvain.mycourt.ui.base.BaseRetainedFragment;
+import seigneur.gauvain.mycourt.data.viewModel.UserViewModel;
 import seigneur.gauvain.mycourt.ui.user.presenter.UserPresenter;
+import seigneur.gauvain.mycourt.ui.user.presenter.UserPresenterImpl;
 import seigneur.gauvain.mycourt.ui.user.recyclerView.UserLinksAdapter;
 import timber.log.Timber;
 
@@ -42,10 +54,14 @@ import static seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp;
 /**
  * Created by gse on 22/11/2017.
  */
-public class UserFragment extends BaseRetainedFragment implements UserViewTest {
+public class UserFragment extends Fragment implements UserView {
 
     @Inject
-    UserPresenter<UserViewTest> mUserPresenter;
+    ViewModelProvider.Factory viewModelFactory;
+
+    private UserViewModel viewModel; //doesn"t need o inject this as is based on viewModel to get daata
+
+    UserPresenter mUserPresenter;
 
     @BindView(R.id.name)
     TextView name;
@@ -84,65 +100,84 @@ public class UserFragment extends BaseRetainedFragment implements UserViewTest {
 
     private int screenWidth;
 
-    /*
-     ************************************************************************************
-     * BaseRetainedFragment methods
-     * **********************************************************************************/
+    private Unbinder mUnbinder;
+    public View mRootview;
+
+    @SuppressWarnings("deprecation")
     @Override
-    protected boolean onInjectView() throws IllegalStateException {
-        //inject dependencies here
-        try {
-            Timber.d("onInjectView called");
+    public void onAttach(Activity activity) {
+        Timber.d("onAttach");
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             AndroidSupportInjection.inject(this);
-            return true;
-        } catch(IllegalStateException e) {
-            Timber.d("onInjectView exception");
-            //if return false it will ask again
-            return false;
         }
+        super.onAttach(activity);
     }
 
-    // View is ready, context is defined and dependencies are ready
     @Override
-    public void onViewInjected(View inRootView, Bundle inSavedInstanceState) {
-        super.onViewInjected(inRootView, inSavedInstanceState);
-        Timber.d("onViewInjected");
-        initMathData();
-        appBarLayout.addOnOffsetChangedListener(appBarOffsetListener);
-        mUserPresenter.onAttach(this);
+    public void onAttach(Context context) {
+        Timber.d("onAttach");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            AndroidSupportInjection.inject(this);
+        }
+        super.onAttach(context);
     }
-    /*
-     ************************************************************************************
-     * Fragment lifecycle methods
-     * **********************************************************************************/
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Timber.d("onCreate");
+        this.configurePresenter();
+        mUserPresenter.onAttach();
+        mUserPresenter.getUser();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        Timber.d("onCreateView");
+        mRootview = inflater.inflate(getFragmentLayout(), container, false );
+        mUnbinder= ButterKnife.bind(this, mRootview);
+        return mRootview;
+    }
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Timber.d("onViewCreated");
-        mUserPresenter.onViewReady();
+        initMathData();
+        appBarLayout.addOnOffsetChangedListener(appBarOffsetListener);
+        //start using presenter
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Timber.d("onActivityCreated");
+        mUserPresenter.getUser();
     }
 
 
     @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-
+    public void onPause() {
+        super.onPause();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        mUnbinder.unbind();
+        Timber.d("onDestroyView");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-       // mUserPresenter.onDetach();
+        Timber.d("onDestroy");
+        mUserPresenter.onDetach();
     }
-    /**
-     * BASE FRAGMENT METHODS
-     */
-    @Override
+
+
     protected int getFragmentLayout() {
         return R.layout.fragment_user;
     }
@@ -150,7 +185,7 @@ public class UserFragment extends BaseRetainedFragment implements UserViewTest {
     @Override
     public void showNoConnectionView(boolean visible) {
         if(visible) {
-            Toast.makeText(activity, "no connection", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "no connection", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -208,13 +243,24 @@ public class UserFragment extends BaseRetainedFragment implements UserViewTest {
 
     @Override
     public void showNoUserFoundView(boolean visible) {
-        Toast.makeText(activity, "no user available", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "no user available", Toast.LENGTH_SHORT).show();
     }
 
     /*
     *********************************************************************************
     * Internal methods
     *********************************************************************************/
+
+    // -----------------
+    // CONFIGURATION with presenter
+    // -----------------
+    private void configurePresenter() {
+        //initialize ViewModel
+        viewModel = ViewModelProviders.of(this, viewModelFactory).get(UserViewModel.class);
+        //initialize presenter with viewModel instance
+        mUserPresenter = new UserPresenterImpl(this, viewModel,this);
+    }
+
     /**
      * add to appbar a listener for scroll change in order to provide some
      * nice animation on scroll

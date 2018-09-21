@@ -68,7 +68,7 @@ import timber.log.Timber;
 public class EditShotActivity extends BaseActivity implements EditShotView {
 
     @Inject
-    EditShotPresenter<EditShotView> mEditShotPresenter;
+    EditShotPresenter mEditShotPresenter;
 
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -128,8 +128,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
         mShotTitleEditor.addTextChangedListener(titleWatcher);
         mTagEditor.addTextChangedListener(tagWtacher);
         mShotDescriptionEditor.addTextChangedListener(descriptionWatcher);
-        mEditShotPresenter.onAttach(this);
-        mEditShotPresenter.onViewReady();
+        mEditShotPresenter.onAttach();
     }
 
     @OnClick(R.id.fab_confirm)

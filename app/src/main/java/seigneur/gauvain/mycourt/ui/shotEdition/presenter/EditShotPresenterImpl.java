@@ -2,9 +2,13 @@ package seigneur.gauvain.mycourt.ui.shotEdition.presenter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.support.annotation.Nullable;
-
+import android.text.style.TtsSpan;
+import android.util.Log;
+import android.widget.Toast;
 import com.yalantis.ucrop.UCrop;
 import java.io.File;
 import java.util.ArrayList;
@@ -15,18 +19,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.HttpException;
 import retrofit2.Response;
+import retrofit2.http.Multipart;
+import seigneur.gauvain.mycourt.data.api.DribbbleService;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.ShotRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.di.scope.PerActivity;
-import seigneur.gauvain.mycourt.ui.base.mvp.BasePresenterImpl;
 import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotView;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
@@ -37,9 +49,10 @@ import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import timber.log.Timber;
 
 @PerActivity
-public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenterImpl<V> implements
-        EditShotPresenter<V> {
+public class EditShotPresenterImpl implements EditShotPresenter {
 
+    @Inject
+    EditShotView mEditShotView;
 
     @Inject
     ShotDraftRepository mShotDraftRepository;
@@ -71,6 +84,8 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
     private ShotDraft mShotDraft;
     private Shot mShot;
     private int mEditionMode;
+    //RX disposable
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     @Inject
     public EditShotPresenterImpl() {
@@ -80,10 +95,15 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
      * EditShotPresenter Implementation
      *************************************************************************/
     @Override
-    public void onViewReady() {
+    public void onAttach() {
         getSourceType();
     }
 
+    @Override
+    public void onDetach() {
+        compositeDisposable.dispose();
+        mEditShotView =null;
+    }
 
     @Override
     public void onTagLimitReached() {
@@ -93,13 +113,13 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
     @Override
     public void onImagePicked(Context context, int requestCode, int resultCode, Intent data) {
         if (requestCode==Constants.PICK_IMAGE_REQUEST) {
-            if (getMvpView()!=null) {
+            if (mEditShotView!=null) {
                 imagePickedUriSource = ImagePicker.getImageUriFromResult(context, resultCode, data);
                 imagePickedFileName = ImagePicker.getPickedImageName(context, imagePickedUriSource);
                 Timber.tag("007bond").d(imagePickedFileName);
                 imagePickedFormat= ImageUtils.getImageExtension(context, imagePickedUriSource);
                 int[] imageSize= ImageUtils.imagePickedWidthHeight(context, imagePickedUriSource, 0);
-                getMvpView().goToUCropActivity(imagePickedFormat, imagePickedUriSource,
+                mEditShotView.goToUCropActivity(imagePickedFormat, imagePickedUriSource,
                          imagePickedFileName, imageSize);
             }
         }
@@ -112,8 +132,8 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
             imageCroppedUri = UCrop.getOutput(data); //get Image Uri after being cropped
             Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
             isImageChanged=true;
-            if (getMvpView()!=null)
-                getMvpView().displayShotImagePreview(imageCroppedUri);
+            if (mEditShotView!=null)
+                mEditShotView.displayShotImagePreview(imageCroppedUri);
         } else if (resultCode == UCrop.RESULT_ERROR) {
             isImageChanged=false;
             final Throwable cropError = UCrop.getError(data);
@@ -124,7 +144,7 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
     @Override
     public void onPermissionGranted(Context context) {
         if (imageCroppedUri!=null) {
-            if (getMvpView()!=null) {
+            if (mEditShotView!=null) {
                 registerOrUpdateDraft(context, true);
             }
         }
@@ -132,25 +152,25 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
 
     @Override
     public void onPermissionDenied() {
-        if (getMvpView()!=null)
-            getMvpView().requestPermission();
+        if (mEditShotView!=null)
+            mEditShotView.requestPermission();
     }
 
     @Override
     public void onConfirmEditionClicked(boolean isFromFab) {
         createTagList(tempTagList());
-        if (getMvpView()!=null && isFromFab) //else is from the dialog called from onAbort method.
-            getMvpView().openConfirmMenu();
+        if (mEditShotView!=null && isFromFab) //else is from the dialog called from onAbort method.
+            mEditShotView.openConfirmMenu();
     }
 
     @Override
     public void onDraftShotClicked(Context context) {
         if (getTitle()==null || getTitle()!=null && getTitle().isEmpty())
-            getMvpView().showMessageEmptyTitle();
+            mEditShotView.showMessageEmptyTitle();
         else {
             if (imageCroppedUri!=null && imagePickedFormat!=null) {
-                if (getMvpView()!=null)
-                    getMvpView().checkPermissionExtStorage();
+                if (mEditShotView!=null)
+                    mEditShotView.checkPermissionExtStorage();
             } else {
                 registerOrUpdateDraft(context,false);
             }
@@ -178,9 +198,9 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
         //todo : check if user has started to write or download a pic
         //if yes : warn him
         //if no : do nothing but close activity
-       if (getMvpView() !=null) {
+       if (mEditShotView !=null) {
            if (isMenuOpen)
-               getMvpView().openConfirmMenu(); //in fact close it
+               mEditShotView.openConfirmMenu(); //in fact close it
            //else if (isStartEditing())
        }
 
@@ -188,11 +208,11 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
 
     @Override
     public void onIllustrationClicked() {
-        if (getMvpView()!=null) {
+        if (mEditShotView!=null) {
             if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT)
-                getMvpView().openImagePicker();
+                mEditShotView.openImagePicker();
             else
-                getMvpView().showImageNotUpdatable();
+                mEditShotView.showImageNotUpdatable();
         }
     }
 
@@ -223,7 +243,7 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
      *************************************************************************/
     // Check whether if the activity is opened from draft registered in database or other
     private void getSourceType() {
-        getCompositeDisposable()
+        compositeDisposable
                 .add(Single.just(mTempDataRepository.getDraftCallingSource())
                 .subscribe(
                         this::getDataFromSourceType,
@@ -245,8 +265,8 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
         } else if (source == Constants.SOURCE_FAB) {
             //User wishes to create a shot
             setEditionMode(Constants.EDIT_MODE_NEW_SHOT);
-            if (getMvpView()!=null) {
-                getMvpView().setUpShotCreationUI();
+            if (mEditShotView!=null) {
+                mEditShotView.setUpShotCreationUI();
             }
         } else {
             Timber.d("impossible error happened! wait wut?");
@@ -263,7 +283,7 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
      * get shot if data source equals == SOURCE_SHOT
      *************************************************************************/
     private void getShot() {
-        getCompositeDisposable().add(Single.just(mTempDataRepository.getShot())
+        compositeDisposable.add(Single.just(mTempDataRepository.getShot())
                 .subscribe(
                         this::manageShotInfo,
                         this::doOngetShotError
@@ -274,8 +294,8 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
 
     private void manageShotInfo(Shot shot) {
         mShot=shot;
-        if (getMvpView()!=null)
-            getMvpView().setUpShotEditionUI(shot, getEditMode());
+        if (mEditShotView!=null)
+            mEditShotView.setUpShotEditionUI(shot, getEditMode());
     }
 
     private void doOngetShotError(Throwable throwable) {
@@ -287,7 +307,7 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
      * get ShotDraft if data source equals == SOURCE_DRAFT
      *************************************************************************/
     private void getShotDraft() {
-        getCompositeDisposable().add(Single.just(mTempDataRepository.getShotDraft())
+        compositeDisposable.add(Single.just(mTempDataRepository.getShotDraft())
                 .subscribe(
                         this::manageShotDraftInfo,
                         this::doOnGetShotDraftError
@@ -298,8 +318,8 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
     private void manageShotDraftInfo(ShotDraft shotDraft) {
         setShotDraft(shotDraft);
         setEditionMode(shotDraft.getDraftType());
-        if (getMvpView()!=null)
-            getMvpView().setUpShotEditionUI(shotDraft,getEditMode());
+        if (mEditShotView!=null)
+            mEditShotView.setUpShotEditionUI(shotDraft,getEditMode());
     }
 
     private void doOnGetShotDraftError(Throwable throwable) {
@@ -320,7 +340,7 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
         //add to HashMap key and RequestBody
         HashMap<String, RequestBody> map = new HashMap<>();
         // executes the request
-        getCompositeDisposable().add(
+        compositeDisposable.add(
                 mShotRepository.publishANewShot(
                         map,
                         body,
@@ -384,7 +404,7 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
      * NETWORK OPERATION - UPDATE SHOT ON DRIBBBLE
      *************************************************************************/
     private void updateShot(String title, String desc, ArrayList<String> tags, boolean profile) {
-        getCompositeDisposable().add(
+        compositeDisposable.add(
                 mShotRepository.updateShot(
                         getShotId(),
                         title,
@@ -424,8 +444,8 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
         if (mSource==Constants.SOURCE_DRAFT)
             deleteDraft();
         else
-        if (getMvpView()!=null)
-            getMvpView().stopActivity();
+        if (mEditShotView!=null)
+            mEditShotView.stopActivity();
     }
     /*
      *************************************************************************
@@ -488,7 +508,7 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
      */
     private void storeDraftImage(String imageCroppedFormat, Uri croppedFileUri, Context context) {
         Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
-        getCompositeDisposable().add(mShotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
+        compositeDisposable.add(mShotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
                 .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t)) //todo : to comment this
                 .subscribe(
                         imageSaved -> saveDraftInDB(imageSaved, imageCroppedFormat),
@@ -524,7 +544,7 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
      * @param imageFormat - jpeg, png, gif
      */
     private void saveInfoDraft(@Nullable String imageUri,@Nullable String imageFormat) {
-        getCompositeDisposable().add(
+        compositeDisposable.add(
                 mShotDraftRepository.storeShotDraft(
                         createShotDraft(0,imageUri,imageFormat))
                         .subscribe(
@@ -540,7 +560,7 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
      * @param imageFormat - jpeg, png, gif
      */
     private void updateInfoDraft(@Nullable String imageUri, @Nullable String imageFormat) {
-        getCompositeDisposable().add(mShotDraftRepository.updateShotDraft(
+        compositeDisposable.add(mShotDraftRepository.updateShotDraft(
                 createShotDraft(mShotDraft.getId(),imageUri,imageFormat))
                 .subscribe(
                         this::onDraftSaved,
@@ -554,8 +574,8 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
      */
     private void onDraftSaved() {
         mTempDataRepository.setDraftsChanged(true);
-        if (getMvpView()!=null)
-            getMvpView().notifyPostSaved();
+        if (mEditShotView!=null)
+            mEditShotView.notifyPostSaved();
     }
 
     /**
@@ -570,7 +590,7 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
      * Delete draft after has been published or updated on Dribbble
      */
     private void deleteDraft() {
-        getCompositeDisposable().add(
+        compositeDisposable.add(
                 mShotDraftRepository.deleteDraft(mShotDraft.getId())
                         .subscribe(
                                 this::onDraftDeleted,
@@ -584,8 +604,8 @@ public class EditShotPresenterImpl<V extends EditShotView> extends BasePresenter
      */
     private void onDraftDeleted() {
         mTempDataRepository.setDraftsChanged(true);
-        if (getMvpView()!=null)
-            getMvpView().stopActivity();
+        if (mEditShotView!=null)
+            mEditShotView.stopActivity();
     }
 
     /**

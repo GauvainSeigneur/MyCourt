@@ -6,7 +6,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.ViewGroup;
 
 import seigneur.gauvain.mycourt.R;
-import timber.log.Timber;
 
 public abstract class FragmentStateManager {
     private static final String TAG = "FragmentStateManager";
@@ -32,7 +31,7 @@ public abstract class FragmentStateManager {
      * @param position
      * @return fragment at position
      */
-   /*public Fragment changeFragment(int position) {
+    public Fragment changeFragment(int position) {
         String tag = makeFragmentName(container.getId(), getItemId(position));
         FragmentTransaction fragmentTransaction = mFragmentManager
                 .beginTransaction()
@@ -40,10 +39,10 @@ public abstract class FragmentStateManager {
                         R.anim.frag_enter,
                         R.anim.frag_exit); //small animation like Google guidelines example
 
-
-          //If fragment manager doesn't have an instance of the fragment, get an instance
-          //and add it to the transaction. Else, attach the instance to transaction.
-
+        /*
+          If fragment manager doesn't have an instance of the fragment, get an instance
+          and add it to the transaction. Else, attach the instance to transaction.
+         */
         Fragment fragment = mFragmentManager.findFragmentByTag(tag);
         if (fragment == null) {
             fragment = getItem(position);
@@ -61,54 +60,10 @@ public abstract class FragmentStateManager {
         // Set fragment as primary navigator for child manager back stack to be handled by system
         fragmentTransaction.setPrimaryNavigationFragment(fragment);
         fragmentTransaction.setReorderingAllowed(true);
-        //todo - find a fix -  for now added by GSE to avoid application crash....
-        try {
-            fragmentTransaction.commitNowAllowingStateLoss();
-        } catch (Exception e) {
-            Timber.d(e);
-        }
-
-        return fragment;
-    }*/
-
-    public Fragment changeFragment(int position) {
-        String tag = makeFragmentName(container.getId(), getItemId(position));
-        FragmentTransaction fragmentTransaction = mFragmentManager
-                .beginTransaction()
-                .setCustomAnimations(
-                        R.anim.frag_enter,
-                        R.anim.frag_exit); //small animation like Google guidelines example
-
-
-        //If fragment manager doesn't have an instance of the fragment, get an instance
-        //and add it to the transaction. Else, show the fragment.
-        Fragment fragment = mFragmentManager.findFragmentByTag(tag);
-        if (fragment == null) {
-            fragment = getItem(position);
-            fragmentTransaction.add(container.getId(), fragment, tag);
-        } else {
-            fragmentTransaction.show(fragment);
-        }
-
-        // hide existing primary fragment
-        Fragment curFrag = mFragmentManager.getPrimaryNavigationFragment();
-        if (curFrag != null) {
-            fragmentTransaction.hide(curFrag);
-        }
-
-        // Set fragment as primary navigator for child manager back stack to be handled by system
-        fragmentTransaction.setPrimaryNavigationFragment(fragment);
-        fragmentTransaction.setReorderingAllowed(true);
-        //todo - find a fix -  for now added by GSE to avoid application crash....
-        try {
-            fragmentTransaction.commitNowAllowingStateLoss();
-        } catch (Exception e) {
-            Timber.d(e);
-        }
+        fragmentTransaction.commitNowAllowingStateLoss();
 
         return fragment;
     }
-
 
     /**
      * Removes Fragment from Fragment Manager and clears all saved states. Call to changeFragment()
@@ -118,7 +73,8 @@ public abstract class FragmentStateManager {
      */
     public void removeFragment(int position) {
         FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-        fragmentTransaction.remove(mFragmentManager.findFragmentByTag(makeFragmentName(container.getId(), getItemId(position))));
+        fragmentTransaction.remove(mFragmentManager
+                .findFragmentByTag(makeFragmentName(container.getId(), getItemId(position))));
         fragmentTransaction.commitNowAllowingStateLoss();
     }
 
