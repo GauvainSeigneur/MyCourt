@@ -3,8 +3,6 @@ package seigneur.gauvain.mycourt.di.modules;
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
 import dagger.android.support.AndroidSupportInjectionModule;
-import seigneur.gauvain.mycourt.test.TestActivity;
-import seigneur.gauvain.mycourt.test.modules.TestActivityModule;
 import seigneur.gauvain.mycourt.ui.pin.view.PinActivity;
 import seigneur.gauvain.mycourt.ui.pin.view.PinActivityModule;
 import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotActivity;
