@@ -25,7 +25,7 @@ public class UserViewModel extends ViewModel {
     ConnectivityReceiver mConnectivityReceiver;
 
     //LiveData to keep a reference of it alive through ViewModel LifeCycle
-    private LiveData<User> mUser;
+    //private LiveData<User> mUser;
     //for using mutable live data : https://medium.com/@cdmunoz/offline-first-android-app-with-mvvm-dagger2-rxjava-livedata-and-room-part-4-2b476142e769
     //Mutable livedata to post and set value
     private MutableLiveData<User> userMutableLiveDatas = new MutableLiveData<>();
@@ -50,8 +50,8 @@ public class UserViewModel extends ViewModel {
                 userRepo.getUser(applyResponseCache)
                         .subscribe(
                                 user -> {
-                                    userMutableLiveDatas.postValue(user); //post value for presenter
-                                    mUser = userMutableLiveDatas; //get a reference of user fetched so you doesn't perform  another request in Oncreate during configuration change
+                                     userMutableLiveDatas.setValue(user); //post value for presenter
+                                     //mUser = userMutableLiveDatas; //get a reference of user fetched so you doesn't perform  another request in Oncreate during configuration change
                                     Timber.d("user found");
                                 },
                                 t -> {
@@ -72,7 +72,7 @@ public class UserViewModel extends ViewModel {
     //
     public void init() {
         //use livedata
-        if (this.mUser != null) {
+        if (this.getUserMutableLiveDatas().getValue() != null) {
             Timber.d("user not null, do not perform another request...");
             return;
         }
