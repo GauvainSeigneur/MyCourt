@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoMap;
+import seigneur.gauvain.mycourt.data.viewModel.ShotDraftViewModel;
 import seigneur.gauvain.mycourt.data.viewModel.UserViewModel;
 import seigneur.gauvain.mycourt.di.scope.ViewModelKey;
 import seigneur.gauvain.mycourt.data.viewModel.FactoryViewModel;
@@ -21,6 +22,11 @@ public abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(UserViewModel.class)
     abstract ViewModel binduserViewModel(UserViewModel userViewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ShotDraftViewModel.class)
+    abstract ViewModel bindShotDraftViewModel(ShotDraftViewModel shotDraftViewModel);
 
     @Binds
     abstract ViewModelProvider.Factory bindViewModelFactory(FactoryViewModel factory);
