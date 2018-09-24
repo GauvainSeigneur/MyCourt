@@ -43,13 +43,6 @@ dependencies {
     implementation "android.arch.persistence.room:rxjava2:$archVersion"
     // ViewModel and LiveData
     implementation "android.arch.lifecycle:extensions:$archVersion"
-    // alternatively - just ViewModel
-    implementation "android.arch.lifecycle:viewmodel:$archVersion" // use -ktx for Kotlin
-    // alternatively - just LiveData
-    implementation "android.arch.lifecycle:livedata:$archVersion"
-    // alternatively - Lifecycles only (no ViewModel or LiveData).
-    //     Support library depends on this lightweight import
-   // implementation "android.arch.lifecycle:runtime:$lifecycle_version"
     //annotationProcessor "android.arch.lifecycle:compiler:$lifecycle_version" // use kapt for Kotlin
     // alternately - if using Java8, use the following instead of compiler
     implementation "android.arch.lifecycle:common-java8:$archVersion"
