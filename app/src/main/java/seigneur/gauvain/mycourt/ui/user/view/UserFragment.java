@@ -1,6 +1,7 @@
 package seigneur.gauvain.mycourt.ui.user.view;
 
 import android.app.Activity;
+import android.app.Application;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -55,6 +56,9 @@ import static seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp;
  * Created by gse on 22/11/2017.
  */
 public class UserFragment extends Fragment implements UserView {
+
+    @Inject
+    Application mApplication;
 
     @Inject
     ViewModelProvider.Factory viewModelFactory;
@@ -138,6 +142,7 @@ public class UserFragment extends Fragment implements UserView {
         Timber.d("onCreateView");
         mRootview = inflater.inflate(getFragmentLayout(), container, false );
         mUnbinder= ButterKnife.bind(this, mRootview);
+        initMathData();
         return mRootview;
     }
 
@@ -145,8 +150,9 @@ public class UserFragment extends Fragment implements UserView {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Timber.d("onViewCreated");
-        initMathData();
+
         appBarLayout.addOnOffsetChangedListener(appBarOffsetListener);
+
         //start using presenter
     }
 
@@ -208,7 +214,7 @@ public class UserFragment extends Fragment implements UserView {
 
     @Override
     public void setUserPicture(User user) {
-        Glide.with(getContext())
+        Glide.with(mApplication)
                 .load(Uri.parse(user.getAvatar_url()))
                 .apply(new RequestOptions()
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
