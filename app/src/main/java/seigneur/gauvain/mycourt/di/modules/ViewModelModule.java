@@ -7,6 +7,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoMap;
 import seigneur.gauvain.mycourt.data.viewModel.ShotDraftViewModel;
+import seigneur.gauvain.mycourt.ui.shotEdition.view.ShotEditionViewModel;
 import seigneur.gauvain.mycourt.data.viewModel.UserViewModel;
 import seigneur.gauvain.mycourt.di.scope.ViewModelKey;
 import seigneur.gauvain.mycourt.data.viewModel.FactoryViewModel;
@@ -27,6 +28,12 @@ public abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(ShotDraftViewModel.class)
     abstract ViewModel bindShotDraftViewModel(ShotDraftViewModel shotDraftViewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ShotEditionViewModel.class)
+    abstract ViewModel bibndShotEditionViewModel(ShotEditionViewModel shotEditionViewModel);
+
 
     @Binds
     abstract ViewModelProvider.Factory bindViewModelFactory(FactoryViewModel factory);

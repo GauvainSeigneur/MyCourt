@@ -39,7 +39,7 @@ public interface EditShotPresenter extends BasePresenter {
      * @param resultCode   - needs to be ok
      * @param data         - source of the image picked
      */
-    void onImageCropped(int requestCode,int resultCode, Intent data);
+    void onImageCropped(int requestCode, int resultCode, Intent data);
 
     /**
      * User wants to copy image cropped in external storage. Need to check permission

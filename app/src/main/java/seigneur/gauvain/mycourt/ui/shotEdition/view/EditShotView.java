@@ -24,7 +24,7 @@ public interface EditShotView {
      * @param editMode  - see Constants file
      */
     void setUpShotEditionUI(Object o,
-                           int editMode);
+                            int editMode);
 
     /**
      * User wants to create a shot from scratch

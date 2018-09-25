@@ -4,10 +4,11 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -20,7 +21,6 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -38,8 +38,6 @@ import com.bumptech.glide.request.target.Target;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,12 +48,14 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import dagger.android.AndroidInjection;
 import seigneur.gauvain.mycourt.R;
-import seigneur.gauvain.mycourt.data.api.DribbbleService;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
-import seigneur.gauvain.mycourt.data.local.dao.PostDao;
+import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.ShotRepository;
+import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.ui.base.BaseActivity;
+import seigneur.gauvain.mycourt.ui.shotEdition.presenter.EditShotPresenterImpl;
+import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.ImagePicker;
 import seigneur.gauvain.mycourt.ui.shotEdition.presenter.EditShotPresenter;
@@ -68,7 +68,26 @@ import timber.log.Timber;
 public class EditShotActivity extends BaseActivity implements EditShotView {
 
     @Inject
-    EditShotPresenter mEditShotPresenter;
+    ViewModelProvider.Factory viewModelFactory;
+
+    @Inject
+    ShotDraftRepository mShotDraftRepository;
+
+    @Inject
+    NetworkErrorHandler mNetworkErrorHandler;
+
+    @Inject
+    ConnectivityReceiver mConnectivityReceiver;
+
+    @Inject
+    ShotRepository mShotRepository;
+
+    @Inject
+    TempDataRepository mTempDataRepository;
+
+    private ShotEditionViewModel viewModel; //doesn"t need o inject this as is based on viewModel to get daata
+
+    private EditShotPresenter mEditShotPresenter;
 
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -120,15 +139,34 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_shot);
         ButterKnife.bind(this);
+        AndroidInjection.inject(this);
+        viewModel = ViewModelProviders.of(this, viewModelFactory).get(ShotEditionViewModel.class);
+        mEditShotPresenter =new EditShotPresenterImpl(
+                this,
+                this,
+                viewModel,
+                mShotDraftRepository,mNetworkErrorHandler, mConnectivityReceiver,
+                mShotRepository, mTempDataRepository);
+
+        mEditShotPresenter.onAttach();
+        /*viewModel.mutableImageCroppedUri() //
+                .observe(
+                        this,
+                        imageCroppedUri -> {
+                            if (imageCroppedUri==null) {
+                                Toast.makeText(this, "uri null", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(this, "uri changed:"+imageCroppedUri, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                );*/
         //editor must be set before presenter first method to check text change!
         mShotTitleEditor.addTextChangedListener(titleWatcher);
         mTagEditor.addTextChangedListener(tagWtacher);
         mShotDescriptionEditor.addTextChangedListener(descriptionWatcher);
-        mEditShotPresenter.onAttach();
     }
 
     @OnClick(R.id.fab_confirm)
@@ -162,6 +200,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
             if (requestCode== Constants.PICK_IMAGE_REQUEST)
                 mEditShotPresenter.onImagePicked(this, requestCode, resultCode, data);
             else
+                //viewModel.mutableImageCroppedUri().setValue(UCrop.getOutput(data)); //this way, the ViewModel keep the ref of the value , so maye be add the VieModel as a parameter of presenter and all injected dependencies too
                 mEditShotPresenter.onImageCropped(requestCode,resultCode, data);
         }
     }

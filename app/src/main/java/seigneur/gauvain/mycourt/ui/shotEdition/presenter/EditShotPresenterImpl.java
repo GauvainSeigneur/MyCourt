@@ -1,14 +1,11 @@
 package seigneur.gauvain.mycourt.ui.shotEdition.presenter;
 
+import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
-import android.provider.OpenableColumns;
 import android.support.annotation.Nullable;
-import android.text.style.TtsSpan;
-import android.util.Log;
-import android.widget.Toast;
+
 import com.yalantis.ucrop.UCrop;
 import java.io.File;
 import java.util.ArrayList;
@@ -17,27 +14,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.inject.Inject;
+
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.HttpException;
 import retrofit2.Response;
-import retrofit2.http.Multipart;
-import seigneur.gauvain.mycourt.data.api.DribbbleService;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.ShotRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
+import seigneur.gauvain.mycourt.ui.shotEdition.view.ShotEditionViewModel;
 import seigneur.gauvain.mycourt.di.scope.PerActivity;
 import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotView;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
@@ -51,29 +41,20 @@ import timber.log.Timber;
 @PerActivity
 public class EditShotPresenterImpl implements EditShotPresenter {
 
-    @Inject
-    EditShotView mEditShotView;
+    private EditShotView mEditShotView;
+    private LifecycleOwner mLifecycleOwner;
+    private  ShotEditionViewModel mShotEditionViewModel;
+    private ShotDraftRepository mShotDraftRepository;
+    private NetworkErrorHandler mNetworkErrorHandler;
+    private ConnectivityReceiver mConnectivityReceiver;
+    private ShotRepository mShotRepository;
+    private TempDataRepository mTempDataRepository; //may be this one could be removed in future
 
-    @Inject
-    ShotDraftRepository mShotDraftRepository;
-
-    @Inject
-    NetworkErrorHandler mNetworkErrorHandler;
-
-    @Inject
-    ConnectivityReceiver mConnectivityReceiver;
-
-    @Inject
-    ShotRepository mShotRepository;
-
-    @Inject
-    TempDataRepository mTempDataRepository;
-
-    //Manage Image picking and cropping
+    //These infos must be maanaged by the viewModel only
     private Uri imagePickedUriSource = null;
     private String imagePickedFileName = null;
     private String imagePickedFormat = null;
-    private Uri imageCroppedUri = null;
+    //private Uri imageCroppedUri = null;
     private boolean isImageChanged=false;
     //Manage data
     private int mSource;
@@ -87,8 +68,34 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     //RX disposable
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    @Inject
-    public EditShotPresenterImpl() {
+    /**
+     * Constructor
+     * Presenter is not injected as I don"t know how inject ViewModel in it correctly
+     * @param editShotView
+     * @param lifecycleOwner
+     * @param shotEditionViewModel
+     * @param shotDraftRepository
+     * @param networkErrorHandler
+     * @param connectivityReceiver
+     * @param shotRepository
+     * @param tempDataRepository
+     */
+    public EditShotPresenterImpl(EditShotView editShotView,
+                                 LifecycleOwner lifecycleOwner,
+                                 ShotEditionViewModel shotEditionViewModel,
+                                 ShotDraftRepository shotDraftRepository,
+                                 NetworkErrorHandler networkErrorHandler,
+                                 ConnectivityReceiver connectivityReceiver,
+                                 ShotRepository shotRepository,
+                                 TempDataRepository tempDataRepository) {
+        this.mEditShotView=editShotView;
+        this.mLifecycleOwner=lifecycleOwner;
+        this.mShotEditionViewModel=shotEditionViewModel;
+        this.mShotDraftRepository=shotDraftRepository;
+        this.mNetworkErrorHandler=networkErrorHandler;
+        this.mConnectivityReceiver=connectivityReceiver;
+        this.mShotRepository=shotRepository;
+        this.mTempDataRepository=tempDataRepository;
     }
 
     /**************************************************************************
@@ -97,6 +104,17 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     @Override
     public void onAttach() {
         getSourceType();
+        //Observes ViewModel datas
+
+        mShotEditionViewModel.getImageCroppedUri() //
+                .observe(
+                        mLifecycleOwner,
+                        uri -> {
+                            Timber.tag("viewModelTest").d("uri changed: "+uri);
+                            if (mEditShotView!=null)
+                                mEditShotView.displayShotImagePreview(uri);
+                        }
+                );
     }
 
     @Override
@@ -129,11 +147,14 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     @Override
     public void onImageCropped(int requestCode, int resultCode, Intent data) {
         if (requestCode== UCrop.REQUEST_CROP) {
-            imageCroppedUri = UCrop.getOutput(data); //get Image Uri after being cropped
-            Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
+            mShotEditionViewModel.mutableImageCroppedUri().setValue(UCrop.getOutput(data));
+           // imageCroppedUri = UCrop.getOutput(data); //get Image Uri after being cropped
+            //Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
             isImageChanged=true;
-            if (mEditShotView!=null)
-                mEditShotView.displayShotImagePreview(imageCroppedUri);
+            //todo use this in on attach... with a observer
+           /* if (mEditShotView!=null)
+                //mEditShotView.displayShotImagePreview(imageCroppedUri);
+                mEditShotView.displayShotImagePreview(mShotEditionViewModel.getImageCroppedUri().getValue());*/
         } else if (resultCode == UCrop.RESULT_ERROR) {
             isImageChanged=false;
             final Throwable cropError = UCrop.getError(data);
@@ -143,7 +164,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     @Override
     public void onPermissionGranted(Context context) {
-        if (imageCroppedUri!=null) {
+        //if (imageCroppedUri!=null) {
+        if (mShotEditionViewModel.getImageCroppedUri().getValue()!=null) {
             if (mEditShotView!=null) {
                 registerOrUpdateDraft(context, true);
             }
@@ -168,7 +190,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         if (getTitle()==null || getTitle()!=null && getTitle().isEmpty())
             mEditShotView.showMessageEmptyTitle();
         else {
-            if (imageCroppedUri!=null && imagePickedFormat!=null) {
+            //if (imageCroppedUri!=null && imagePickedFormat!=null) {
+            if (mShotEditionViewModel.getImageCroppedUri().getValue()!=null && imagePickedFormat!=null) {
                 if (mEditShotView!=null)
                     mEditShotView.checkPermissionExtStorage();
             } else {
@@ -487,14 +510,16 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     private void registerOrUpdateDraft(Context context,boolean isRegisteringImage) {
         if (mSource==Constants.SOURCE_DRAFT) {
             if (isRegisteringImage)
-                storeDraftImage(imagePickedFormat, imageCroppedUri, context);
+                storeDraftImage(imagePickedFormat, mShotEditionViewModel.getImageCroppedUri().getValue(), context);
+                //storeDraftImage(imagePickedFormat, imageCroppedUri, context);
             else
                 updateInfoDraft(mShotDraft.getImageUrl(), mShotDraft.getImageFormat());
         } else if (mSource==Constants.SOURCE_SHOT) {
             saveInfoDraft(mShot.getImageUrl(), null);
         } else if (mSource==Constants.SOURCE_FAB) {
             if (isRegisteringImage)
-                storeDraftImage(imagePickedFormat,imageCroppedUri,context);
+                //storeDraftImage(imagePickedFormat,imageCroppedUri,context);
+                storeDraftImage(imagePickedFormat,mShotEditionViewModel.getImageCroppedUri().getValue(),context);
             else
                 saveInfoDraft( null, null);
         }
@@ -507,7 +532,7 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      * @param context - EditShot Activity
      */
     private void storeDraftImage(String imageCroppedFormat, Uri croppedFileUri, Context context) {
-        Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
+        Timber.tag("imageCroppedUri").d(mShotEditionViewModel.getImageCroppedUri().getValue().toString());
         compositeDisposable.add(mShotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
                 .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t)) //todo : to comment this
                 .subscribe(
@@ -699,18 +724,21 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     }
 
     private Uri getImageUri() {
+        //todo - can be change with ViewModel
         if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
             if(mShotDraft!=null && mShotDraft.getImageUrl()!=null) {
                 if (!isImageChanged)
                     return Uri.parse(mShotDraft.getImageUrl());
                 else
-                    return imageCroppedUri;
+                    //return imageCroppedUri;
+                    return  mShotEditionViewModel.getImageCroppedUri().getValue();
             } else {
                 //if it is not a ShotDraft it is a shot
                 return Uri.parse(mShot.getImageUrl());
             }
         } else {
-            return imageCroppedUri;
+            //return imageCroppedUri;
+            return mShotEditionViewModel.getImageCroppedUri().getValue();
         }
     }
 
