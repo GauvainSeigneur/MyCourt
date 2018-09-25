@@ -23,7 +23,12 @@ import timber.log.Timber;
 
 public class ShotEditionViewModel extends ViewModel {
 
-    private MutableLiveData<Uri> imageCroppedUri =new MutableLiveData<>();
+    //Image data
+    public MutableLiveData<Uri> imageCroppedUri =new MutableLiveData<>();
+    public MutableLiveData<String> imagePickedFormat = new MutableLiveData<>();
+    public MutableLiveData<Boolean> isImageChanged = new MutableLiveData<>();
+    //Edition mode data
+    public MutableLiveData<Integer> mSource = new MutableLiveData<>();
 
 
     @Inject
@@ -37,14 +42,22 @@ public class ShotEditionViewModel extends ViewModel {
 
     /*
      *************************************************************************
-     * GETTER AND SETTER
+     * GETTER for presenter
      *************************************************************************/
-    public MutableLiveData<Uri> mutableImageCroppedUri() {
-        return imageCroppedUri;
+    public LiveData<String> getImagePickedFormat() {
+        return imagePickedFormat;
     }
 
     public LiveData<Uri> getImageCroppedUri() {
         return imageCroppedUri;
+    }
+
+    public LiveData<Boolean> getImageChanged() {
+        return isImageChanged;
+    }
+
+    public LiveData<Integer> getSource() {
+        return mSource;
     }
 
 }

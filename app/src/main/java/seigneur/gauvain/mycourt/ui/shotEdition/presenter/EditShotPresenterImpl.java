@@ -41,6 +41,7 @@ import timber.log.Timber;
 @PerActivity
 public class EditShotPresenterImpl implements EditShotPresenter {
 
+    //Dependencies
     private EditShotView mEditShotView;
     private LifecycleOwner mLifecycleOwner;
     private  ShotEditionViewModel mShotEditionViewModel;
@@ -50,14 +51,9 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     private ShotRepository mShotRepository;
     private TempDataRepository mTempDataRepository; //may be this one could be removed in future
 
-    //These infos must be maanaged by the viewModel only
-    private Uri imagePickedUriSource = null;
-    private String imagePickedFileName = null;
-    private String imagePickedFormat = null;
-    //private Uri imageCroppedUri = null;
-    private boolean isImageChanged=false;
+    //Data, these info have to be managed by ViewModel
     //Manage data
-    private int mSource;
+    //private int mSource;
     private String mTags;
     private ArrayList<String> mTagList;
     private String mShotTitle;
@@ -104,8 +100,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     @Override
     public void onAttach() {
         getSourceType();
-        //Observes ViewModel datas
 
+        //Observes ViewModel datas to display last value on UI
         mShotEditionViewModel.getImageCroppedUri() //
                 .observe(
                         mLifecycleOwner,
@@ -132,13 +128,17 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     public void onImagePicked(Context context, int requestCode, int resultCode, Intent data) {
         if (requestCode==Constants.PICK_IMAGE_REQUEST) {
             if (mEditShotView!=null) {
-                imagePickedUriSource = ImagePicker.getImageUriFromResult(context, resultCode, data);
-                imagePickedFileName = ImagePicker.getPickedImageName(context, imagePickedUriSource);
+                Uri imagePickedUriSource = ImagePicker.getImageUriFromResult(context, resultCode, data);
+                String imagePickedFileName = ImagePicker.getPickedImageName(context, imagePickedUriSource);
                 Timber.tag("007bond").d(imagePickedFileName);
-                imagePickedFormat= ImageUtils.getImageExtension(context, imagePickedUriSource);
+                mShotEditionViewModel.imagePickedFormat.setValue(ImageUtils.getImageExtension(context, imagePickedUriSource));
+                //imagePickedFormat= ImageUtils.getImageExtension(context, imagePickedUriSource);
                 int[] imageSize= ImageUtils.imagePickedWidthHeight(context, imagePickedUriSource, 0);
-                mEditShotView.goToUCropActivity(imagePickedFormat, imagePickedUriSource,
-                         imagePickedFileName, imageSize);
+                mEditShotView.goToUCropActivity(
+                        mShotEditionViewModel.getImagePickedFormat().getValue(),
+                        imagePickedUriSource,
+                         imagePickedFileName,
+                        imageSize);
             }
         }
     }
@@ -147,16 +147,12 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     @Override
     public void onImageCropped(int requestCode, int resultCode, Intent data) {
         if (requestCode== UCrop.REQUEST_CROP) {
-            mShotEditionViewModel.mutableImageCroppedUri().setValue(UCrop.getOutput(data));
-           // imageCroppedUri = UCrop.getOutput(data); //get Image Uri after being cropped
-            //Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
-            isImageChanged=true;
-            //todo use this in on attach... with a observer
-           /* if (mEditShotView!=null)
-                //mEditShotView.displayShotImagePreview(imageCroppedUri);
-                mEditShotView.displayShotImagePreview(mShotEditionViewModel.getImageCroppedUri().getValue());*/
+            mShotEditionViewModel.imageCroppedUri.setValue(UCrop.getOutput(data));
+            mShotEditionViewModel.isImageChanged.setValue(true);
+            //isImageChanged=true;
         } else if (resultCode == UCrop.RESULT_ERROR) {
-            isImageChanged=false;
+            //isImageChanged=false;
+            mShotEditionViewModel.isImageChanged.setValue(false);
             final Throwable cropError = UCrop.getError(data);
             Timber.d(cropError);
         }
@@ -191,7 +187,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
             mEditShotView.showMessageEmptyTitle();
         else {
             //if (imageCroppedUri!=null && imagePickedFormat!=null) {
-            if (mShotEditionViewModel.getImageCroppedUri().getValue()!=null && imagePickedFormat!=null) {
+            if (mShotEditionViewModel.getImageCroppedUri().getValue()!=null &&
+                    mShotEditionViewModel.getImagePickedFormat().getValue()!=null) {
                 if (mEditShotView!=null)
                     mEditShotView.checkPermissionExtStorage();
             } else {
@@ -276,7 +273,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     }
 
     private void getDataFromSourceType(int source) {
-        mSource= source;
+        mShotEditionViewModel.mSource.setValue(source);
+        //mSource= source;
         Timber.d("calling source: " +source);
         if (source == Constants.SOURCE_DRAFT) {
             //user click on a saved shotdraft
@@ -298,7 +296,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     private void manageSourceTypeError(Throwable throwable) {
         Timber.d(throwable);
-        mSource=-1;
+        //mSource=-1;
+        mShotEditionViewModel.mSource.setValue(-1); //todo - check this!
     }
 
     /*
@@ -464,7 +463,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      * manage UI and DB items on Post/Updated Succeed
      */
     private void onPublishOrUpdateSucceed() {
-        if (mSource==Constants.SOURCE_DRAFT)
+        if (mShotEditionViewModel.getSource().getValue()!=null &&
+                mShotEditionViewModel.getSource().getValue()==Constants.SOURCE_DRAFT)
             deleteDraft();
         else
         if (mEditShotView!=null)
@@ -508,18 +508,26 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      * DB OPERATIONS - REGISTER OR UPDATE SHOTDRAFT
      *************************************************************************/
     private void registerOrUpdateDraft(Context context,boolean isRegisteringImage) {
-        if (mSource==Constants.SOURCE_DRAFT) {
+        if (mShotEditionViewModel.getSource().getValue()!=null &&
+                mShotEditionViewModel.getSource().getValue()==Constants.SOURCE_DRAFT) {
             if (isRegisteringImage)
-                storeDraftImage(imagePickedFormat, mShotEditionViewModel.getImageCroppedUri().getValue(), context);
+                storeDraftImage(
+                        mShotEditionViewModel.getImagePickedFormat().getValue(),
+                        mShotEditionViewModel.getImageCroppedUri().getValue(),
+                        context);
                 //storeDraftImage(imagePickedFormat, imageCroppedUri, context);
             else
                 updateInfoDraft(mShotDraft.getImageUrl(), mShotDraft.getImageFormat());
-        } else if (mSource==Constants.SOURCE_SHOT) {
+        } else if (mShotEditionViewModel.getSource().getValue()!=null &&
+                mShotEditionViewModel.getSource().getValue()==Constants.SOURCE_SHOT) {
             saveInfoDraft(mShot.getImageUrl(), null);
-        } else if (mSource==Constants.SOURCE_FAB) {
+        } else if (mShotEditionViewModel.getSource().getValue()!=null &&
+                mShotEditionViewModel.getSource().getValue()==Constants.SOURCE_FAB) {
             if (isRegisteringImage)
                 //storeDraftImage(imagePickedFormat,imageCroppedUri,context);
-                storeDraftImage(imagePickedFormat,mShotEditionViewModel.getImageCroppedUri().getValue(),context);
+                storeDraftImage(mShotEditionViewModel.getImagePickedFormat().getValue(),
+                        mShotEditionViewModel.getImageCroppedUri().getValue(),
+                        context);
             else
                 saveInfoDraft( null, null);
         }
@@ -548,7 +556,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      * @param imageCroppedFormat - jpeg, png, gif
      */
     private void saveDraftInDB(String imageStorageURL,String imageCroppedFormat)  {
-        if (mSource==Constants.SOURCE_DRAFT) {
+        if (mShotEditionViewModel.getSource().getValue()!=null &&
+                mShotEditionViewModel.getSource().getValue()==Constants.SOURCE_DRAFT) {
             updateInfoDraft(imageStorageURL,imageCroppedFormat);
         } else {
             saveInfoDraft(imageStorageURL,imageCroppedFormat);
@@ -727,7 +736,9 @@ public class EditShotPresenterImpl implements EditShotPresenter {
         //todo - can be change with ViewModel
         if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
             if(mShotDraft!=null && mShotDraft.getImageUrl()!=null) {
-                if (!isImageChanged)
+                if (mShotEditionViewModel.getImageChanged()!=null &&
+                        mShotEditionViewModel.getImageChanged().getValue()!=null &&
+                        !mShotEditionViewModel.getImageChanged().getValue())
                     return Uri.parse(mShotDraft.getImageUrl());
                 else
                     //return imageCroppedUri;
@@ -743,16 +754,22 @@ public class EditShotPresenterImpl implements EditShotPresenter {
     }
 
     private String getImageFormat() {
-        if(!isImageChanged && mShotDraft!=null && mShotDraft.getImageFormat()!=null)
+        if(mShotEditionViewModel.getImageChanged()!=null &&
+                mShotEditionViewModel.getImageChanged().getValue()!=null &&
+                !mShotEditionViewModel.getImageChanged().getValue() &&
+                mShotDraft!=null && mShotDraft.getImageFormat()!=null)
             return mShotDraft.getImageFormat();
         else
-            return imagePickedFormat;
+            return mShotEditionViewModel.getImagePickedFormat().getValue();
     }
-    //Todo - manage this from UI
+
+    //Todo - following methods are not good, manage this in another way
     private boolean getProfile(){
-        if(mSource==Constants.SOURCE_SHOT)
+        if(mShotEditionViewModel.getSource().getValue()!=null &&
+                mShotEditionViewModel.getSource().getValue()==Constants.SOURCE_SHOT)
             return mShot.isLow_profile();
-        if(mSource==Constants.SOURCE_DRAFT)
+        if(mShotEditionViewModel.getSource().getValue()!=null &&
+                mShotEditionViewModel.getSource().getValue()==Constants.SOURCE_DRAFT)
             return mShotDraft.isLowProfile();
         else
             return false;
@@ -760,9 +777,11 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     //Todo - manage this from UI (only of new draft)
     private Date getDateOfPublication(){
-        if(mSource==Constants.SOURCE_SHOT)
+        if(mShotEditionViewModel.getSource().getValue()!=null &&
+                mShotEditionViewModel.getSource().getValue()==Constants.SOURCE_SHOT)
             return mShot.getPublishDate();
-        if(mSource==Constants.SOURCE_DRAFT)
+        if(mShotEditionViewModel.getSource().getValue()!=null &&
+                mShotEditionViewModel.getSource().getValue()==Constants.SOURCE_DRAFT)
             return mShotDraft.getDateOfPublication();
         else
             return null;
@@ -770,18 +789,22 @@ public class EditShotPresenterImpl implements EditShotPresenter {
 
     //info that can't be change
     private String getShotId(){
-        if(mSource==Constants.SOURCE_SHOT)
+        if(mShotEditionViewModel.getSource().getValue()!=null &&
+                mShotEditionViewModel.getSource().getValue()==Constants.SOURCE_SHOT)
             return mShot.getId();
-        if(mSource==Constants.SOURCE_DRAFT)
+        if(mShotEditionViewModel.getSource().getValue()!=null &&
+                mShotEditionViewModel.getSource().getValue()==Constants.SOURCE_DRAFT)
             return mShotDraft.getShotId();
         else
             return "undefined";
     }
 
     private Date getDateOfupdate(){
-        if(mSource==Constants.SOURCE_SHOT)
+        if(mShotEditionViewModel.getSource().getValue()!=null &&
+                mShotEditionViewModel.getSource().getValue()==Constants.SOURCE_SHOT)
             return mShot.getUpdateDate();
-        if(mSource==Constants.SOURCE_DRAFT)
+        if(mShotEditionViewModel.getSource().getValue()!=null &&
+                mShotEditionViewModel.getSource().getValue()==Constants.SOURCE_DRAFT)
             return mShotDraft.getDateOfUpdate();
         else
             return null;
