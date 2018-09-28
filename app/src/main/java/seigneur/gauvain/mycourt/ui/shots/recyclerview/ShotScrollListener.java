@@ -3,6 +3,8 @@ package seigneur.gauvain.mycourt.ui.shots.recyclerview;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import timber.log.Timber;
+
 
 public abstract class ShotScrollListener extends RecyclerView.OnScrollListener {
 
@@ -24,6 +26,7 @@ public abstract class ShotScrollListener extends RecyclerView.OnScrollListener {
         if (!isLoading() && !isLastPage()) {
             if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
                     && firstVisibleItemPosition >= 0) {
+                Timber.d("must load other item");
                 loadMoreItems();
             }
         }

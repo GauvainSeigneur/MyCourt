@@ -2,10 +2,14 @@ package seigneur.gauvain.mycourt.ui.shots.view;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -24,11 +28,12 @@ import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.ui.base.BaseFragment;
+import seigneur.gauvain.mycourt.ui.shots.ShotsViewModel;
 import seigneur.gauvain.mycourt.ui.shots.recyclerview.ShotListAdapter;
 import seigneur.gauvain.mycourt.ui.shots.recyclerview.ShotListCallback;
 import seigneur.gauvain.mycourt.ui.shots.recyclerview.ShotScrollListener;
-import seigneur.gauvain.mycourt.ui.shots.presenter.ShotsPresenter;
-import seigneur.gauvain.mycourt.ui.shotDetail.view.ShotDetailActivity;
+import seigneur.gauvain.mycourt.ui.shotDetail.ShotDetailActivity;
+import seigneur.gauvain.mycourt.utils.Constants;
 import timber.log.Timber;
 
 /**
@@ -36,8 +41,14 @@ import timber.log.Timber;
  */
 public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCallback {
 
+    /*@Inject
+    ShotsPresenter mShotsPresenter;*/
+
     @Inject
-    ShotsPresenter mShotsPresenter;
+    ViewModelProvider.Factory viewModelFactory;
+
+    ShotsViewModel mShotsViewModel;
+
     @BindView(R.id.swipe_refresh_shots)
     SwipeRefreshLayout swipeRefreshLayout;
 
@@ -51,6 +62,8 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
     private ShotListAdapter adapter;
     //private ShotListCallback adapterCallback;
     private ProgressBar progressBar;
+    boolean isLastpage=false;
+    boolean isLoading=false;
 
     /*
      * FRAGMENT LIFE CYCLE
@@ -58,6 +71,8 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mShotsViewModel = ViewModelProviders.of(this, viewModelFactory).get(ShotsViewModel.class);
+        mShotsViewModel.onLoadFirstPage();
         adapter = new ShotListAdapter(getContext(), this);
         mGridLayoutManager = new GridLayoutManager(getContext(),2);
         mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -81,7 +96,7 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
     public void onCreateView(View rootView, Bundle savedInstanceState) {
         //bindView here
         ButterKnife.bind(this, rootView);
-        mShotsPresenter.onAttach();
+
         DefaultItemAnimator animator = new DefaultItemAnimator() {
             @Override
             public boolean canReuseUpdatedViewHolder(RecyclerView.ViewHolder viewHolder) {
@@ -94,45 +109,90 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
         recyclerView.addOnScrollListener(new ShotScrollListener(mGridLayoutManager) {
             @Override
             protected void loadMoreItems() {
-                mShotsPresenter.onLoading();
-                currentPage += 1;
-                mShotsPresenter.onLoadNextPage(currentPage);
+                mShotsViewModel.onLoadNextPage();
             }
 
             @Override
             public boolean isLastPage() {
-                return mShotsPresenter.isLastPageReached();
+                return isLastpage;
             }
 
             @Override
             public boolean isLoading() {
-                return mShotsPresenter.isLoading();
+                return isLoading;
             }
         });
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                currentPage = PAGE_START;
-                //todo - must limit the reQUEST BY ADDING a HEADER ? and use diff utils ?
-                mShotsPresenter.onLoadRefresh(PAGE_START);
+                mShotsViewModel.onLoadRefresh();
             }
         });
         // Scheme colors for animation
         swipeRefreshLayout.setColorSchemeColors(
                 getResources().getColor(R.color.colorAccent)
-                //getResources().getColor(android.R.color.holo_green_light),
-               // getResources().getColor(android.R.color.holo_orange_light),
-                //getResources().getColor(android.R.color.holo_red_light)
         );
 
-        mShotsPresenter.onLoadFirstPage(currentPage);
-
-
+        subscribeToLiveData(mShotsViewModel);
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    private void subscribeToLiveData(ShotsViewModel shotsViewModel) {
+
+        mShotsViewModel.geShotsFetched().observe(
+                this,
+                new Observer<List<Shot>>() {
+                    @Override
+                    public void onChanged(@Nullable List<Shot> shots) {
+                        if (shots!=null) {
+                            addShots(shots);
+                        } else {
+
+                        }
+                    }
+                }
+        );
+
+        mShotsViewModel.getListFooterState().observe(
+                this,
+                state -> {
+                    if (state!=null) {
+                        Timber.d("footer state change:" +state);
+                        switch (state) {
+                            case Constants.FOOTER_STATE_LOADING :
+                                    isLoading=true;
+                                    isLastpage=false;
+                                    showLoadingFooter(true);
+                                    showEndListReached(false);
+                                showNextFetchError(false, null);
+                                break;
+                            case Constants.FOOTER_STATE_NOT_LOADING :
+                                isLoading=false;
+                                isLastpage=false;
+                                showLoadingFooter(false);
+                                showEndListReached(false);
+                                showNextFetchError(false, null);
+                                break;
+                                case Constants.FOOTER_STATE_ERROR :
+                                    isLoading=false;
+                                    isLastpage=false;
+                                    showLoadingFooter(false);
+                                    showEndListReached(false);
+                                    showNextFetchError(true, "error");
+                                break;
+                                case Constants.FOOTER_STATE_END :
+                                    isLoading=false;
+                                    isLastpage=true;
+                                    showLoadingFooter(false);
+                                    showEndListReached(true);
+                                    showNextFetchError(false, null);
+                                break;
+
+                        }
+                    }
+
+                }
+        );
+
     }
 
     @SuppressWarnings("deprecation")
@@ -166,7 +226,6 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mShotsPresenter.onDetach();
     }
     /**
      * BASE FRAGMENT METHODS
@@ -238,12 +297,12 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
     @Override
     public void retryPageLoad() {
         //adapter.showRetry(false, null); //to make it in View and call it in presenter
-        mShotsPresenter.onLoadNextPage(currentPage);
+        //mShotsPresenter.onLoadNextPage(currentPage);  //TODO - VIEWMODEL
     }
     @Override
     public void onShotClicked(int position) {
         Shot shotItem = adapter.getItem(position);
-        mShotsPresenter.onShotClicked(shotItem, position);
+        //mShotsPresenter.onShotClicked(shotItem, position);  //TODO - VIEWMODEL
     }
 
 }

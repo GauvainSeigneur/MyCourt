@@ -21,6 +21,11 @@ public class Constants {
     /**
      * INTERNAL CONSTANTS
      */
+    public static final int FOOTER_STATE_LOADING        = 10;
+    public static final int FOOTER_STATE_NOT_LOADING    = 11;
+    public static final int FOOTER_STATE_ERROR          = 12;
+    public static final int FOOTER_STATE_END            = 13;
+
     public static final int REQUEST_STORAGE_READ_ACCESS_PERMISSION = 1001;
     public static final int REQUEST_STORAGE_WRITE_ACCESS_PERMISSION = 1002;
     public static final int PICK_IMAGE_REQUEST              = 1003;

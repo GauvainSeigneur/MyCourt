@@ -41,9 +41,6 @@ public class PinPresenterImpl implements PinPresenter {
     private Pin mTempPin=null;
     private boolean isDeCryptorEnabled=false;
 
-
-
-
     @Inject
     public PinPresenterImpl() {
     }

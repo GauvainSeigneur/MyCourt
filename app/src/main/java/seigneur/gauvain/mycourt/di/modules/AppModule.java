@@ -7,14 +7,14 @@ import seigneur.gauvain.mycourt.ui.pin.view.PinActivity;
 import seigneur.gauvain.mycourt.ui.pin.view.PinActivityModule;
 import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotActivity;
 import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotActivityModule;
-import seigneur.gauvain.mycourt.ui.main.view.MainActivity;
-import seigneur.gauvain.mycourt.ui.main.view.MainActivityModule;
+import seigneur.gauvain.mycourt.ui.main.MainActivity;
+import seigneur.gauvain.mycourt.ui.main.MainActivityModule;
 import seigneur.gauvain.mycourt.ui.base.BaseActivity;
 import seigneur.gauvain.mycourt.ui.base.BaseActivityModule;
-import seigneur.gauvain.mycourt.ui.shotDetail.view.ShotDetailActivity;
-import seigneur.gauvain.mycourt.ui.shotDetail.view.ShotDetailActivityModule;
-import seigneur.gauvain.mycourt.ui.splash.view.SplashActivityModule;
-import seigneur.gauvain.mycourt.ui.splash.view.SplashActivity;
+import seigneur.gauvain.mycourt.ui.shotDetail.ShotDetailActivity;
+import seigneur.gauvain.mycourt.ui.shotDetail.ShotDetailActivityModule;
+import seigneur.gauvain.mycourt.ui.splash.SplashActivityModule;
+import seigneur.gauvain.mycourt.ui.splash.SplashActivity;
 import seigneur.gauvain.mycourt.di.scope.PerActivity;
 /**
  * Created by Gauvain on 26/03/2018.

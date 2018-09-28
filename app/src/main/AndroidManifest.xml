@@ -30,7 +30,7 @@
 
         <activity android:name=".ui.AuthActivity" />
         <activity
-            android:name=".ui.splash.view.SplashActivity"
+            android:name=".ui.splash.SplashActivity"
             android:theme="@style/MyCourt.SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,12 +38,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.main.view.MainActivity"
+            android:name=".ui.main.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/MyCourt.MainActivityTheme" />
         <activity android:name=".ui.base.BaseActivity" />
         <activity
-            android:name=".ui.shotDetail.view.ShotDetailActivity"
+            android:name=".ui.shotDetail.ShotDetailActivity"
             android:theme="@style/MyCourt.DetailShotActivityTheme"/>
         <activity android:name=".ui.shotEdition.view.EditShotActivity"/>
         <activity
@@ -52,12 +52,6 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity
             android:name=".ui.pin.view.PinActivity"/>
-
-
-        <activity
-            android:name=".test.TestActivity">
-        </activity>
-
     </application>
 
 </manifest>

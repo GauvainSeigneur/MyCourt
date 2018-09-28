@@ -21,9 +21,6 @@ import seigneur.gauvain.mycourt.data.model.Token;
 @Singleton
 public class TokenRepository {
 
-    /*@Inject
-    SharedPrefs sharedPrefs;*/
-
     @Inject
     TokenDao mTokenDao;
 
@@ -33,6 +30,11 @@ public class TokenRepository {
     @Inject
     public TokenRepository(){}
 
+    /**
+     * TODO - use cyphering to store a crypted version of the token...
+     * @param token
+     * @return
+     */
     public Completable insertToken(@NonNull Token token)  {
         accessToken = String.valueOf(token.getAccessToken());
         return Completable.fromAction(() ->
@@ -47,25 +49,5 @@ public class TokenRepository {
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread());
     }
-    /************************************
-     * Manage Access token
-     * Saved in sharedPrefs
-     ***********************************/
-    /*public void saveAccessToken(@NonNull String token)  {
-        accessToken = token;
-        storeAccessToken(accessToken);
-    }
 
-    public void checkAccessToken() {
-        accessToken = loadAccessToken();
-    }
-
-    public void storeAccessToken(@Nullable String token) {
-        sharedPrefs.putString(SharedPrefs.kAccessToken, token);
-    }
-
-    public String loadAccessToken() {
-        return sharedPrefs.getString(SharedPrefs.kAccessToken);
-    }
-    */
 }

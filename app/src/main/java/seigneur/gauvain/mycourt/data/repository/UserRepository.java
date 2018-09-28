@@ -58,8 +58,6 @@ public class UserRepository {
                 getUserFromAPI(applyResponseCache).
                         toObservable()
         )
-
-
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .materialize()
@@ -102,6 +100,7 @@ public class UserRepository {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSuccess(user -> {
                     isFetchFromAPISuccess=true;
+                    //insertUser(user);
                 });
     }
 

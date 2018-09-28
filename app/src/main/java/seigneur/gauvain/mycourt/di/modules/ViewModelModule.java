@@ -6,18 +6,29 @@ import android.arch.lifecycle.ViewModelProvider;
 import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoMap;
-import seigneur.gauvain.mycourt.data.viewModel.ShotDraftViewModel;
+import seigneur.gauvain.mycourt.ui.main.MainViewModel;
+import seigneur.gauvain.mycourt.ui.shotDraft.ShotDraftViewModel;
+import seigneur.gauvain.mycourt.ui.shotDetail.ShotDetailViewModel;
 import seigneur.gauvain.mycourt.ui.shotEdition.view.ShotEditionViewModel;
-import seigneur.gauvain.mycourt.data.viewModel.UserViewModel;
+import seigneur.gauvain.mycourt.ui.shots.ShotsViewModel;
+import seigneur.gauvain.mycourt.ui.user.UserViewModel;
 import seigneur.gauvain.mycourt.di.scope.ViewModelKey;
 import seigneur.gauvain.mycourt.data.viewModel.FactoryViewModel;
-
-/**
- * Created by Philippe on 02/03/2018.
- */
+import seigneur.gauvain.mycourt.ui.splash.SplashViewModel;
 
 @Module
 public abstract class ViewModelModule {
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(MainViewModel.class)
+    abstract ViewModel bindMainViewModel(MainViewModel mainViewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ShotsViewModel.class)
+    abstract ViewModel bindShotsViewModel(ShotsViewModel shotsViewModel);
+
 
     @Binds
     @IntoMap
@@ -33,6 +44,16 @@ public abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(ShotEditionViewModel.class)
     abstract ViewModel bibndShotEditionViewModel(ShotEditionViewModel shotEditionViewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(SplashViewModel.class)
+    abstract ViewModel bindSplashVieModel(SplashViewModel splashViewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ShotDetailViewModel.class)
+    abstract ViewModel bindShotDetailViewModel(ShotDetailViewModel shotDetailViewModel);
 
 
     @Binds
