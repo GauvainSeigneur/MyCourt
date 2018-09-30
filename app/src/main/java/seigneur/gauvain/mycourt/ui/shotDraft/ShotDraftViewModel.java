@@ -29,6 +29,8 @@ public class ShotDraftViewModel extends ViewModel {
 
     private final SingleLiveEvent<Void> mStopRefreshEvent = new SingleLiveEvent<>();
 
+    private final SingleLiveEvent<ShotDraft> mItemClicked = new SingleLiveEvent<>();
+
     private final MutableLiveData<List<ShotDraft>> mShotDrafts = new MutableLiveData<>();
 
     private boolean isRefreshing;
@@ -49,6 +51,11 @@ public class ShotDraftViewModel extends ViewModel {
     public SingleLiveEvent<Void> dbChanged() {
         return mShotDraftRepository.onDraftDBChanged;
     }
+
+    public SingleLiveEvent<ShotDraft> getItemClickedEvent() {
+        return mItemClicked;
+    }
+
 
     public void fetchShotDrafts() {
         isRefreshing=false;
@@ -123,6 +130,7 @@ public class ShotDraftViewModel extends ViewModel {
     public void onShotDraftClicked(ShotDraft shotDraft, int position) {
         mTempDataRepository.setDraftCallingSource(Constants.SOURCE_DRAFT);
         mTempDataRepository.setShotDraft(shotDraft);
+        mItemClicked.setValue(shotDraft);
 
         // mShotDraftView.goToShotEdition(); //TODO -SINGLE EVENT
 

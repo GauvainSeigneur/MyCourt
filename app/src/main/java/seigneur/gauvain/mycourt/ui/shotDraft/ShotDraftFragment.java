@@ -108,7 +108,7 @@ public class ShotDraftFragment extends Fragment implements  Toolbar.OnMenuItemCl
         mcallabck = new ShotDraftListCallback() {
             @Override
             public void onShotDraftClicked(ShotDraft shotDraft,int position) {
-
+                mShotDraftViewModel.onShotDraftClicked(shotDraft, position);
                // mShotDraftPresenter.onShotDraftClicked(shotDraft, position); //TODO SINGLE EVENT
 
             }
@@ -157,11 +157,20 @@ public class ShotDraftFragment extends Fragment implements  Toolbar.OnMenuItemCl
         viewModel.dbChanged().observe(
                 this,
                 dbChangedEVent -> {
-                    mShotDraftViewModel.fetchShotDrafts();
                     Timber.d("db has changed");
                     Toast.makeText(mApplication, "db has changed", Toast.LENGTH_SHORT).show();
                 }
         );
+
+        viewModel.getItemClickedEvent().observe(
+                this,
+                item -> {
+                    Intent intent = new Intent(getActivity(), EditShotActivity.class);
+                    startActivity(intent);
+                }
+        );
+
+
 
     }
 
