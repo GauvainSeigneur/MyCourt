@@ -593,7 +593,9 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      * Draft has been saved/updated in DB
      */
     private void onDraftSaved() {
-        mTempDataRepository.setDraftsChanged(true);
+       // mTempDataRepository.setDraftsChanged(true);
+        //Notify ViewModels
+        mShotDraftRepository.onDraftDBChanged.call();
         if (mEditShotView!=null)
             mEditShotView.notifyPostSaved();
     }
@@ -623,7 +625,8 @@ public class EditShotPresenterImpl implements EditShotPresenter {
      * Draft has been deleted correctly
      */
     private void onDraftDeleted() {
-        mTempDataRepository.setDraftsChanged(true);
+        //Notify ViewModels
+        mShotDraftRepository.onDraftDBChanged.call();
         if (mEditShotView!=null)
             mEditShotView.stopActivity();
     }

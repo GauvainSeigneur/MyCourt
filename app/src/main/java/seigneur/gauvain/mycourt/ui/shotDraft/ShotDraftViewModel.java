@@ -46,8 +46,11 @@ public class ShotDraftViewModel extends ViewModel {
         return mShotDrafts;
     }
 
+    public SingleLiveEvent<Void> dbChanged() {
+        return mShotDraftRepository.onDraftDBChanged;
+    }
 
-    public void init() {
+    public void fetchShotDrafts() {
         isRefreshing=false;
         mCompositeDisposable.add(fetchDrafts()
                 .subscribe(
@@ -58,10 +61,8 @@ public class ShotDraftViewModel extends ViewModel {
         );
     }
 
-
-
     public void onRefresh(boolean fromSwipeRefresh) {
-        if (fromSwipeRefresh || mTempDataRepository.isDraftsChanged()) {
+        if (fromSwipeRefresh) {
             isRefreshing=true;
             mCompositeDisposable.add(fetchDrafts()
                     .subscribe(
@@ -87,7 +88,6 @@ public class ShotDraftViewModel extends ViewModel {
      * @param shotDrafts - list Found in DB
      */
     private void doOnDraftFound(List<ShotDraft> shotDrafts){
-        mTempDataRepository.setDraftsChanged(false); //Consume the event
         Timber.d("list loaded"+shotDrafts.toString());
         //todo - live data
         mShotDrafts.setValue(shotDrafts);
@@ -103,7 +103,6 @@ public class ShotDraftViewModel extends ViewModel {
      * When nothing found in DB, stop refreshing and set up a dedicated view
      */
     private void doOnNothingFound(){
-        mTempDataRepository.setDraftsChanged(false);
         if (isRefreshing) {
             mStopRefreshEvent.call();
             //mShotDraftView.stopRefresh(); //SINGLE EVENT ?

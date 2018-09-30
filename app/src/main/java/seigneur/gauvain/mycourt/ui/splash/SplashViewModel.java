@@ -61,7 +61,6 @@ public class SplashViewModel extends ViewModel {
         checkIfUserIsLoggedIn();
     }
 
-
     public SingleLiveEvent<Void> getSignInCommand() {
         return mSignInCommand;
     }
@@ -69,8 +68,6 @@ public class SplashViewModel extends ViewModel {
     public SingleLiveEvent<Void> getGoToHomeCommand() {
         return mGoToHomeCommand;
     }
-
-
 
     public void onSignInSuccess(String authCode) {
         fetchToken(authCode);

@@ -19,6 +19,7 @@ import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.ui.shots.view.ShotsView;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
+import seigneur.gauvain.mycourt.utils.SingleLiveEvent;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import timber.log.Timber;
 
@@ -48,6 +49,7 @@ public class ShotsViewModel extends ViewModel {
     //private MutableLiveData<Boolean> isLastPage = new MutableLiveData<>();
     private MutableLiveData<List<Shot>> mShotListFetched = new MutableLiveData<>();
     private MutableLiveData<Integer> mListFooterState = new MutableLiveData<>();
+    private SingleLiveEvent<Void> mRefreshCalled =  new SingleLiveEvent<>();
 
     //to compare prev list fetch and next list fetched in loadNextPage();
     private List<Shot> oldList = null;
@@ -62,17 +64,19 @@ public class ShotsViewModel extends ViewModel {
         super.onCleared();
     }
 
-
     public LiveData<List<Shot>> geShotsFetched() {
         return mShotListFetched;
     }
-
 
     public LiveData<Integer> getListFooterState() {
         if (mListFooterState.getValue()==null)
             mListFooterState.setValue(Constants.FOOTER_STATE_LOADING);
 
         return mListFooterState;
+    }
+
+    public SingleLiveEvent<Void> getRefreshEvent() {
+        return mRefreshCalled;
     }
 
     /**************************************************************************
@@ -100,7 +104,6 @@ public class ShotsViewModel extends ViewModel {
     public void onShotClicked(Shot shot, int position) {
         mTempDataRepository.setShot(shot); //store the current shot clicked in a dedicated file
         //todo - singleEVENT
-
         /*if(mShotsView !=null) {
             mTempDataRepository.setShot(shot); //store the current shot clicked in a dedicated file
             mShotsView.goToShotDetail(shot, position);
@@ -255,9 +258,11 @@ public class ShotsViewModel extends ViewModel {
      */
     private void doOnRefreshNext(List<Shot> shots) {
         mPage=0;
-        oldList =shots;
-        mShotListFetched.setValue(shots);
+        oldList = shots;
         Timber.d("list refreshing");
+        mRefreshCalled.call();
+        //mShotListFetched.setValue(shots);
+        //mListFooterState.setValue(Constants.FOOTER_STATE_NOT_LOADING);
         //todo - LIVE DATA
 
        /* if (mShotsView!=null) {

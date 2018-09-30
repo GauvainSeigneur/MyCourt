@@ -167,7 +167,7 @@ public class ShotListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public void clear() {
         //isLoadingAdded = false;
-        while (getItemCount() > 0) {
+        while (getItemCount() > 1) {
             remove(getItem(0));
         }
     }

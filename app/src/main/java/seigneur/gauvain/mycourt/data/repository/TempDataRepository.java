@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
+import seigneur.gauvain.mycourt.utils.SingleLiveEvent;
 
 /**
  * Class used to get reference of data which are not
@@ -23,7 +24,7 @@ public class TempDataRepository {
     public int mDraftCallingSource;
 
     //Used to notify that change has been made on Draft DB
-    public boolean mDraftsChanged=false;
+    //public boolean mDraftsChanged=false;
 
     @Inject
     public TempDataRepository() {}
@@ -48,11 +49,4 @@ public class TempDataRepository {
         return mDraftCallingSource;
     }
 
-    public boolean isDraftsChanged() {
-        return mDraftsChanged;
-    }
-
-    public void setDraftsChanged(boolean draftsChanged) {
-        this.mDraftsChanged = draftsChanged;
-    }
 }

@@ -134,6 +134,7 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
         );
 
         subscribeToLiveData(mShotsViewModel);
+        subscribeToSingleEvents(mShotsViewModel);
     }
 
     private void subscribeToLiveData(ShotsViewModel shotsViewModel) {
@@ -193,6 +194,15 @@ public class ShotsFragment extends BaseFragment implements ShotsView, ShotListCa
                 }
         );
 
+    }
+
+    private void subscribeToSingleEvents(ShotsViewModel shotsViewModel) {
+        shotsViewModel.getRefreshEvent().observe(this, new Observer<Void>() {
+            @Override
+            public void onChanged(@Nullable Void methdod) {
+                clearShots();
+            }
+        });
     }
 
     @SuppressWarnings("deprecation")

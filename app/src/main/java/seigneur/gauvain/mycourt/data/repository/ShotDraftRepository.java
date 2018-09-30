@@ -21,6 +21,7 @@ import seigneur.gauvain.mycourt.data.local.dao.PostDao;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.utils.ImageUtils;
+import seigneur.gauvain.mycourt.utils.SingleLiveEvent;
 
 @Singleton
 public class ShotDraftRepository {
@@ -30,6 +31,8 @@ public class ShotDraftRepository {
 
     @Inject
     public ShotDraftRepository(){}
+
+    public SingleLiveEvent<Void> onDraftDBChanged =new SingleLiveEvent<>();
 
     public Maybe<List<ShotDraft>> getShotDraft() {
         return postDao.getAllPost()
@@ -44,7 +47,13 @@ public class ShotDraftRepository {
     public Completable updateShotDraft(ShotDraft shotDraft) {
         return Completable.fromRunnable(() -> postDao.updateDraft(shotDraft))
                 .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread());
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnComplete(() -> {
+                            //notifiy With Single event
+                            onDraftDBChanged.call();
+                        }
+
+                );
     }
 
     public Completable storeShotDraft(ShotDraft shotDraft) {
@@ -52,13 +61,25 @@ public class ShotDraftRepository {
                 () -> postDao.insertPost(shotDraft)
         )
                 .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread());
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnComplete(() -> {
+                            //notifiy With Single event
+                            onDraftDBChanged.call();
+                        }
+
+                );
     }
 
     public Completable deleteDraft(int id) {
         return Completable.fromRunnable(() -> postDao.deletDraftByID(id))
                 .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread());
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnComplete(() -> {
+                            //notifiy With Single event
+                            onDraftDBChanged.call();
+                        }
+
+                );
     }
 
     public Single<String> storeImageAndReturnItsUri(String imageCroppedFormat, Uri croppedFileUri, Context context) {

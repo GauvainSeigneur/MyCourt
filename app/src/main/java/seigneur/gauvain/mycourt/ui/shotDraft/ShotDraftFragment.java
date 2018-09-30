@@ -33,6 +33,7 @@ import butterknife.Unbinder;
 import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
+import seigneur.gauvain.mycourt.ui.main.MainViewModel;
 import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotActivity;
 import timber.log.Timber;
 
@@ -102,7 +103,7 @@ public class ShotDraftFragment extends Fragment implements  Toolbar.OnMenuItemCl
         Timber.d("onCreate new instance");
         //provide ViewModel
         mShotDraftViewModel = ViewModelProviders.of(this, viewModelFactory).get(ShotDraftViewModel.class);
-        mShotDraftViewModel.init();
+        mShotDraftViewModel.fetchShotDrafts();
 
         mcallabck = new ShotDraftListCallback() {
             @Override
@@ -148,6 +149,23 @@ public class ShotDraftFragment extends Fragment implements  Toolbar.OnMenuItemCl
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         //listen livedata
+        subscribeToSingleEvents(mShotDraftViewModel);
+        listenLiveData(mShotDraftViewModel);
+    }
+
+    private void subscribeToSingleEvents(ShotDraftViewModel viewModel) {
+        viewModel.dbChanged().observe(
+                this,
+                dbChangedEVent -> {
+                    mShotDraftViewModel.fetchShotDrafts();
+                    Timber.d("db has changed");
+                    Toast.makeText(mApplication, "db has changed", Toast.LENGTH_SHORT).show();
+                }
+        );
+
+    }
+
+    private void listenLiveData(ShotDraftViewModel shotDraftViewModel) {
         mShotDraftViewModel.getDrafts()
                 .observe(
                         this,
@@ -158,12 +176,11 @@ public class ShotDraftFragment extends Fragment implements  Toolbar.OnMenuItemCl
                                     showEmptyView(false);
                                     showDraftList(drafts, false);//todo - fix this
                                 } else {
-                                   showEmptyView(true);
+                                    showEmptyView(true);
                                 }
                             }
                         }
                 );
-
     }
 
     @Override
