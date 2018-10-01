@@ -36,6 +36,11 @@ public class ShotRepository {
         return mDribbbleService.getShots(applyResponseCache, page, perPage);
     }
 
+    //get list of Shot from Dribbble
+    public Flowable<List<Shot>> getShotsFromAPItest(int applyResponseCache,  long page, int perPage) {
+        return mDribbbleService.getShotAPI(applyResponseCache, page, perPage);
+    }
+
     //send an update to Dribbble
     public Single<Shot> updateShot(String id,
                                    String title,

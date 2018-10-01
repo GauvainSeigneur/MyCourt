@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar_layout"
@@ -20,46 +21,35 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <FrameLayout
+    <android.support.constraint.ConstraintLayout
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <include
+            android:id="@+id/globalNetworkState"
+            layout="@layout/list_item_network_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/usersSwipeRefreshLayout" />
+
         <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/swipe_refresh_shots"
+            android:id="@+id/usersSwipeRefreshLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/rv_shots"
+                android:id="@+id/rvShots"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                tools:listitem="@layout/list_item_shot" />
 
         </android.support.v4.widget.SwipeRefreshLayout>
 
-
-        <ViewStub
-            android:id="@+id/no_connection_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <ViewStub
-            android:id="@+id/no_shots_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <ViewStub
-            android:id="@+id/error_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <ProgressBar
-            android:id="@+id/main_progress"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"/>
-
-    </FrameLayout>
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -26,7 +26,7 @@ import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.ui.base.BaseActivity;
 import seigneur.gauvain.mycourt.ui.shotDraft.ShotDraftFragment;
 import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotActivity;
-import seigneur.gauvain.mycourt.ui.shots.view.ShotsFragment;
+import seigneur.gauvain.mycourt.ui.shots.ShotsFragment;
 import seigneur.gauvain.mycourt.ui.user.UserFragment;
 import seigneur.gauvain.mycourt.utils.FragmentStateManager;
 
@@ -189,12 +189,14 @@ public class MainActivity extends BaseActivity implements HasSupportFragmentInje
             public Fragment getItem(int position) {
                 switch(position) {
                     case 0:
+                        //return new ShotsFragment();
                         return new ShotsFragment();
                     case 1:
                         return new ShotDraftFragment();
                     case 2:
                         return new UserFragment();
                 }
+                //return new ShotsFragment();
                 return new ShotsFragment();
             }
         };

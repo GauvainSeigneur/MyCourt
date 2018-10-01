@@ -4,8 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-        <!--
-            android:stateListAnimator="@animator/raise"-->
         <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
             android:id="@+id/shot_image"
             android:elevation="8dp"

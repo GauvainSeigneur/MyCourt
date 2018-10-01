@@ -50,10 +50,16 @@ dependencies {
     implementation "android.arch.lifecycle:reactivestreams:$archVersion"
     // optional - Test helpers for LiveData
     testImplementation "android.arch.core:core-testing:$archVersion"
+    def paging_version = "1.0.1"
+    implementation "android.arch.paging:runtime:$paging_version"
+    // alternatively - without Android dependencies for testing
+    testImplementation "android.arch.paging:common:$paging_version"
+    // optional - RxJava support, currently in release candidate
+    implementation "android.arch.paging:rxjava2:1.0.1"
     //if use this you must not used com.android.support lib but androidx
     //see : https://material.io/develop/android/docs/getting-started/
     //implementation 'com.google.android.material:material:1.0.0-beta01'
-    def androidSupportVersion = '28.0.0-rc02'//'27.1.1'
+    def androidSupportVersion = '28.0.0'//'27.1.1'
     implementation "com.android.support:support-v4:$androidSupportVersion"
     implementation "com.android.support:appcompat-v7:$androidSupportVersion"
     implementation "com.android.support:design:$androidSupportVersion"

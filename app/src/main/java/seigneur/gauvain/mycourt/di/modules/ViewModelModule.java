@@ -29,7 +29,6 @@ public abstract class ViewModelModule {
     @ViewModelKey(ShotsViewModel.class)
     abstract ViewModel bindShotsViewModel(ShotsViewModel shotsViewModel);
 
-
     @Binds
     @IntoMap
     @ViewModelKey(UserViewModel.class)
