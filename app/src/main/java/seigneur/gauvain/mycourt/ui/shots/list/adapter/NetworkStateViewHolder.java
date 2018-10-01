@@ -27,10 +27,10 @@ public class NetworkStateViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.loadingProgressBar)
     ProgressBar loadingProgressBar;
 
-    private NetworkStateViewHolder(View itemView, RetryCallback retryCallback) {
+    private NetworkStateViewHolder(View itemView, ShotItemCallback shotItemCallback) {
         super(itemView);
         ButterKnife.bind(this, itemView);
-        retryLoadingButton.setOnClickListener(v -> retryCallback.retry());
+        retryLoadingButton.setOnClickListener(v -> shotItemCallback.retry());
     }
 
     public void bindTo(NetworkState networkState) {
@@ -45,10 +45,10 @@ public class NetworkStateViewHolder extends RecyclerView.ViewHolder {
         loadingProgressBar.setVisibility(networkState.getStatus() == Status.RUNNING ? View.VISIBLE : View.GONE);
     }
 
-    public static NetworkStateViewHolder create(ViewGroup parent, RetryCallback retryCallback) {
+    public static NetworkStateViewHolder create(ViewGroup parent, ShotItemCallback shotItemCallback) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View view = layoutInflater.inflate(R.layout.list_item_network_state, parent, false);
-        return new NetworkStateViewHolder(view, retryCallback);
+        return new NetworkStateViewHolder(view, shotItemCallback);
     }
 
 }

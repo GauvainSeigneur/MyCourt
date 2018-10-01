@@ -16,6 +16,7 @@ import seigneur.gauvain.mycourt.ui.shots.list.data.NetworkState;
 import seigneur.gauvain.mycourt.ui.shots.list.data.datasource.ShotDataSourceFactory;
 import seigneur.gauvain.mycourt.ui.shots.list.data.datasource.ShotsDataSource;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
+import seigneur.gauvain.mycourt.utils.SingleLiveEvent;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 
 
@@ -43,6 +44,7 @@ public class ShotsViewModel extends ViewModel {
 
     private PagedList.Config config;
 
+    private SingleLiveEvent<Integer> shotClickEvent = new SingleLiveEvent<>();
 
     @Inject
     public ShotsViewModel() { }
@@ -72,11 +74,22 @@ public class ShotsViewModel extends ViewModel {
     }
 
     public LiveData<NetworkState> getNetworkState() {
-        return Transformations.switchMap(shotDataSourceFactory.getUsersDataSourceLiveData(), ShotsDataSource::getNetworkState);
+        return Transformations.switchMap(shotDataSourceFactory.getUsersDataSourceLiveData(),
+                ShotsDataSource::getNetworkState);
     }
 
     public LiveData<NetworkState> getRefreshState() {
-        return Transformations.switchMap(shotDataSourceFactory.getUsersDataSourceLiveData(), ShotsDataSource::getInitialLoad);
+        return Transformations.switchMap(shotDataSourceFactory.getUsersDataSourceLiveData(),
+                ShotsDataSource::getInitialLoad);
+    }
+
+    public SingleLiveEvent<Integer> getShotClickEvent() {
+        return shotClickEvent;
+    }
+
+    public void onShotClicked(Shot shot, int position) {
+        shotClickEvent.setValue(position);
+        mTempDataRepository.setShot(shot);
     }
 
     @Override

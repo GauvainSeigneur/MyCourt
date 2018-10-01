@@ -1,6 +1,8 @@
 package seigneur.gauvain.mycourt.ui.shots.list.adapter;
 
 
-public interface RetryCallback {
+public interface ShotItemCallback {
     void retry();
+
+    void onShotClicked(int position);
 }

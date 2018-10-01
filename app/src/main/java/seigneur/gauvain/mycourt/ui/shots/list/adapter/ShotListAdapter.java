@@ -17,11 +17,13 @@ public class ShotListAdapter extends PagedListAdapter<Shot, RecyclerView.ViewHol
 
     private NetworkState networkState;
 
-    private RetryCallback retryCallback;
+    private ShotItemCallback shotItemCallback;
 
-    public ShotListAdapter(RetryCallback retryCallback) {
+    private int pos;
+
+    public ShotListAdapter(ShotItemCallback shotItemCallback) {
         super(UserDiffCallback);
-        this.retryCallback = retryCallback;
+        this.shotItemCallback = shotItemCallback;
     }
 
     @NonNull
@@ -29,9 +31,9 @@ public class ShotListAdapter extends PagedListAdapter<Shot, RecyclerView.ViewHol
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
             case R.layout.list_item_shot:
-                return ShotViewHolder.create(parent);
+                return ShotViewHolder.create(parent,shotItemCallback);
             case R.layout.list_item_network_state:
-                return NetworkStateViewHolder.create(parent, retryCallback);
+                return NetworkStateViewHolder.create(parent, shotItemCallback);
             default:
                 throw new IllegalArgumentException("unknown view type");
         }
@@ -65,6 +67,10 @@ public class ShotListAdapter extends PagedListAdapter<Shot, RecyclerView.ViewHol
     @Override
     public int getItemCount() {
         return super.getItemCount() + (hasExtraRow() ? 1 : 0);
+    }
+
+    public Shot getShotClicked(int pos) {
+        return getItem(pos);
     }
 
     /**
@@ -106,5 +112,6 @@ public class ShotListAdapter extends PagedListAdapter<Shot, RecyclerView.ViewHol
             return Objects.equals(oldItem, newItem);
         }
     };
+
 
 }

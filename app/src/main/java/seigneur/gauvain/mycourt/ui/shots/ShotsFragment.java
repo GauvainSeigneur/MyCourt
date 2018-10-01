@@ -1,9 +1,11 @@
 package seigneur.gauvain.mycourt.ui.shots;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,6 +20,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import javax.inject.Inject;
 
@@ -27,7 +30,9 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
-import seigneur.gauvain.mycourt.ui.shots.list.adapter.RetryCallback;
+import seigneur.gauvain.mycourt.data.model.Shot;
+import seigneur.gauvain.mycourt.ui.shotDetail.ShotDetailActivity;
+import seigneur.gauvain.mycourt.ui.shots.list.adapter.ShotItemCallback;
 import seigneur.gauvain.mycourt.ui.shots.list.adapter.ShotListAdapter;
 import seigneur.gauvain.mycourt.ui.shots.list.data.NetworkState;
 import seigneur.gauvain.mycourt.ui.shots.list.data.Status;
@@ -37,7 +42,7 @@ import timber.log.Timber;
 /**
  * Created by gse on 22/11/2017.
  */
-public class ShotsFragment extends Fragment implements RetryCallback {
+public class ShotsFragment extends Fragment implements ShotItemCallback {
 
     @BindView(R.id.usersSwipeRefreshLayout)
     SwipeRefreshLayout usersSwipeRefreshLayout;
@@ -61,11 +66,12 @@ public class ShotsFragment extends Fragment implements RetryCallback {
 
     private Unbinder mUnbinder;
     public View mRootview;
+    private LinearLayoutManager mLinearLayoutManager;
 
     @Inject
     ViewModelProvider.Factory viewModelFactory;
 
-    private ShotsViewModel usersViewModel;
+    private ShotsViewModel shotsViewModel;
 
     @SuppressWarnings("deprecation")
     @Override
@@ -102,8 +108,8 @@ public class ShotsFragment extends Fragment implements RetryCallback {
         mRootview = inflater.inflate(getFragmentLayout(), container, false );
         mUnbinder= ButterKnife.bind(this, mRootview);
         //usersViewModel = ViewModelProviders.of(this).get(ShotsViewModel.class);
-        usersViewModel = ViewModelProviders.of(this, viewModelFactory).get(ShotsViewModel.class);
-        usersViewModel.init();
+        shotsViewModel = ViewModelProviders.of(this, viewModelFactory).get(ShotsViewModel.class);
+        shotsViewModel.init();
         initAdapter();
         initSwipeToRefresh();
         return mRootview;
@@ -120,6 +126,7 @@ public class ShotsFragment extends Fragment implements RetryCallback {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         //listen livedata
+        subscribeToSingleEvent(shotsViewModel);
     }
 
 
@@ -134,20 +141,20 @@ public class ShotsFragment extends Fragment implements RetryCallback {
     }
 
     private void initAdapter() {
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(),
+        mLinearLayoutManager = new LinearLayoutManager(getContext(),
                 LinearLayoutManager.VERTICAL, false);
         shotListAdapter = new ShotListAdapter(this);
-        mRvShots.setLayoutManager(linearLayoutManager);
+        mRvShots.setLayoutManager(mLinearLayoutManager);
         mRvShots.setAdapter(shotListAdapter);
-        usersViewModel.shotList.observe(this, shotListAdapter::submitList);
-        usersViewModel.getNetworkState().observe(this, shotListAdapter::setNetworkState);
+        shotsViewModel.shotList.observe(this, shotListAdapter::submitList);
+        shotsViewModel.getNetworkState().observe(this, shotListAdapter::setNetworkState);
     }
 
     /**
      * Init swipe to refresh and enable pull to refresh only when there are items in the adapter
      */
     private void initSwipeToRefresh() {
-        usersViewModel.getRefreshState().observe(this, networkState -> {
+        shotsViewModel.getRefreshState().observe(this, networkState -> {
             if (networkState != null) {
                 if (shotListAdapter.getCurrentList() != null) {
                     if (shotListAdapter.getCurrentList().size() > 0) {
@@ -161,7 +168,24 @@ public class ShotsFragment extends Fragment implements RetryCallback {
                 }
             }
         });
-        usersSwipeRefreshLayout.setOnRefreshListener(() -> usersViewModel.refresh());
+        usersSwipeRefreshLayout.setOnRefreshListener(() -> shotsViewModel.refresh());
+    }
+
+    private void subscribeToSingleEvent(ShotsViewModel shotsViewModel) {
+        shotsViewModel.getShotClickEvent().observe(
+                this,
+                position -> {
+
+                    ActivityOptions options = null;
+                    Intent i = new Intent(getActivity(), ShotDetailActivity.class);
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                        options = ActivityOptions.makeSceneTransitionAnimation((Activity) getActivity(),
+                                mLinearLayoutManager.findViewByPosition(position),
+                                getActivity().getString(R.string.shot_transition_name));
+                        getContext().startActivity(i, options.toBundle());
+                    }
+                }
+        );
     }
 
     /**
@@ -190,12 +214,21 @@ public class ShotsFragment extends Fragment implements RetryCallback {
 
     @OnClick(R.id.retryLoadingButton)
     void retryInitialLoading() {
-        usersViewModel.retry();
+        shotsViewModel.retry();
     }
 
     @Override
     public void retry() {
-        usersViewModel.retry();
+        shotsViewModel.retry();
+    }
+
+    @Override
+    public void onShotClicked(int position) {
+        //usersViewModel.retry()
+        Shot shotItem = shotListAdapter.getShotClicked(position);
+        shotsViewModel.onShotClicked(shotItem, position);
+        //Toast.makeText(getContext(), ""+shotItem.title, Toast.LENGTH_SHORT).show();
+        //mShotsPresenter.onShotClicked(shotItem, position);
     }
     
 
