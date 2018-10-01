@@ -14,7 +14,7 @@ It is based on MVVM architecture & Android Architecture components.
 * Edit your published shots
 * Save in drafts your current work
 
-##Technologies & pattern
+## Technologies & pattern
 * MVVM and Observable/Observer pattern
 * Android Architecture Components - ViewModel, LiveData, Room, Paging
 * Retrofit - Http client
