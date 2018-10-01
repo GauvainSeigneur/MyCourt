@@ -3,6 +3,8 @@ package seigneur.gauvain.mycourt;
 import android.app.Activity;
 import android.app.Application;
 
+import com.squareup.leakcanary.LeakCanary;
+
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjector;
@@ -30,6 +32,12 @@ public class MyCourtApp extends Application implements HasActivityInjector {
     @Override
     public void onCreate() {
         super.onCreate();
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            // This process is dedicated to LeakCanary for heap analysis.
+            // You should not init your app in this process.
+            return;
+        }
+        LeakCanary.install(this);
         mAppComponent = createComponent();
         inject(); //get Application context
         TimberLog.init(); //Init timberLog
