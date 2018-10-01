@@ -1,23 +1,36 @@
 # My Court
 A mobile application which uses Dribbble API V2. It focuses on Prospect, Players and pros. 
-It is based on MVP pattern, Dependency injection, RXJava, Retrofit, Architecture components. 
+It is based on MVVM architecture & Android Architecture components. 
 
 <img src="art/home.png" width="30%"></img>
 <img src="art/draft.png" width="30%"></img>
 <img src="art/account.png" width="30%"></img>
 
 ## Features
-* Fetch your shots in a recyclerView (endless scroll)
+* Fetch your shots in a endless recyclerView (paging library)
 * See details of each shots
 * see your account
 * Create a shot and publish it (Image picker and cropping)
 * Edit your published shots
 * Save in drafts your current work
 
+##Technologies & pattern
+* MVVM and Observable/Observer pattern
+* Android Architecture Components - ViewModel, LiveData, Room, Paging
+* Retrofit - Http client
+* Gson - Serialization & deserialization
+* Glide - Image loading
+* Timber - Logging
+* Leak Canary - Memory leak detection
+* Butterknife - Data binding
+* Rxjava - Data handling
+* Dagger2 - Dependency injection
+
 ## State
-Stable -  UI must be finalized  
+Not stable - architecture refactoring
 
 ## Todo
+* Finish converting from MVP to MVVM 
 * Convert to Kotlin
 * Future : Manage pros, Manage attachments
 
