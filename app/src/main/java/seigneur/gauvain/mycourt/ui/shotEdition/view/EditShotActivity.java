@@ -85,9 +85,8 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     @Inject
     TempDataRepository mTempDataRepository;
 
-    private ShotEditionViewModel viewModel; //doesn"t need o inject this as is based on viewModel to get daata
-
-    private EditShotPresenter mEditShotPresenter;
+    @Inject
+    EditShotPresenter mEditShotPresenter;
 
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -143,26 +142,8 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
         setContentView(R.layout.activity_edit_shot);
         ButterKnife.bind(this);
         AndroidInjection.inject(this);
-        viewModel = ViewModelProviders.of(this, viewModelFactory).get(ShotEditionViewModel.class);
-        mEditShotPresenter =new EditShotPresenterImpl(
-                this,
-                this,
-                viewModel,
-                mShotDraftRepository,mNetworkErrorHandler, mConnectivityReceiver,
-                mShotRepository, mTempDataRepository);
-
         mEditShotPresenter.onAttach();
-        /*viewModel.mutableImageCroppedUri() //
-                .observe(
-                        this,
-                        imageCroppedUri -> {
-                            if (imageCroppedUri==null) {
-                                Toast.makeText(this, "uri null", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(this, "uri changed:"+imageCroppedUri, Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                );*/
+
         //editor must be set before presenter first method to check text change!
         mShotTitleEditor.addTextChangedListener(titleWatcher);
         mTagEditor.addTextChangedListener(tagWtacher);
