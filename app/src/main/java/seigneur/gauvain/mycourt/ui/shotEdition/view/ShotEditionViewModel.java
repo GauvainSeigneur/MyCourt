@@ -81,10 +81,11 @@ public class ShotEditionViewModel extends ViewModel {
     private String mShotDescription;
     private ShotDraft mShotDraft;
     private Shot mShot;
-    private int mEditionMode;
     //RX disposable
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
+    //Edition mode accroding to the source;
+    private MutableLiveData <Integer> mEditionMode = new MutableLiveData<>(); //todo - no nedd to use Live data... 
     //User wants to pick a new image
     private SingleLiveEvent<Void> pickImg =new SingleLiveEvent<>();
     //Needed data to go to cropping activity
@@ -111,6 +112,11 @@ public class ShotEditionViewModel extends ViewModel {
     /**************************************************************************
      * Event subscribed by activity
      *************************************************************************/
+    //DATA to set up UI
+    public LiveData<Integer> getEditionMode() {
+        return mEditionMode;
+    }
+
     //Event to display image cropped
     public LiveData<Uri> getImageCroppedUri() {
         return mImageCroppedUri;
@@ -221,10 +227,10 @@ public class ShotEditionViewModel extends ViewModel {
 
     public void onPublishClicked(Context context) {
         if (isAuthorizedToPublish()) {
-            if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT) {
+            if (mEditionMode.getValue()==Constants.EDIT_MODE_NEW_SHOT) {
                 postShot(context, getImageUri(),getImageFormat(),getTitle(), getShotDescription(),
                         getTagList());
-            } else if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
+            } else if (mEditionMode.getValue()==Constants.EDIT_MODE_UPDATE_SHOT) {
                 updateShot(getTitle(), getShotDescription(), getTagList(), getProfile());
             }
         } else {
@@ -241,7 +247,7 @@ public class ShotEditionViewModel extends ViewModel {
     }
 
     public void onIllustrationClicked() {
-        if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT) {
+        if (mEditionMode.getValue()==Constants.EDIT_MODE_NEW_SHOT) {
             //todo single event
             pickImg.call();
             //mEditShotView.openImagePicker();
@@ -294,11 +300,11 @@ public class ShotEditionViewModel extends ViewModel {
             getShotDraft();
         } else if (source == Constants.SOURCE_SHOT) {
             //User wishes to update a published shot
-            setEditionMode(Constants.EDIT_MODE_UPDATE_SHOT);
+            mEditionMode.setValue(Constants.EDIT_MODE_UPDATE_SHOT);
             getShot();
         } else if (source == Constants.SOURCE_FAB) {
             //User wishes to create a shot
-            setEditionMode(Constants.EDIT_MODE_NEW_SHOT);
+            mEditionMode.setValue(Constants.EDIT_MODE_NEW_SHOT);
             //todo - refactor it with a livedata
             /*if (mEditShotView!=null) {
                 mEditShotView.setUpShotCreationUI();
@@ -353,9 +359,10 @@ public class ShotEditionViewModel extends ViewModel {
 
     private void manageShotDraftInfo(ShotDraft shotDraft) {
         setShotDraft(shotDraft);
-        setEditionMode(shotDraft.getDraftType());
+        mEditionMode.setValue(shotDraft.getDraftType());
         //todo - refactor it with a livedata
         /*if (mEditShotView!=null)
+
             mEditShotView.setUpShotEditionUI(shotDraft,getEditMode());*/
     }
 
@@ -482,6 +489,7 @@ public class ShotEditionViewModel extends ViewModel {
             deleteDraft();
         else {
             //todo - single event
+            close.setValue(2); // pusblished
             /*if (mEditShotView!=null)
                 mEditShotView.stopActivity();*/
         }
@@ -614,6 +622,7 @@ public class ShotEditionViewModel extends ViewModel {
      */
     private void onDraftSaved() {
         //mTempDataRepository.setDraftsChanged(true); //TODO LIVE DATA
+        close.setValue(1); //deleted
         /*if (mEditShotView!=null)
             mEditShotView.notifyPostSaved();*/
     }
@@ -676,7 +685,7 @@ public class ShotEditionViewModel extends ViewModel {
                 null, //todo - for phase 2 : allow user to schedule publishing
                 getTagList(),
                 -1, //todo - for phase 2 : manage team
-                getEditMode(),
+                mEditionMode.getValue(),
                 getDateOfPublication(),
                 getDateOfupdate()
         );
@@ -735,12 +744,8 @@ public class ShotEditionViewModel extends ViewModel {
         return mShotDescription;
     }
 
-    private int getEditMode() {
-        return mEditionMode;
-    }
-
     private Uri getImageUri() {
-        if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
+        if (mEditionMode.getValue()==Constants.EDIT_MODE_UPDATE_SHOT) {
             if(mShotDraft!=null && mShotDraft.getImageUrl()!=null) {
                 if (!isImageChanged)
                     return Uri.parse(mShotDraft.getImageUrl());
@@ -805,9 +810,6 @@ public class ShotEditionViewModel extends ViewModel {
         return false;
     }
 
-    private void setEditionMode(int editionMode) {
-        mEditionMode = editionMode;
-    }
 
     private void setShotDraft(ShotDraft shotDraft) {
         mShotDraft = shotDraft;
