@@ -1,6 +1,8 @@
 package seigneur.gauvain.mycourt.ui.shotEdition.view;
 
 import android.app.Application;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.content.Intent;
@@ -37,13 +39,15 @@ import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.ImagePicker;
 import seigneur.gauvain.mycourt.utils.ImageUtils;
 import seigneur.gauvain.mycourt.utils.MyTextUtils;
+import seigneur.gauvain.mycourt.utils.SingleLiveEvent;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import timber.log.Timber;
 
 /**
  * PRESENTER REFACTORING INTO VIEWMODEL
  * FILES TO BIG - Dificult to read
- * split it into task files : fetch source and set up UI / listen data set by user / store /update/publish
+ * split it into task files : fetch source and set up UI /pick and crop image /
+ * listen data set by user / store /update/publish
  */
 public class ShotEditionViewModel extends ViewModel {
 
@@ -66,10 +70,8 @@ public class ShotEditionViewModel extends ViewModel {
     Application mApplication;
 
     //Manage Image picking and cropping
-    private Uri imagePickedUriSource = null;
-    private String imagePickedFileName = null;
-    private String imagePickedFormat = null;
-    private Uri imageCroppedUri = null;
+
+    //image is cropped
     private boolean isImageChanged=false;
     //Manage data
     private int mSource;
@@ -83,6 +85,20 @@ public class ShotEditionViewModel extends ViewModel {
     //RX disposable
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
+    //User wants to pick a new image
+    private SingleLiveEvent<Void> pickImg =new SingleLiveEvent<>();
+    //Needed data to go to cropping activity
+    private MutableLiveData<Uri> mImagePickedUriSource = new MutableLiveData<>();
+    private MutableLiveData<String> mImagePickedFileName = new MutableLiveData<>();
+    private MutableLiveData<String> mImagePickedFormat = new MutableLiveData<>();
+    private MutableLiveData<int[]> mImageSize = new MutableLiveData<>();//todo - check this
+    //Go to crop activity
+    private SingleLiveEvent<Void> imagePicked =new SingleLiveEvent<>();
+    //Needed to display cropped image in UI
+    private MutableLiveData<Uri> mImageCroppedUri = new MutableLiveData<>();
+    //close activity - int will define state of draft on close (pblish/save/delet to set appropriate UI)
+    private SingleLiveEvent<Integer> close =new SingleLiveEvent<>();
+
     @Inject
     public ShotEditionViewModel() {}
 
@@ -93,9 +109,45 @@ public class ShotEditionViewModel extends ViewModel {
         compositeDisposable.clear();
     }
     /**************************************************************************
+     * Event subscribed by activity
+     *************************************************************************/
+    //Event to display image cropped
+    public LiveData<Uri> getImageCroppedUri() {
+        return mImageCroppedUri;
+    }
+
+    public LiveData<Uri> getPickedImageUri() {
+        return mImagePickedUriSource;
+    }
+
+    public LiveData<String> getImagePickedFileName() {
+        return mImagePickedFileName;
+    }
+
+    public LiveData<String> getPickedImgFormat() {
+        return mImagePickedFormat;
+    }
+
+    public LiveData<int[]> getPickedImgSize() {
+        return mImageSize;
+    }
+
+    public SingleLiveEvent<Void> getPickImgEvent() {
+        return pickImg;
+    }
+
+    public SingleLiveEvent<Void> getImagePickedEvent() {
+        return imagePicked;
+    }
+
+    public SingleLiveEvent<Integer> getCloseEvent() {
+        return close;
+    }
+
+    /**************************************************************************
      * Methods call by activity
      *************************************************************************/
-    public void onAttach() {
+    public void init() {
         getSourceType();
     }
 
@@ -103,28 +155,27 @@ public class ShotEditionViewModel extends ViewModel {
         Timber.d("onTagLimitReached called");
     }
 
-
     public void onImagePicked(Context context, int requestCode, int resultCode, Intent data) {
         if (requestCode== Constants.PICK_IMAGE_REQUEST) {
-            imagePickedUriSource = ImagePicker.getImageUriFromResult(context, resultCode, data);
-            imagePickedFileName = ImagePicker.getPickedImageName(context, imagePickedUriSource);
-            Timber.tag("007bond").d(imagePickedFileName);
-            imagePickedFormat= ImageUtils.getImageExtension(context, imagePickedUriSource);
-            int[] imageSize= ImageUtils.imagePickedWidthHeight(context, imagePickedUriSource, 0);
+            //todo - use swicth map ?
+            mImagePickedUriSource.setValue(ImagePicker.getImageUriFromResult(context, resultCode, data));
+            mImagePickedFileName.setValue(ImagePicker.getPickedImageName(context, mImagePickedUriSource.getValue()));
+            mImagePickedFormat.setValue(ImageUtils.getImageExtension(context, mImagePickedUriSource.getValue()));
+            mImageSize.setValue(ImageUtils.imagePickedWidthHeight(context, mImagePickedUriSource.getValue(),
+                    0));
             //TODO single EVENT HERE
+            imagePicked.call();
+            //call this inactivity
             /*mEditShotView.goToUCropActivity(imagePickedFormat, imagePickedUriSource,
                     imagePickedFileName, imageSize);*/
         }
     }
 
-
     public void onImageCropped(int requestCode, int resultCode, Intent data) {
         if (requestCode== UCrop.REQUEST_CROP) {
-            imageCroppedUri = UCrop.getOutput(data); //get Image Uri after being cropped
-            Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
+            mImageCroppedUri.setValue(UCrop.getOutput(data)); //get Image Uri after being cropped
+            Timber.tag("imageCroppedUri").d(mImageCroppedUri.toString());
             isImageChanged=true; // todo - what to do with ?
-            //todo - LIVE DATA HERE
-            //mEditShotView.displayShotImagePreview(imageCroppedUri);
         } else if (resultCode == UCrop.RESULT_ERROR) {
             isImageChanged=false;
             final Throwable cropError = UCrop.getError(data);
@@ -133,7 +184,7 @@ public class ShotEditionViewModel extends ViewModel {
     }
 
     public void onPermissionGranted() {
-        if (imageCroppedUri!=null) {
+        if (mImageCroppedUri.getValue()!=null) {
             registerOrUpdateDraft(mApplication, true);
         }
     }
@@ -159,7 +210,7 @@ public class ShotEditionViewModel extends ViewModel {
             // mEditShotView.showMessageEmptyTitle();
         }
         else {
-            if (imageCroppedUri!=null && imagePickedFormat!=null) {
+            if (mImageCroppedUri.getValue()!=null && mImagePickedFormat!=null) {
                 //TODO - single event or livedata, checked directly in int of Viewmodel?
                 //mEditShotView.checkPermissionExtStorage();
             } else {
@@ -192,6 +243,7 @@ public class ShotEditionViewModel extends ViewModel {
     public void onIllustrationClicked() {
         if (mEditionMode==Constants.EDIT_MODE_NEW_SHOT) {
             //todo single event
+            pickImg.call();
             //mEditShotView.openImagePicker();
         } else {
             //todo single event
@@ -475,14 +527,14 @@ public class ShotEditionViewModel extends ViewModel {
     private void registerOrUpdateDraft(Context context,boolean isRegisteringImage) {
         if (mSource==Constants.SOURCE_DRAFT) {
             if (isRegisteringImage)
-                storeDraftImage(imagePickedFormat, imageCroppedUri, context);
+                storeDraftImage(mImagePickedFormat.getValue(), mImageCroppedUri.getValue(), context);
             else
                 updateInfoDraft(mShotDraft.getImageUrl(), mShotDraft.getImageFormat());
         } else if (mSource==Constants.SOURCE_SHOT) {
             saveInfoDraft(mShot.getImageUrl(), null);
         } else if (mSource==Constants.SOURCE_FAB) {
             if (isRegisteringImage)
-                storeDraftImage(imagePickedFormat,imageCroppedUri,context);
+                storeDraftImage(mImagePickedFormat.getValue(),mImageCroppedUri.getValue(),context);
             else
                 saveInfoDraft( null, null);
         }
@@ -495,7 +547,7 @@ public class ShotEditionViewModel extends ViewModel {
      * @param context - EditShot Activity
      */
     private void storeDraftImage(String imageCroppedFormat, Uri croppedFileUri, Context context) {
-        Timber.tag("imageCroppedUri").d(imageCroppedUri.toString());
+        Timber.tag("imageCroppedUri").d(mImageCroppedUri.getValue().toString());
         compositeDisposable.add(mShotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
                 .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t)) //todo : to comment this
                 .subscribe(
@@ -593,8 +645,8 @@ public class ShotEditionViewModel extends ViewModel {
     private void onDraftDeleted() {
         //mTempDataRepository.setDraftsChanged(true);//TODO LIVE DATA
         //TODO single event
-        /*if (mEditShotView!=null)
-            mEditShotView.stopActivity();*/
+        close.setValue(0); //
+        /*call it in activity stopActivity();*/
     }
 
     /**
@@ -693,13 +745,13 @@ public class ShotEditionViewModel extends ViewModel {
                 if (!isImageChanged)
                     return Uri.parse(mShotDraft.getImageUrl());
                 else
-                    return imageCroppedUri;
+                    return mImageCroppedUri.getValue();
             } else {
                 //if it is not a ShotDraft it is a shot
                 return Uri.parse(mShot.getImageUrl());
             }
         } else {
-            return imageCroppedUri;
+            return mImageCroppedUri .getValue();
         }
     }
 
@@ -707,7 +759,7 @@ public class ShotEditionViewModel extends ViewModel {
         if(!isImageChanged && mShotDraft!=null && mShotDraft.getImageFormat()!=null)
             return mShotDraft.getImageFormat();
         else
-            return imagePickedFormat;
+            return mImagePickedFormat.getValue();
     }
     //Todo - manage this from UI
     private boolean getProfile(){
