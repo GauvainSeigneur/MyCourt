@@ -7,6 +7,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoMap;
 import seigneur.gauvain.mycourt.ui.main.MainViewModel;
+import seigneur.gauvain.mycourt.ui.pin.PinViewModel;
 import seigneur.gauvain.mycourt.ui.shotDraft.ShotDraftViewModel;
 import seigneur.gauvain.mycourt.ui.shotDetail.ShotDetailViewModel;
 import seigneur.gauvain.mycourt.ui.shotEdition.view.ShotEditionViewModel;
@@ -18,6 +19,11 @@ import seigneur.gauvain.mycourt.ui.splash.SplashViewModel;
 
 @Module
 public abstract class ViewModelModule {
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(PinViewModel.class)
+    abstract ViewModel bindPinViewModel(PinViewModel pinViewModel);
 
     @Binds
     @IntoMap

@@ -27,7 +27,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_provider_paths" />
         </provider>
-
         <activity android:name=".ui.AuthActivity" />
         <activity
             android:name=".ui.splash.SplashActivity"
@@ -51,7 +50,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity
-            android:name=".ui.pin.view.PinActivity"/>
+            android:name=".ui.pin.PinActivity"/>
     </application>
 
 </manifest>
