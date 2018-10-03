@@ -3,11 +3,14 @@ package seigneur.gauvain.mycourt.ui.base;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.annotation.CallSuper;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * Base fragment which allows to not duplicate some methods in child
@@ -16,26 +19,29 @@ import android.view.ViewGroup;
 public abstract class BaseFragment extends Fragment {
     public View mRootview;
     public Activity activity;
+    public Unbinder mUnbinder;
+
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        activity = getActivity();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //first time created
-        // Check if it's a new view
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        //use this sucks...
-        if (mRootview == null) {
-            mRootview = inflater.inflate(getFragmentLayout(), container, false );
-            onCreateView(mRootview,savedInstanceState);
-        }
+        mRootview = inflater.inflate(getFragmentLayout(), container, false );
+        mUnbinder = ButterKnife.bind(this, mRootview);
+        onCreateView(mRootview,savedInstanceState);
         return mRootview;
 
     }
-
 
     /**
      method to be overriden.
@@ -47,7 +53,6 @@ public abstract class BaseFragment extends Fragment {
 
     }
 
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -55,9 +60,14 @@ public abstract class BaseFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        activity = getActivity();
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        //mUnbinder.unbind();
     }
 
     /**
@@ -68,3 +78,4 @@ public abstract class BaseFragment extends Fragment {
     protected abstract int getFragmentLayout();
 
 }
+

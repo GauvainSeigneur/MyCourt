@@ -85,7 +85,7 @@ public class ShotEditionViewModel extends ViewModel {
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     //Edition mode accroding to the source;
-    private MutableLiveData <Integer> mEditionMode = new MutableLiveData<>(); //todo - no nedd to use Live data... 
+    private MutableLiveData <Integer> mEditionMode = new MutableLiveData<>(); //todo - no nedd to use Live data...
     //User wants to pick a new image
     private SingleLiveEvent<Void> pickImg =new SingleLiveEvent<>();
     //Needed data to go to cropping activity

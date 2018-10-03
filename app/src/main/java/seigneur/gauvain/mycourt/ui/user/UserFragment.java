@@ -11,15 +11,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.Display;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -39,20 +36,18 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.User;
+import seigneur.gauvain.mycourt.ui.base.BaseFragment;
 import timber.log.Timber;
 
 import static seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp;
 
-
 /**
  * Created by gse on 22/11/2017.
  */
-public class UserFragment extends Fragment  {
+public class UserFragment extends BaseFragment {
 
     @Inject
     Application mApplication;
@@ -99,13 +94,13 @@ public class UserFragment extends Fragment  {
 
     private int screenWidth;
 
-    private Unbinder mUnbinder;
-    public View mRootview;
-
+    /*
+    ************************************************************************************
+    *  Fragment lifecycle
+    ************************************************************************************/
     @SuppressWarnings("deprecation")
     @Override
     public void onAttach(Activity activity) {
-        Timber.d("onAttach");
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             AndroidSupportInjection.inject(this);
         }
@@ -114,14 +109,11 @@ public class UserFragment extends Fragment  {
 
     @Override
     public void onAttach(Context context) {
-        Timber.d("onAttach");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             AndroidSupportInjection.inject(this);
-
         }
         super.onAttach(context);
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -134,16 +126,14 @@ public class UserFragment extends Fragment  {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        Timber.d("onCreateView");
-        mRootview = inflater.inflate(getFragmentLayout(), container, false );
-        mUnbinder= ButterKnife.bind(this, mRootview);
-        initMathData();
-
-        return mRootview;
+    protected int getFragmentLayout() {
+        return R.layout.fragment_user;
     }
 
+    @Override
+    public void onCreateView(View inRootView, Bundle inSavedInstanceState){
+        initMathData();
+    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -156,7 +146,16 @@ public class UserFragment extends Fragment  {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         //listen livedata
-        mUserViewModel.getUser()
+        subscribeToLiveData(mUserViewModel);
+
+    }
+
+    /*
+    ************************************************************************************
+    * VIEWMODEL SUBSCRIPTION
+    ************************************************************************************/
+    private void subscribeToLiveData(UserViewModel viewModel) {
+        viewModel.getUser()
                 .observe(
                         this,
                         new Observer<User>() {
@@ -175,25 +174,15 @@ public class UserFragment extends Fragment  {
 
     }
 
-
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        mUnbinder.unbind();
-    }
-
-    protected int getFragmentLayout() {
-        return R.layout.fragment_user;
-    }
-
-
+    /*
+    ************************************************************************************
+    * UI methods
+    ************************************************************************************/
     public void showNoConnectionView(boolean visible) {
         if(visible) {
             Toast.makeText(getActivity(), "no connection", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     public void setUpUserAccountInfo(User user){
         name.setText(user.getName());
@@ -223,11 +212,7 @@ public class UserFragment extends Fragment  {
                 .into(avatar);
     }
 
-
-    public void showNoTeamsView(boolean visible) {
-
-    }
-
+    public void showNoTeamsView(boolean visible) {}
 
     public void showUserLinks(User user) {
         ArrayList userLinks = new ArrayList();
@@ -253,9 +238,8 @@ public class UserFragment extends Fragment  {
 
     /*
     *********************************************************************************
-    * Internal methods
+    * Math & utils
     *********************************************************************************/
-
     /**
      * add to appbar a listener for scroll change in order to provide some
      * nice animation on scroll
@@ -315,7 +299,7 @@ public class UserFragment extends Fragment  {
                     avatar.setY(transitionY);
 
                     float transitionNameY = (vRatio * nameExpandTopMargin)//Manage padding when appBar is expanded
-                                            + (diffToolbarHeightNameheight/2 -((diffToolbarHeightNameheight/2)*vRatio)); //Manage padding when appBar is collapsed
+                            + (diffToolbarHeightNameheight/2 -((diffToolbarHeightNameheight/2)*vRatio)); //Manage padding when appBar is collapsed
                     userTextInfoInAppbar.setY(transitionNameY);
                     //name.setY(transitionNameY);
                     userLocation.setAlpha(vRatio);

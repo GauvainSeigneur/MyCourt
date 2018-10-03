@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 
 import seigneur.gauvain.mycourt.R;
 
+
 public abstract class FragmentStateManager {
     private static final String TAG = "FragmentStateManager";
     private static final boolean DEBUG = false;
@@ -60,6 +61,8 @@ public abstract class FragmentStateManager {
         // Set fragment as primary navigator for child manager back stack to be handled by system
         fragmentTransaction.setPrimaryNavigationFragment(fragment);
         fragmentTransaction.setReorderingAllowed(true);
+
+
         fragmentTransaction.commitNowAllowingStateLoss();
 
         return fragment;
