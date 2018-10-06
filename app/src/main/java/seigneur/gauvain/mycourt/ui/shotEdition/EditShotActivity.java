@@ -1,9 +1,6 @@
-package seigneur.gauvain.mycourt.ui.shotEdition.view;
+package seigneur.gauvain.mycourt.ui.shotEdition;
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -13,7 +10,6 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
@@ -22,10 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
-import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.FrameLayout;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -35,6 +28,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -54,39 +48,21 @@ import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.ShotRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.ui.base.BaseActivity;
-import seigneur.gauvain.mycourt.ui.shotEdition.presenter.EditShotPresenterImpl;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.ImagePicker;
-import seigneur.gauvain.mycourt.ui.shotEdition.presenter.EditShotPresenter;
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView;
 import seigneur.gauvain.mycourt.utils.ImageUtils;
 import seigneur.gauvain.mycourt.utils.MyTextUtils;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import timber.log.Timber;
 
-public class EditShotActivity extends BaseActivity implements EditShotView {
+public class EditShotActivity extends BaseActivity {
 
     @Inject
     ViewModelProvider.Factory viewModelFactory;
 
-    @Inject
-    ShotDraftRepository mShotDraftRepository;
-
-    @Inject
-    NetworkErrorHandler mNetworkErrorHandler;
-
-    @Inject
-    ConnectivityReceiver mConnectivityReceiver;
-
-    @Inject
-    ShotRepository mShotRepository;
-
-    @Inject
-    TempDataRepository mTempDataRepository;
-
-    @Inject
-    EditShotPresenter mEditShotPresenter;
+    private ShotEditionViewModel mShotEditionViewModel;
 
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -104,92 +80,113 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     TextInputEditText mShotDescriptionEditor;
 
     @BindView(R.id.cropped_img_preview)
-    FourThreeImageView croppedImagepreview;
+    FourThreeImageView croppedImagePreview;
 
-    @BindView(R.id.confirm_action_layout)
-    FrameLayout confirmActionLayout;
-
-    @BindView(R.id.fab_draft)
-    FloatingActionButton fabDraft;
-
-    @BindView(R.id.fab_publish)
-    FloatingActionButton fabPublish;
-
-    @BindView(R.id.layout_buttons)
-    FrameLayout layoutButtons;
-
-    @BindView(R.id.scrim_view)
-    View scrimView;
-
-    @BindView(R.id.fab_confirm)
-    FloatingActionButton fabConfirm;
-
-    //for confirmation menu
-    private boolean isConfirmMenuOpen = false;
-    private int revealX;
-    private int revealY;
-    private int openStartRadius;
-    private int openEndRadius;
-    private int closeStartRadius;
-    private int closeEndRadius;
-    private Animator openAnim, closeAnim;
-    private ObjectAnimator openFadeIn, closeFadeOut;
-    private AnimatorSet openAnimatorSet, closeAnimatorSet;
+    @BindView(R.id.btn_store)
+    Button storeBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_shot);
         ButterKnife.bind(this);
+        //provide Dependencies
         AndroidInjection.inject(this);
-        mEditShotPresenter.onAttach();
 
-        //editor must be set before presenter first method to check text change!
+        //Provide ViewModel
+        mShotEditionViewModel = ViewModelProviders.of(this, viewModelFactory).get(ShotEditionViewModel.class);
+        mShotEditionViewModel.init();
+        //Subscribe to ViewModel data and event
+        subscribeToLiveData(mShotEditionViewModel);
+        subscribeToSingleEvent(mShotEditionViewModel);
+
+        //Listen EditText
         mShotTitleEditor.addTextChangedListener(titleWatcher);
         mTagEditor.addTextChangedListener(tagWtacher);
         mShotDescriptionEditor.addTextChangedListener(descriptionWatcher);
     }
 
-    @OnClick(R.id.fab_confirm)
-    public void confirmEdition() {
-        mEditShotPresenter.onConfirmEditionClicked(true);
+    @OnClick(R.id.btn_store)
+    public void store() {
+        mShotEditionViewModel.onStoreDraftClicked();
     }
 
-    @OnClick(R.id.fab_draft)
-    public void draftShot() {
-        mEditShotPresenter.onDraftShotClicked(this);
+    /*
+    *********************************************************************************************
+    * EVENT WHICH VIEW WILL SUBSCRIBE
+    *********************************************************************************************/
+    private void subscribeToLiveData(ShotEditionViewModel viewModel) {
+        viewModel.getCroppedImageUri().observe(this, this::displayShotImagePreview);
+
+        viewModel.getTitle().observe(this, title -> {
+            Timber.d("title change:" +title);
+        });
+
+        viewModel.getDescription().observe(this,  desc -> {
+            Timber.d("desc change:" +desc);
+        });
+
+        viewModel.getTags().observe(this, tags -> {
+            Timber.d("tags change:" +tags);
+        });
     }
 
-    @OnClick(R.id.fab_publish)
-    public void publishShot() {
-        mEditShotPresenter.onPublishClicked(this);
+    private void subscribeToSingleEvent(ShotEditionViewModel viewModel) {
+
+        viewModel.getSetUpUiCmd().observe(this,
+                call -> setUpShotEditionUI(
+                        mShotEditionViewModel.getObjectSource(),
+                        mShotEditionViewModel.getSource())
+        );
+
+        viewModel.getPickShotCommand().observe(this, call -> openImagePicker());
+
+        viewModel.getCropImageCmd().observe(this,
+                call -> goToUCropActivity(
+                        mShotEditionViewModel.imagePickedFormat,
+                        mShotEditionViewModel.imagePickedUriSource,
+                        mShotEditionViewModel.imagePickedFileName,
+                        mShotEditionViewModel.imageSize));
+
+        viewModel.getPickCropImgErrorCmd().observe(this,
+                errorCode -> Toast.makeText(this, "oops :"+errorCode , Toast.LENGTH_SHORT).show());
+
     }
 
+    /*
+    *********************************************************************************************
+    * INNER
+    *********************************************************************************************/
     @OnClick(R.id.cropped_img_preview)
     public void shotPreviewClick() {
-        mEditShotPresenter.onIllustrationClicked();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
+        mShotEditionViewModel.onImagePreviewClicked();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            if (requestCode== Constants.PICK_IMAGE_REQUEST)
-                mEditShotPresenter.onImagePicked(this, requestCode, resultCode, data);
+            if (requestCode== Constants.PICK_IMAGE_REQUEST) {
+                mShotEditionViewModel.setImagePickedUriSource(ImagePicker.getImageUriFromResult(this, resultCode, data));
+                mShotEditionViewModel.setImagePickedFileName(ImagePicker.getPickedImageName(this, mShotEditionViewModel.getImagePickedUriSource()));
+                mShotEditionViewModel.setImagePickedFormat(ImageUtils.getImageExtension(this, mShotEditionViewModel.getImagePickedUriSource()));
+                mShotEditionViewModel.setImageSize(ImageUtils.imagePickedWidthHeight(this, mShotEditionViewModel.getImagePickedUriSource(), 0));
+
+                mShotEditionViewModel.onImagePicked();
+            }
             else
-                //viewModel.mutableImageCroppedUri().setValue(UCrop.getOutput(data)); //this way, the ViewModel keep the ref of the value , so maye be add the VieModel as a parameter of presenter and all injected dependencies too
-                mEditShotPresenter.onImageCropped(requestCode,resultCode, data);
+                if (requestCode == UCrop.REQUEST_CROP)
+                    mShotEditionViewModel.onImageCropped(UCrop.getOutput(data));
+        } else {
+            if (resultCode == UCrop.RESULT_ERROR)
+                mShotEditionViewModel.onPickcropError(0);
+            else
+                mShotEditionViewModel.onPickcropError(1);
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mEditShotPresenter.onDetach();
     }
 
     /**
@@ -204,9 +201,11 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
             case Constants.REQUEST_STORAGE_WRITE_ACCESS_PERMISSION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //saveCroppedImage(resultCropUri);
-                    mEditShotPresenter.onPermissionGranted(this);
+                    //todo single live event
+                    //mEditShotPresenter.onPermissionGranted(this);
                 } else {
-                    mEditShotPresenter.onPermissionDenied();
+                    //todo single live event
+                    //mEditShotPresenter.onPermissionDenied();
                 }
                 break;
             default:
@@ -215,7 +214,6 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     }
 
 
-    @Override
     public void displayShotImagePreview(Uri uriImageCropped) {
         if (uriImageCropped!=null) {
             Glide
@@ -228,22 +226,23 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
                                     .placeholder(R.mipmap.ic_launcher)
                             //.error(R.mipmap.ic_launcher)
                     )
-                    .into(croppedImagepreview);
+                    .into(croppedImagePreview);
         } else {
-            croppedImagepreview.setImageResource(R.drawable.add_image_illustration);
+            croppedImagePreview.setImageResource(R.drawable.add_image_illustration);
         }
     }
 
-    @Override
+
     public void checkPermissionExtStorage() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            mEditShotPresenter.onPermissionDenied();
+            //todo single live event
+            //mEditShotPresenter.onPermissionDenied();
         } else {
-            mEditShotPresenter.onPermissionGranted(this);
+            //todo single live event
+            //mEditShotPresenter.onPermissionGranted(this);
         }
     }
 
-    @Override
     public void requestPermission() {
         requestPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -251,30 +250,30 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
                 Constants.REQUEST_STORAGE_WRITE_ACCESS_PERMISSION);
     }
 
-    @Override
     public void notifyPostSaved() {
         Toast.makeText(this, "ShotDraft saved in memory: ", Toast.LENGTH_SHORT).show();
         finishAfterTransition();
     }
 
-    @Override
     public void setUpShotEditionUI(Object object, int source) {
-        mToolbar.setTitle("Edit a shot");
-        setUpEditionUI(true, object, source);
+        //Listen text change
+        mShotTitleEditor.addTextChangedListener(titleWatcher);
+        mTagEditor.addTextChangedListener(tagWtacher);
+        mShotDescriptionEditor.addTextChangedListener(descriptionWatcher);
+
+        if (object!=null)  {
+            mToolbar.setTitle("Edit a shot");
+            setUpEditionUI(true, object, source);
+        } else {
+            mToolbar.setTitle("Create a shot");
+            setUpCreationModeUI();
+        }
     }
 
-    @Override
-    public void setUpShotCreationUI() {
-        mToolbar.setTitle("Create a shot");
-        setUpCreationModeUI();
-    }
-
-    @Override
     public void openImagePicker() {
         ImagePicker.pickImage(this, Constants.PICK_IMAGE_REQUEST);
     }
 
-    @Override
     public void goToUCropActivity(String imagePickedformat,
                                   Uri imagePickedUriSource,
                                   String imagePickedFileName,
@@ -285,119 +284,28 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
                 imageSize);
     }
 
-    @Override
     public void showImageNotUpdatable() {
         Toast.makeText(EditShotActivity.this, "Shot can't be changed in edition mode", Toast.LENGTH_SHORT).show();
     }
 
-    @Override
     public void openConfirmMenu() {
-        showHideConfirmMenu();
     }
 
-    @Override
     public void stopActivity() {
         finish();
     }
 
-    /********************************************************************
-     * ACTIVITY PRIVATE METHODS
-     *******************************************************************/
-    private void showHideConfirmMenu() {
-        final int[] stateSet = {android.R.attr.state_checked * (!isConfirmMenuOpen ? 1 : -1)};
-        fabConfirm.setImageState(stateSet, true);
-        revealX = fabConfirm.getLeft()+fabConfirm.getWidth()/2;
-        revealY = fabConfirm.getTop()+fabConfirm.getHeight()/2;
-        openStartRadius = 0;
-        openEndRadius = (int) Math.hypot(layoutMain.getWidth(), layoutMain.getHeight());
-        closeStartRadius = Math.max(layoutMain.getWidth(), layoutMain.getHeight());
-        closeEndRadius=0;
-        if (!isConfirmMenuOpen) {
-            //fab.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(),android.R.color.white,null)));
-            //fab.setImageResource(R.drawable.ic_close_grey);
-            openAnim = ViewAnimationUtils.createCircularReveal(layoutButtons, revealX, revealY, openStartRadius, openEndRadius);
-            openFadeIn = ObjectAnimator.ofFloat(scrimView, "alpha", 0f, 1f);
-            openAnimatorSet = new AnimatorSet();
-            openAnimatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
-            openAnimatorSet.play(openAnim).with(openFadeIn);
-            openAnimatorSet.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animator) {
-                    confirmActionLayout.setVisibility(View.VISIBLE);
-                    //scrimView.setVisibility(View.VISIBLE);
-                    fabConfirm.setClickable(false);
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animator) {
-                    isConfirmMenuOpen = true;
-                    fabConfirm.setClickable(true);
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animator) {
-                    fabConfirm.setClickable(true);
-                    isConfirmMenuOpen = false;
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animator) {
-
-                }
-            });
-            openAnimatorSet.start();
-
-        } else {
-            //fab.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(),R.color.colorAccent,null)));
-            //fab.setImageResource(R.drawable.ic_plus_white);
-            closeAnim = ViewAnimationUtils.createCircularReveal(layoutButtons, revealX, revealY, closeStartRadius, closeEndRadius);
-            closeFadeOut = ObjectAnimator.ofFloat(scrimView, "alpha", 1f, 0f);
-            closeAnimatorSet = new AnimatorSet();
-            closeAnimatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
-            closeAnimatorSet.play(closeAnim).with(closeFadeOut);
-            closeAnimatorSet.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animator) {
-                    fabConfirm.setClickable(false);
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animator) {
-                    confirmActionLayout.setVisibility(View.GONE);
-                    // scrimView.setVisibility(View.GONE);
-                    fabConfirm.setClickable(true);
-                    isConfirmMenuOpen = false;
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animator) {
-                    fabConfirm.setClickable(true);
-                    isConfirmMenuOpen = true;
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animator) {
-
-                }
-            });
-            closeAnimatorSet.start();
-        }
+    /*
+    *********************************************************************************************
+    * UI - MANAGE EDITION MODE
+    *********************************************************************************************/
+    private void setUpCreationModeUI() {
+        croppedImagePreview.setImageResource(R.drawable.add_image_illustration);
     }
 
-    /********************************************************************
-     * UI - EDITION MODE
-     *******************************************************************/
     private void setUpEditionUI(final boolean isTransactionPostponed,Object object, int source) {
-
-        if (isTransactionPostponed)
-            postponeEnterTransition();
-       // Toast.makeText(this, ""+url, Toast.LENGTH_SHORT).show();
-
-        /**
-         *  AS shot image is loaded from Glide ressource, put listener to define when to start startPostponedEnterTransition
-         */
-        Glide
-                .with(this)
+        if (isTransactionPostponed) postponeEnterTransition();
+        Glide.with(this)
                 .asBitmap()
                 .load(getImageUrl(object, source))
                 .apply(new RequestOptions()
@@ -407,7 +315,6 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
                         if (isTransactionPostponed) startPostponedEnterTransition();
-                        //croppedImagepreview.setImageResource(R.drawable.ic_my_shot_black_24dp);
                         return false;
                     }
 
@@ -417,7 +324,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
                         return false;
                     }
                 })
-                .into(croppedImagepreview);
+                .into(croppedImagePreview);
 
         mTagEditor.setText(getTagList(object));
         mShotTitleEditor.setText(getTitle(object));
@@ -428,6 +335,7 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
 
 
     //get title from data sent by presenter
+    //todo - mange this in Viewmodel to alwas send the same livedata
     public String getTitle(Object object){
         if (object instanceof Shot) {
             Shot shot = (Shot) object;
@@ -509,23 +417,18 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
     public void showMessageEmptyTitle() {
         Toast.makeText(this, "please define a title", Toast.LENGTH_SHORT).show();
     }
-    /********************************************************************
-     * UI - CREATION MODE
-     *******************************************************************/
-    private void setUpCreationModeUI() {
-        croppedImagepreview.setImageResource(R.drawable.add_image_illustration);
-    }
 
-    /********************************************************************
-     * TextWatcher
-     *******************************************************************/
+    /*
+     *********************************************************************************************
+     * TEXTWATCHER
+     *********************************************************************************************/
     private final TextWatcher titleWatcher = new TextWatcher() {
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
         }
 
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            mEditShotPresenter.onTitleChanged(s.toString());
+            mShotEditionViewModel.onTitleChanged(s.toString());
         }
 
         public void afterTextChanged(Editable s) {
@@ -537,13 +440,14 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
         }
 
         public void onTextChanged(CharSequence s, int start, int before, int count) {
+            //todo - must manage tag limit in ViewmODEL
             String tagString = s.toString();
             int commas = s.toString().replaceAll("[^,]","").length();
             Timber.d(commas+"");
             if (commas<12) {
-                mEditShotPresenter.onTagChanged(tagString);
+                mShotEditionViewModel.onTagChanged(tagString);
             } else {
-                mEditShotPresenter.onTagLimitReached();
+
             }
         }
 
@@ -556,12 +460,13 @@ public class EditShotActivity extends BaseActivity implements EditShotView {
         }
 
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            mEditShotPresenter.onDescriptionChanged(s.toString());
+            mShotEditionViewModel.onDescriptionChanged(s.toString());
         }
 
         public void afterTextChanged(Editable s) {
         }
     };
+
 }
 
 

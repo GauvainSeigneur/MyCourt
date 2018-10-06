@@ -25,7 +25,7 @@ import dagger.android.support.HasSupportFragmentInjector;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.ui.base.BaseActivity;
 import seigneur.gauvain.mycourt.ui.shotDraft.ShotDraftFragment;
-import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotActivity;
+import seigneur.gauvain.mycourt.ui.shotEdition.EditShotActivity;
 import seigneur.gauvain.mycourt.ui.shots.ShotsFragment;
 import seigneur.gauvain.mycourt.ui.user.UserFragment;
 import seigneur.gauvain.mycourt.utils.FragmentStateManager;

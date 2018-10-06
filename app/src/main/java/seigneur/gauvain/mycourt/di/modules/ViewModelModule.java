@@ -10,7 +10,7 @@ import seigneur.gauvain.mycourt.ui.main.MainViewModel;
 import seigneur.gauvain.mycourt.ui.pin.PinViewModel;
 import seigneur.gauvain.mycourt.ui.shotDraft.ShotDraftViewModel;
 import seigneur.gauvain.mycourt.ui.shotDetail.ShotDetailViewModel;
-import seigneur.gauvain.mycourt.ui.shotEdition.view.ShotEditionViewModel;
+import seigneur.gauvain.mycourt.ui.shotEdition.ShotEditionViewModel;
 import seigneur.gauvain.mycourt.ui.shots.ShotsViewModel;
 import seigneur.gauvain.mycourt.ui.user.UserViewModel;
 import seigneur.gauvain.mycourt.di.scope.ViewModelKey;
@@ -59,7 +59,6 @@ public abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(ShotDetailViewModel.class)
     abstract ViewModel bindShotDetailViewModel(ShotDetailViewModel shotDetailViewModel);
-
 
     @Binds
     abstract ViewModelProvider.Factory bindViewModelFactory(FactoryViewModel factory);

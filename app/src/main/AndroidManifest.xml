@@ -44,7 +44,7 @@
         <activity
             android:name=".ui.shotDetail.ShotDetailActivity"
             android:theme="@style/MyCourt.DetailShotActivityTheme"/>
-        <activity android:name=".ui.shotEdition.view.EditShotActivity"/>
+        <activity android:name=".ui.shotEdition.EditShotActivity"/>
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"

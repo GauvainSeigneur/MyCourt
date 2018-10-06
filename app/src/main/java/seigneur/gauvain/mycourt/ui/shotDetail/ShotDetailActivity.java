@@ -47,7 +47,7 @@ import dagger.android.AndroidInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.ui.base.BaseActivity;
-import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotActivity;
+import seigneur.gauvain.mycourt.ui.shotEdition.EditShotActivity;
 import seigneur.gauvain.mycourt.utils.ImageUtils;
 import seigneur.gauvain.mycourt.utils.MyColorUtils;
 import seigneur.gauvain.mycourt.utils.MyTextUtils;

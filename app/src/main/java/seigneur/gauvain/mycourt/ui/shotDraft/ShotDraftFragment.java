@@ -34,7 +34,7 @@ import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.ui.main.MainViewModel;
-import seigneur.gauvain.mycourt.ui.shotEdition.view.EditShotActivity;
+import seigneur.gauvain.mycourt.ui.shotEdition.EditShotActivity;
 import timber.log.Timber;
 
 

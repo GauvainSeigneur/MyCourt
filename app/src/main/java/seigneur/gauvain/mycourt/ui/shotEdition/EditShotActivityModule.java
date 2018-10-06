@@ -1,7 +1,6 @@
-package seigneur.gauvain.mycourt.ui.shotEdition.view;
+package seigneur.gauvain.mycourt.ui.shotEdition;
 
 import android.app.Activity;
-import android.arch.lifecycle.LifecycleOwner;
 
 import dagger.Binds;
 import dagger.Module;
@@ -21,17 +20,5 @@ public abstract class EditShotActivityModule {
     @Binds
     @PerActivity
     abstract Activity activity(EditShotActivity mEditShotActivity);
-
-    /**
-     *
-     * @param mEditShotActivity
-     * @return
-     */
-    @Binds
-    @PerActivity
-    abstract EditShotView createPostView(EditShotActivity mEditShotActivity);
-
-
-
 
 }
