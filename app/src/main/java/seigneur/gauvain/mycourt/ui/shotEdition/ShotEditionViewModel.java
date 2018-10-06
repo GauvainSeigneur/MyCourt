@@ -70,6 +70,8 @@ public class ShotEditionViewModel extends ViewModel implements
     //Pick and Crop Image
     private SingleLiveEvent<Void> mPickShotCommand = new SingleLiveEvent<>();
     private SingleLiveEvent<Void> mCropImageCmd = new SingleLiveEvent<>();
+    private SingleLiveEvent<Void> mRequestPermCmd = new SingleLiveEvent<>();
+    private SingleLiveEvent<Void> mCheckPerm = new SingleLiveEvent<>();
     public Uri imagePickedUriSource = null; //NOT LIVEDATA - NOT RELATED TO UI
     public String imagePickedFileName = null; //NOT LIVEDATA - NOT RELATED TO UI
     public String imagePickedFormat = null; //NOT LIVEDATA - NOT RELATED TO UI
@@ -117,6 +119,14 @@ public class ShotEditionViewModel extends ViewModel implements
 
     public SingleLiveEvent<Void> getSetUpUiCmd() {
         return mSetUpUiCmd;
+    }
+
+    public SingleLiveEvent<Void> getRequestPermCmd() {
+        return mRequestPermCmd;
+    }
+
+    public SingleLiveEvent<Void> getCheckPerm() {
+        return mCheckPerm;
     }
 
     public LiveData<Uri> getCroppedImageUri() {
@@ -175,8 +185,21 @@ public class ShotEditionViewModel extends ViewModel implements
         mTags.setValue(tagListWithoutQuote(tag));
     }
 
+    public void requestPerm() {
+        mRequestPermCmd.call();
+    }
+
+    public void onPermGranted() {
+        registerOrUpdateDraft(mApplication, true);
+    }
+
     public void onStoreDraftClicked() {
-        registerOrUpdateDraft(mApplication, false);
+        if (getCroppedImageUri().getValue()!=null && getImagePickedFormat() !=null) {
+            mCheckPerm.call();
+        } else {
+            registerOrUpdateDraft(mApplication, false);
+        }
+
         /*if (getTitle().getValue() == null || getTitle().getValue().isEmpty()) {
             //TODO - single live event
             //mEditShotView.showMessageEmptyTitle();
@@ -257,25 +280,28 @@ public class ShotEditionViewModel extends ViewModel implements
     private void registerOrUpdateDraft(Context context, boolean isRegisteringImage) {
         if (mSource == Constants.SOURCE_DRAFT) {
             if (isRegisteringImage) {
-                //storeDraftImage(getImagePickedFormat(), getCroppedImageUri().getValue(), context);
+                mStoreDrafTask.storeDraftImage(context,compositeDisposable, mShotDraftRepository,
+                        getImagePickedFormat(), getCroppedImageUri().getValue());
             } else {
-                mStoreDrafTask.updateDraft(
+                mStoreDrafTask.updateInfoDraft(
                         compositeDisposable, mShotDraftRepository, mObjectSource,
+                        ((ShotDraft)mObjectSource).getImageUrl(), ((ShotDraft)mObjectSource).getImageFormat(),
                         getTitle().getValue(), getDescription().getValue(),
                         getTags().getValue(), getEditionMode());
             }
         } else if (mSource == Constants.SOURCE_SHOT) {
-            mStoreDrafTask.saveDraft(
+            mStoreDrafTask.saveInfoDraft(
                     compositeDisposable, mShotDraftRepository,mObjectSource,
                     ((Shot) mObjectSource).getImageUrl(), null,
                     getTitle().getValue(), getDescription().getValue(),
                     getTags().getValue(), getEditionMode());
         } else if (mSource == Constants.SOURCE_FAB) {
             if (isRegisteringImage) {
-                //storeDraftImage(imagePickedFormat, getCroppedImageUri().getValue(), context);
+                mStoreDrafTask.storeDraftImage(context,compositeDisposable, mShotDraftRepository,
+                        getImagePickedFormat(), getCroppedImageUri().getValue());
             }
             else
-                mStoreDrafTask.saveDraft(
+                mStoreDrafTask.saveInfoDraft(
                         compositeDisposable, mShotDraftRepository, mObjectSource,
                         null, null, getTitle().getValue(), getDescription().getValue(),
                         getTags().getValue(), getEditionMode());
@@ -395,8 +421,19 @@ public class ShotEditionViewModel extends ViewModel implements
     * StoreTaskCallback
     *********************************************************************************************/
     @Override
-    public void onSaveImageSuccess() {
-
+    public void onSaveImageSuccess(String uri) {
+        if (mSource==Constants.SOURCE_DRAFT) {
+            mStoreDrafTask.updateInfoDraft(
+                    compositeDisposable, mShotDraftRepository, mObjectSource,
+                    uri, getImagePickedFormat(),
+                    getTitle().getValue(), getDescription().getValue(),
+                    getTags().getValue(), getEditionMode());
+        } else {
+            mStoreDrafTask.saveInfoDraft(
+                    compositeDisposable, mShotDraftRepository, mObjectSource,
+                    uri, getImagePickedFormat(), getTitle().getValue(), getDescription().getValue(),
+                    getTags().getValue(), getEditionMode());
+        }
     }
 
     @Override

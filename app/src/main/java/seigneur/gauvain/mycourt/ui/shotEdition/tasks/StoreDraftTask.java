@@ -27,61 +27,52 @@ public class StoreDraftTask {
         this.mStoreRequestListener=requestListener;
     }
 
-    /**
-     * Store image in "My Court" folder in external storage and get the URI to save it in DB
-     * @param context - context, must be application context
-     * @param compositeDisposable
-     * @param shotDraftRepository
-     * @param imageCroppedFormat
-     * @param croppedFileUri
-     * @param imageStorageURL
-     * @param id
-     * @param title
-     * @param desc
-     * @param tags
-     * @param typeOfDraft
-     */
+
+    //Store image in "My Court" folder in external storage and get the URI to save it in DB
     public void storeDraftImage(Context context,
                                 CompositeDisposable compositeDisposable,
                                 ShotDraftRepository shotDraftRepository,
                                 String imageCroppedFormat,
-                                Uri croppedFileUri,
-                                String imageStorageURL,
-                                String id,
-                                String title,
-                                String desc,
-                                ArrayList<String> tags,
-                                int typeOfDraft) {
-        compositeDisposable.add(shotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
+                                Uri croppedFileUri) {
+        compositeDisposable.add(
+                shotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
                 .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t)) //todo : to comment this
                 .subscribe(
                         //TODO -listener !!!
-                        uri -> saveDraft(compositeDisposable,
-                                shotDraftRepository,
-                                imageStorageURL,
-                                imageCroppedFormat,
-                                id,
-                                title,
-                                desc,
-                                tags,
-                                typeOfDraft),
+                        uri -> mStoreRequestListener.onSaveImageSuccess(uri),
                         this::doOnCopyImageError
                 )
         );
     }
 
-    /**
-     * Save or update draft in db
-     * @param compositeDisposable
-     * @param shotDraftRepository
-     * @param imageUri
-     * @param imageFormat
-     * @param title
-     * @param desc
-     * @param tags
-     * @param typeOfDraft
-     */
+
     public void saveDraft(CompositeDisposable compositeDisposable,
+                              ShotDraftRepository shotDraftRepository,
+                              Object sourceObject,
+                              @Nullable String imageUri,
+                              @Nullable String imageFormat,
+                              String title,
+                              String desc,
+                              ArrayList<String> tags,
+                              int typeOfDraft) {
+        Timber.d("save draft called");
+        //just update a draft
+        ShotDraft shotDraft =  createShotDraft(
+                getDraftId(sourceObject), imageUri,imageFormat,
+                getShotId(sourceObject),
+                title,desc, getProfile(sourceObject), tags,
+                typeOfDraft, getDateOfPublication(sourceObject), getDateOfUpdate(sourceObject));
+        compositeDisposable.add(
+                shotDraftRepository.storeShotDraft(shotDraft)
+                        .subscribe(
+                                this::onDraftSaved, //todo Listener
+                                this::onDraftSavingError //todo Listener
+                        )
+        );
+
+    }
+    //Save only info of draft
+    public void saveInfoDraft(CompositeDisposable compositeDisposable,
                           ShotDraftRepository shotDraftRepository,
                           Object sourceObject,
                           @Nullable String imageUri,
@@ -104,13 +95,15 @@ public class StoreDraftTask {
                                     this::onDraftSavingError //todo Listener
                             )
             );
-
     }
 
-    public void updateDraft(
+    //update draft in db
+    public void updateInfoDraft(
             CompositeDisposable compositeDisposable,
             ShotDraftRepository shotDraftRepository,
             Object sourceObject,
+            @Nullable String imageUri,
+            @Nullable String imageFormat,
             String title,
             String desc,
             ArrayList<String> tags,
@@ -118,8 +111,8 @@ public class StoreDraftTask {
         Timber.d("update draft called");
         ShotDraft shotDraft =  createShotDraft(
                 getDraftId(sourceObject),
-                ((ShotDraft)sourceObject).getImageUrl(),
-                ((ShotDraft)sourceObject).getImageFormat(),
+                imageUri,
+                imageFormat,
                 getShotId(sourceObject),title,desc, getProfile(sourceObject), tags, typeOfDraft,
                 getDateOfPublication(sourceObject),
                 getDateOfUpdate(sourceObject));
@@ -280,7 +273,7 @@ public class StoreDraftTask {
      */
     public interface StoreRequestListener {
 
-        void onSaveImageSuccess();
+        void onSaveImageSuccess(String uri);
 
         void onStoreDraftSucees();
 

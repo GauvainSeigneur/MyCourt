@@ -151,6 +151,12 @@ public class EditShotActivity extends BaseActivity {
         viewModel.getPickCropImgErrorCmd().observe(this,
                 errorCode -> Toast.makeText(this, "oops :"+errorCode , Toast.LENGTH_SHORT).show());
 
+        viewModel.getCheckPerm().observe(this,
+                call -> checkPermissionExtStorage());
+
+        viewModel.getRequestPermCmd().observe(this,
+                call -> requestPermission());
+
     }
 
     /*
@@ -200,12 +206,9 @@ public class EditShotActivity extends BaseActivity {
         switch (requestCode) {
             case Constants.REQUEST_STORAGE_WRITE_ACCESS_PERMISSION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //saveCroppedImage(resultCropUri);
-                    //todo single live event
-                    //mEditShotPresenter.onPermissionGranted(this);
+                    mShotEditionViewModel.onPermGranted();
                 } else {
-                    //todo single live event
-                    //mEditShotPresenter.onPermissionDenied();
+                    mShotEditionViewModel.requestPerm();
                 }
                 break;
             default:
@@ -236,10 +239,9 @@ public class EditShotActivity extends BaseActivity {
     public void checkPermissionExtStorage() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             //todo single live event
-            //mEditShotPresenter.onPermissionDenied();
+            mShotEditionViewModel.requestPerm();
         } else {
-            //todo single live event
-            //mEditShotPresenter.onPermissionGranted(this);
+            mShotEditionViewModel.onPermGranted();
         }
     }
 
