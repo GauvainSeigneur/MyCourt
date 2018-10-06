@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
+import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.utils.Constants;
@@ -37,11 +38,8 @@ public class StoreDraftTask {
      * @param id
      * @param title
      * @param desc
-     * @param profile
      * @param tags
      * @param typeOfDraft
-     * @param dateOfPublication
-     * @param dateOfUpdate
      */
     public void storeDraftImage(Context context,
                                 CompositeDisposable compositeDisposable,
@@ -52,11 +50,8 @@ public class StoreDraftTask {
                                 String id,
                                 String title,
                                 String desc,
-                                boolean profile,
                                 ArrayList<String> tags,
-                                int typeOfDraft,
-                                @Nullable Date dateOfPublication,
-                                @Nullable Date dateOfUpdate) {
+                                int typeOfDraft) {
         compositeDisposable.add(shotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
                 .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t)) //todo : to comment this
                 .subscribe(
@@ -68,11 +63,8 @@ public class StoreDraftTask {
                                 id,
                                 title,
                                 desc,
-                                profile,
                                 tags,
-                                typeOfDraft,
-                                dateOfPublication,
-                                dateOfUpdate),
+                                typeOfDraft),
                         this::doOnCopyImageError
                 )
         );
@@ -84,30 +76,27 @@ public class StoreDraftTask {
      * @param shotDraftRepository
      * @param imageUri
      * @param imageFormat
-     * @param id
      * @param title
      * @param desc
-     * @param profile
      * @param tags
      * @param typeOfDraft
-     * @param dateOfPublication
-     * @param dateOfUpdate
      */
     public void saveDraft(CompositeDisposable compositeDisposable,
-                            ShotDraftRepository shotDraftRepository,
-                            @Nullable String imageUri,
-                            @Nullable String imageFormat,
-                            String id,
-                            String title,
-                            String desc,
-                            boolean profile,
-                            ArrayList<String> tags,
-                            int typeOfDraft,
-                            @Nullable Date dateOfPublication,
-                            @Nullable Date dateOfUpdate) {
+                          ShotDraftRepository shotDraftRepository,
+                          Object sourceObject,
+                          @Nullable String imageUri,
+                          @Nullable String imageFormat,
+                          String title,
+                          String desc,
+                          ArrayList<String> tags,
+                          int typeOfDraft) {
         Timber.d("save draft called");
             //just update a draft
-            ShotDraft shotDraft =  createShotDraft(0,imageUri,imageFormat,id,title,desc, profile, tags, typeOfDraft, dateOfPublication, dateOfUpdate);
+            ShotDraft shotDraft =  createShotDraft(
+                    getDraftId(sourceObject), imageUri,imageFormat,
+                    getShotId(sourceObject),
+                    title,desc, getProfile(sourceObject), tags,
+                    typeOfDraft, getDateOfPublication(sourceObject), getDateOfUpdate(sourceObject));
             compositeDisposable.add(
                     shotDraftRepository.storeShotDraft(shotDraft)
                             .subscribe(
@@ -122,18 +111,18 @@ public class StoreDraftTask {
             CompositeDisposable compositeDisposable,
             ShotDraftRepository shotDraftRepository,
             Object sourceObject,
-            @Nullable String imageUri,
-            @Nullable String imageFormat,
-            String id,
             String title,
             String desc,
-            boolean profile,
             ArrayList<String> tags,
-            int typeOfDraft,
-            @Nullable Date dateOfPublication,
-            @Nullable Date dateOfUpdate) {
+            int typeOfDraft) {
         Timber.d("update draft called");
-        ShotDraft shotDraft =  createShotDraft(((ShotDraft)sourceObject).getId(),imageUri,imageFormat,id,title,desc, profile, tags, typeOfDraft, dateOfPublication, dateOfUpdate);
+        ShotDraft shotDraft =  createShotDraft(
+                getDraftId(sourceObject),
+                ((ShotDraft)sourceObject).getImageUrl(),
+                ((ShotDraft)sourceObject).getImageFormat(),
+                getShotId(sourceObject),title,desc, getProfile(sourceObject), tags, typeOfDraft,
+                getDateOfPublication(sourceObject),
+                getDateOfUpdate(sourceObject));
         compositeDisposable.add(
                 shotDraftRepository.updateShotDraft(shotDraft)
                         .subscribe(
@@ -208,6 +197,82 @@ public class StoreDraftTask {
                 dateOfPublication,
                 dateOfUpdate
         );
+    }
+
+    /**
+     *
+     * @param objectSource
+     * @return
+     */
+    private int getDraftId(Object objectSource) {
+        if (objectSource instanceof Shot) {
+            return 0;
+        } else if (objectSource instanceof ShotDraft) {
+            return ((ShotDraft) objectSource).getId();
+        } else {
+            return 0;
+        }
+    }
+
+
+    /**
+     * get shot id
+     * @param objectSource
+     * @return
+     */
+    private String getShotId(Object objectSource) {
+        if (objectSource instanceof Shot) {
+            return ((Shot) objectSource).getId();
+        } else if (objectSource instanceof ShotDraft) {
+            return ((ShotDraft) objectSource).getShotId();
+        } else {
+            return "undefined";
+        }
+    }
+
+    /**
+     * get profile of the shot - todo manage it in UI for future
+     * @param objectSource
+     * @return
+     */
+    private boolean getProfile(Object objectSource) {
+        if (objectSource instanceof Shot) {
+            return ((Shot) objectSource).isLow_profile();
+        } else if (objectSource instanceof ShotDraft) {
+            return ((ShotDraft) objectSource).isLowProfile();
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Get date of publication for this draft
+     * @param objectSource
+     * @return
+     */
+    private Date getDateOfPublication(Object objectSource) {
+        if (objectSource instanceof Shot) {
+            return ((Shot) objectSource).getPublishDate();
+        } else if (objectSource instanceof ShotDraft) {
+            return ((ShotDraft) objectSource).getDateOfPublication();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     *
+     * @param objectSource
+     * @return
+     */
+    private Date getDateOfUpdate(Object objectSource) {
+        if (objectSource instanceof Shot) {
+            return ((Shot) objectSource).getUpdateDate();
+        } else if (objectSource instanceof ShotDraft) {
+            return ((ShotDraft) objectSource).getDateOfUpdate();
+        } else {
+            return null;
+        }
     }
 
     /**

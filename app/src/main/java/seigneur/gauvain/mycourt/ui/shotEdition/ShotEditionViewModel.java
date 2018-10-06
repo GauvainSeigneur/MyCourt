@@ -100,9 +100,9 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     /*
-     *********************************************************************************************
-     * EVENT WHICH VIEW WILL SUBSCRIBE
-     *********************************************************************************************/
+    *********************************************************************************************
+    * EVENT WHICH VIEW WILL SUBSCRIBE
+    *********************************************************************************************/
     public SingleLiveEvent<Void> getPickShotCommand() {
         return mPickShotCommand;
     }
@@ -255,34 +255,31 @@ public class ShotEditionViewModel extends ViewModel implements
      * STORE DRAFT IN DB
      *********************************************************************************************/
     private void registerOrUpdateDraft(Context context, boolean isRegisteringImage) {
-        //FOR TESTS ONLY
-        mStoreDrafTask.saveDraft(
-                compositeDisposable,
-                mShotDraftRepository,
-                null,
-                null,
-                getShotId(getSource()),
-                getTitle().getValue(),
-                getDescription().getValue(),
-                getProfile(getSource()),
-                getTags().getValue(),
-                getEditionMode(),
-                getDateOfPublication(getSource()),
-                getDateOfUpdate(getSource()));
-        //TODO - REACTIVATE
-        /*if (mSource == Constants.SOURCE_DRAFT) {
-            if (isRegisteringImage)
-                storeDraftImage(getImagePickedFormat(), getCroppedImageUri().getValue(), context);
-            else
-                updateInfoDraft(((ShotDraft) mObjectSource).getImageUrl(), ((ShotDraft) mObjectSource).getImageFormat());
+        if (mSource == Constants.SOURCE_DRAFT) {
+            if (isRegisteringImage) {
+                //storeDraftImage(getImagePickedFormat(), getCroppedImageUri().getValue(), context);
+            } else {
+                mStoreDrafTask.updateDraft(
+                        compositeDisposable, mShotDraftRepository, mObjectSource,
+                        getTitle().getValue(), getDescription().getValue(),
+                        getTags().getValue(), getEditionMode());
+            }
         } else if (mSource == Constants.SOURCE_SHOT) {
-            saveInfoDraft(((Shot) mObjectSource).getImageUrl(), null);
+            mStoreDrafTask.saveDraft(
+                    compositeDisposable, mShotDraftRepository,mObjectSource,
+                    ((Shot) mObjectSource).getImageUrl(), null,
+                    getTitle().getValue(), getDescription().getValue(),
+                    getTags().getValue(), getEditionMode());
         } else if (mSource == Constants.SOURCE_FAB) {
-            if (isRegisteringImage)
-                storeDraftImage(imagePickedFormat, getCroppedImageUri().getValue(), context);
+            if (isRegisteringImage) {
+                //storeDraftImage(imagePickedFormat, getCroppedImageUri().getValue(), context);
+            }
             else
-                saveInfoDraft(null, null);
-        }*/
+                mStoreDrafTask.saveDraft(
+                        compositeDisposable, mShotDraftRepository, mObjectSource,
+                        null, null, getTitle().getValue(), getDescription().getValue(),
+                        getTags().getValue(), getEditionMode());
+        }
     }
 
     /**
