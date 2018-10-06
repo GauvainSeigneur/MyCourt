@@ -258,7 +258,7 @@ public class EditShotActivityOld extends BaseActivity implements EditShotView {
     @Override
     public void setUpShotEditionUI(Object object, int source) {
         mToolbar.setTitle("Edit a shot");
-        setUpEditionUI(true, object, source);
+        setUpEditionUI(true, object);
     }
 
     @Override
@@ -385,7 +385,7 @@ public class EditShotActivityOld extends BaseActivity implements EditShotView {
     /********************************************************************
      * UI - EDITION MODE
      *******************************************************************/
-    private void setUpEditionUI(final boolean isTransactionPostponed,Object object, int source) {
+    private void setUpEditionUI(final boolean isTransactionPostponed,Object object) {
 
         if (isTransactionPostponed)
             postponeEnterTransition();
@@ -397,7 +397,7 @@ public class EditShotActivityOld extends BaseActivity implements EditShotView {
         Glide
                 .with(this)
                 .asBitmap()
-                .load(getImageUrl(object, source))
+                .load(getImageUrl(object))
                 .apply(new RequestOptions()
                         .error(R.drawable.ic_my_shot_black_24dp)
                 )
@@ -439,7 +439,7 @@ public class EditShotActivityOld extends BaseActivity implements EditShotView {
     }
 
     //get image uri from data sent by presenter
-    public Uri getImageUrl(Object object, int source) {
+    public Uri getImageUrl(Object object) {
         if (object instanceof Shot){
             Shot shot = (Shot) object;
             return Uri.parse(shot.getImageUrl());
@@ -447,7 +447,7 @@ public class EditShotActivityOld extends BaseActivity implements EditShotView {
         else if(object instanceof ShotDraft) {
             ShotDraft shotDraft = (ShotDraft) object;
             if (shotDraft.getImageUrl()!=null) {
-                if (source==Constants.EDIT_MODE_NEW_SHOT)
+                if (shotDraft.getDraftType()==Constants.EDIT_MODE_NEW_SHOT)
                     return FileProvider.getUriForFile(this,
                             this.getString(R.string.file_provider_authorities),
                             new File(shotDraft.getImageUrl()));

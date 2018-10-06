@@ -135,8 +135,7 @@ public class EditShotActivity extends BaseActivity {
 
         viewModel.getSetUpUiCmd().observe(this,
                 call -> setUpShotEditionUI(
-                        mShotEditionViewModel.getObjectSource(),
-                        mShotEditionViewModel.getSource())
+                        mShotEditionViewModel.getObjectSource())
         );
 
         viewModel.getPickShotCommand().observe(this, call -> openImagePicker());
@@ -257,7 +256,7 @@ public class EditShotActivity extends BaseActivity {
         finishAfterTransition();
     }
 
-    public void setUpShotEditionUI(Object object, int source) {
+    public void setUpShotEditionUI(Object object) {
         //Listen text change
         mShotTitleEditor.addTextChangedListener(titleWatcher);
         mTagEditor.addTextChangedListener(tagWtacher);
@@ -265,7 +264,7 @@ public class EditShotActivity extends BaseActivity {
 
         if (object!=null)  {
             mToolbar.setTitle("Edit a shot");
-            setUpEditionUI(true, object, source);
+            setUpEditionUI(true, object);
         } else {
             mToolbar.setTitle("Create a shot");
             setUpCreationModeUI();
@@ -305,11 +304,11 @@ public class EditShotActivity extends BaseActivity {
         croppedImagePreview.setImageResource(R.drawable.add_image_illustration);
     }
 
-    private void setUpEditionUI(final boolean isTransactionPostponed,Object object, int source) {
+    private void setUpEditionUI(final boolean isTransactionPostponed,Object object) {
         if (isTransactionPostponed) postponeEnterTransition();
         Glide.with(this)
                 .asBitmap()
-                .load(getImageUrl(object, source))
+                .load(getImageUrl(object))
                 .apply(new RequestOptions()
                         .error(R.drawable.ic_my_shot_black_24dp)
                 )
@@ -317,6 +316,7 @@ public class EditShotActivity extends BaseActivity {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
                         if (isTransactionPostponed) startPostponedEnterTransition();
+                        Toast.makeText(EditShotActivity.this, "error loading image", Toast.LENGTH_SHORT).show();
                         return false;
                     }
 
@@ -351,20 +351,25 @@ public class EditShotActivity extends BaseActivity {
     }
 
     //get image uri from data sent by presenter
-    public Uri getImageUrl(Object object, int source) {
+    public Uri getImageUrl(Object object) {
         if (object instanceof Shot){
             Shot shot = (Shot) object;
             return Uri.parse(shot.getImageUrl());
         }
-        else if(object instanceof ShotDraft) {
+        else if (object instanceof ShotDraft) {
             ShotDraft shotDraft = (ShotDraft) object;
             if (shotDraft.getImageUrl()!=null) {
-                if (source==Constants.EDIT_MODE_NEW_SHOT)
-                    return FileProvider.getUriForFile(this,
+                if (shotDraft.getDraftType()==Constants.EDIT_MODE_NEW_SHOT) {
+                    return FileProvider.getUriForFile(
+                            this,
                             this.getString(R.string.file_provider_authorities),
                             new File(shotDraft.getImageUrl()));
-                else
+                }
+                else {
+                    Toast.makeText(this, "is sshotdraft not new"+shotDraft.getDraftType(), Toast.LENGTH_SHORT).show();
                     return Uri.parse(shotDraft.getImageUrl());
+                }
+
             }
             else
                 return null;

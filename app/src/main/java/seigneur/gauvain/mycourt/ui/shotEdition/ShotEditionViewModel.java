@@ -7,6 +7,7 @@ import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -423,6 +424,7 @@ public class ShotEditionViewModel extends ViewModel implements
     @Override
     public void onSaveImageSuccess(String uri) {
         if (mSource==Constants.SOURCE_DRAFT) {
+            Toast.makeText(mApplication, "edition mode :"+getEditionMode(), Toast.LENGTH_SHORT).show();
             mStoreDrafTask.updateInfoDraft(
                     compositeDisposable, mShotDraftRepository, mObjectSource,
                     uri, getImagePickedFormat(),
