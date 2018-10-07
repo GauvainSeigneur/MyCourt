@@ -8,9 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-import dagger.Provides;
 import io.reactivex.disposables.CompositeDisposable;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -18,14 +16,20 @@ import okhttp3.RequestBody;
 import retrofit2.HttpException;
 import retrofit2.Response;
 import seigneur.gauvain.mycourt.data.model.Shot;
+import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.ShotRepository;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
-import seigneur.gauvain.mycourt.utils.ImageUtils;
+import seigneur.gauvain.mycourt.utils.HttpUtils;
+import seigneur.gauvain.mycourt.utils.image.ImageUtils;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import timber.log.Timber;
 
 public class PublishTask {
+
+    private CompositeDisposable mCompositeDisposable;
+
+    private ShotRepository mShotRepository;
 
     private NetworkErrorHandler mNetworkErrorHandler;
 
@@ -33,43 +37,39 @@ public class PublishTask {
 
     private PublishTaskCallBack mPublishTaskCallBack;
 
+    private ShotDraftRepository mShotDraftRepository;
+
     @Inject
-    public PublishTask(NetworkErrorHandler networkErrorHandler,
+    public PublishTask(CompositeDisposable compositeDisposable,
+                       ShotRepository shotRepository,
+                       ShotDraftRepository shotDraftRepository,
+                       NetworkErrorHandler networkErrorHandler,
                        ConnectivityReceiver connectivityReceiver,
                        PublishTaskCallBack publishTaskCallBack) {
+        this.mCompositeDisposable=compositeDisposable;
+        this.mShotRepository=shotRepository;
+        this.mShotDraftRepository=shotDraftRepository;
         this.mNetworkErrorHandler=networkErrorHandler;
         this.mConnectivityReceiver=connectivityReceiver;
         this.mPublishTaskCallBack=publishTaskCallBack;
-    }
-
-    public void test() {
-       if (mConnectivityReceiver!=null) {
-           mPublishTaskCallBack.onTestGood();
-           Timber.d("mConnectivityReceiver not null");
-       }
-        else
-            Timber.d("null");
     }
 
     /*
     *************************************************************************
     * NETWORK OPERATION - POST SHOT ON DRIBBBLE
     *************************************************************************/
-    private void postShot(
-            CompositeDisposable compositeDisposable,
-            ShotRepository shotRepository,
-            Context context,
+    private void postShot(Context context,
                           Uri fileUri,
                           String imageFormat,
                           String titleString,
                           String descriptionString,
                           ArrayList<String> tagList) {
-        MultipartBody.Part body = prepareFilePart(context,fileUri,imageFormat,"image");
+        MultipartBody.Part body = HttpUtils.createFilePart(context,fileUri,imageFormat,"image");
         //add to HashMap key and RequestBody
         HashMap<String, RequestBody> map = new HashMap<>();
         // executes the request
-        compositeDisposable.add(
-                shotRepository.publishANewShot(
+        mCompositeDisposable.add(
+                mShotRepository.publishANewShot(
                         map,
                         body,
                         titleString,
@@ -82,24 +82,7 @@ public class PublishTask {
         );
     }
 
-    /**
-     * Create MultipartBody.Part instance separated in order to use @PartMap annotation
-     * to pass parameters along with File request. PartMap is a Map of "Key" and RequestBody.
-     * See : https://stackoverflow.com/a/40873297
-     */
-    private MultipartBody.Part prepareFilePart(Context context, Uri fileUri,String imageFormat, String partName) {
-        //Get file
-        String uriOfFile = ImageUtils.getRealPathFromImage(context,fileUri);
-        File file = new File(uriOfFile);
-        String imageFormatFixed;
-        //Word around for jpg format - refused by dribbble
-        if (imageFormat.equals("jpg")) imageFormatFixed="JPG"; // to be tested
-        else imageFormatFixed =imageFormat;
-        // create RequestBody instance from file
-        RequestBody requestFile = RequestBody.create(MediaType.parse("image/"+imageFormatFixed), file);
-        // MultipartBody.Part is used to send also the actual file name
-        return MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
-    }
+
 
     /**
      * Post operation has succeed - check the response from server
@@ -128,15 +111,14 @@ public class PublishTask {
     }
 
     /*
-     *************************************************************************
-     * NETWORK OPERATION - UPDATE SHOT ON DRIBBBLE
-     *************************************************************************/
+    *************************************************************************
+    * NETWORK OPERATION - UPDATE SHOT ON DRIBBBLE
+    *************************************************************************/
     private void updateShot(
-            CompositeDisposable compositeDisposable, ShotRepository shotRepository,
             String shotId,
             String title, String desc, ArrayList<String> tags, boolean profile) {
-        compositeDisposable.add(
-                shotRepository.updateShot(
+        mCompositeDisposable.add(
+                mShotRepository.updateShot(
                         shotId, //get it from viewmodel
                         title,
                         desc,
@@ -182,6 +164,41 @@ public class PublishTask {
             //    mEditShotView.stopActivity();
         }*/
     }
+
+
+    /*
+    *************************************************************************
+    * DB OPERATION - DELETE DRAFT AFTER PUBLISH OR UPDATE
+    *************************************************************************/
+    private void deleteDraft() {
+        /*mCompositeDisposable.add(
+                mShotDraftRepository.deleteDraft(((ShotDraft) mObjectSource).getId())
+                        .subscribe(
+                                this::onDraftDeleted,
+                                this::onDeleteDraftFailed
+                        )
+        );*/
+    }
+
+    /**
+     * Draft has been deleted correctly
+     */
+    private void onDraftDeleted() {
+        //mTempDataRepository.setDraftsChanged(true);//TODO LIVE DATA
+        //TODO SINGLE LIVE EVENT
+        /*if (mEditShotView!=null)
+            mEditShotView.stopActivity();*/
+    }
+
+    /**
+     * An error happened during delete process
+     *
+     * @param t - error description
+     */
+    private void onDeleteDraftFailed(Throwable t) {
+        Timber.d(t);
+    }
+
     /*
      *************************************************************************
      * MANAGE NETWORK EXCEPTION

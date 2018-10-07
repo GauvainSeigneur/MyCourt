@@ -90,13 +90,6 @@ public class ShotEditionViewModel extends ViewModel implements
     public ShotEditionViewModel() {
     }
 
-    public void test() {
-        if (mPublishTask!=null)
-            mPublishTask.test();
-        else
-            Toast.makeText(mApplication, "mPublishTask is null", Toast.LENGTH_SHORT).show();
-    }
-
     @Override
     public void onCleared() {
         super.onCleared();
@@ -104,54 +97,11 @@ public class ShotEditionViewModel extends ViewModel implements
         compositeDisposable.clear();
     }
 
-    /*
-    *********************************************************************************************
-    * EVENT WHICH VIEW WILL SUBSCRIBE
-    *********************************************************************************************/
-    public SingleLiveEvent<Void> getPickShotCommand() {
-        return mPickShotCommand;
-    }
-
-    public SingleLiveEvent<Void> getCropImageCmd() {
-        return mCropImageCmd;
-    }
-
-    public SingleLiveEvent<Integer> getPickCropImgErrorCmd() {
-        return pickCropImgErrorCmd;
-    }
-
-    public SingleLiveEvent<Void> getSetUpUiCmd() {
-        return mSetUpUiCmd;
-    }
-
-    public SingleLiveEvent<Void> getRequestPermCmd() {
-        return mRequestPermCmd;
-    }
-
-    public SingleLiveEvent<Void> getCheckPerm() {
-        return mCheckPerm;
-    }
-
-    public LiveData<Uri> getCroppedImageUri() {
-        return croppedImageUri;
-    }
-
-    public LiveData<String> getTitle() {
-        return mTitle;
-    }
-
-    public LiveData<String> getDescription() {
-        return mDescription;
-    }
-
-    public LiveData<ArrayList<String>> getTags() {
-        return mTags;
-    }
 
     /*
-    *********************************************************************************************
-    * PUBLIC METHODS CALLED IN VIEW
-    *********************************************************************************************/
+     *********************************************************************************************
+     * PUBLIC METHODS CALLED IN VIEW
+     *********************************************************************************************/
     public void init() {
         initTasks();
         if (croppedImageUri.getValue() == null)
@@ -170,7 +120,8 @@ public class ShotEditionViewModel extends ViewModel implements
         }
 
         if (mPublishTask==null)
-            mPublishTask=new PublishTask(mNetworkErrorHandler, mConnectivityReceiver,
+            mPublishTask=new PublishTask(compositeDisposable, mShotRepository, mShotDraftRepository,
+                    mNetworkErrorHandler, mConnectivityReceiver,
                     this);
         if (mStoreDrafTask==null)
             mStoreDrafTask  = new StoreDraftTask(compositeDisposable, mShotDraftRepository,this);
@@ -233,6 +184,51 @@ public class ShotEditionViewModel extends ViewModel implements
                 registerOrUpdateDraft(mApplication, false);
             }
         }*/
+    }
+
+
+    /*
+    *********************************************************************************************
+    * EVENT WHICH VIEW WILL SUBSCRIBE
+    *********************************************************************************************/
+    public SingleLiveEvent<Void> getPickShotCommand() {
+        return mPickShotCommand;
+    }
+
+    public SingleLiveEvent<Void> getCropImageCmd() {
+        return mCropImageCmd;
+    }
+
+    public SingleLiveEvent<Integer> getPickCropImgErrorCmd() {
+        return pickCropImgErrorCmd;
+    }
+
+    public SingleLiveEvent<Void> getSetUpUiCmd() {
+        return mSetUpUiCmd;
+    }
+
+    public SingleLiveEvent<Void> getRequestPermCmd() {
+        return mRequestPermCmd;
+    }
+
+    public SingleLiveEvent<Void> getCheckPerm() {
+        return mCheckPerm;
+    }
+
+    public LiveData<Uri> getCroppedImageUri() {
+        return croppedImageUri;
+    }
+
+    public LiveData<String> getTitle() {
+        return mTitle;
+    }
+
+    public LiveData<String> getDescription() {
+        return mDescription;
+    }
+
+    public LiveData<ArrayList<String>> getTags() {
+        return mTags;
     }
 
     /*
@@ -327,39 +323,6 @@ public class ShotEditionViewModel extends ViewModel implements
                         getTags().getValue(), getEditionMode());
         }
     }
-
-    /**
-     * Delete draft after has been published or updated on Dribbble
-     */
-    private void deleteDraft() {
-        compositeDisposable.add(
-                mShotDraftRepository.deleteDraft(((ShotDraft) mObjectSource).getId())
-                        .subscribe(
-                                this::onDraftDeleted,
-                                this::onDeleteDraftFailed
-                        )
-        );
-    }
-
-    /**
-     * Draft has been deleted correctly
-     */
-    private void onDraftDeleted() {
-        //mTempDataRepository.setDraftsChanged(true);//TODO LIVE DATA
-        //TODO SINGLE LIVE EVENT
-        /*if (mEditShotView!=null)
-            mEditShotView.stopActivity();*/
-    }
-
-    /**
-     * An error happened during delete process
-     *
-     * @param t - error description
-     */
-    private void onDeleteDraftFailed(Throwable t) {
-        Timber.d(t);
-    }
-
 
     /*
     *********************************************************************************************

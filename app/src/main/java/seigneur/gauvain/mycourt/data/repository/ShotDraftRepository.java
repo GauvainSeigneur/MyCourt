@@ -3,7 +3,6 @@ package seigneur.gauvain.mycourt.data.repository;
 import android.content.Context;
 import android.net.Uri;
 
-import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -13,14 +12,11 @@ import javax.inject.Singleton;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
-import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.local.dao.PostDao;
-import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
-import seigneur.gauvain.mycourt.utils.ImageUtils;
+import seigneur.gauvain.mycourt.utils.image.ImageUtils;
 import seigneur.gauvain.mycourt.utils.SingleLiveEvent;
 
 @Singleton

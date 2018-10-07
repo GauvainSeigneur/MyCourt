@@ -44,17 +44,12 @@ import dagger.android.AndroidInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
-import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
-import seigneur.gauvain.mycourt.data.repository.ShotRepository;
-import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.ui.base.BaseActivity;
-import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
-import seigneur.gauvain.mycourt.utils.ImagePicker;
+import seigneur.gauvain.mycourt.utils.image.ImagePicker;
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView;
-import seigneur.gauvain.mycourt.utils.ImageUtils;
+import seigneur.gauvain.mycourt.utils.image.ImageUtils;
 import seigneur.gauvain.mycourt.utils.MyTextUtils;
-import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import timber.log.Timber;
 
 public class EditShotActivity extends BaseActivity {
@@ -113,7 +108,6 @@ public class EditShotActivity extends BaseActivity {
 
     @OnClick(R.id.btn_publish)
     public void publish() {
-        mShotEditionViewModel.test();
     }
 
     /*

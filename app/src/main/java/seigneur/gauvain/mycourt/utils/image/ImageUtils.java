@@ -1,4 +1,4 @@
-package seigneur.gauvain.mycourt.utils;
+package seigneur.gauvain.mycourt.utils.image;
 
 import android.app.Activity;
 import android.content.ContentResolver;

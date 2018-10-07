@@ -48,7 +48,7 @@ import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.ui.base.BaseActivity;
 import seigneur.gauvain.mycourt.ui.shotEdition.EditShotActivity;
-import seigneur.gauvain.mycourt.utils.ImageUtils;
+import seigneur.gauvain.mycourt.utils.image.ImageUtils;
 import seigneur.gauvain.mycourt.utils.MyColorUtils;
 import seigneur.gauvain.mycourt.utils.MyTextUtils;
 import static seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp;
