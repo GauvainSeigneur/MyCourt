@@ -141,10 +141,10 @@ public class EditShotActivity extends BaseActivity {
 
         viewModel.getCropImageCmd().observe(this,
                 call -> goToUCropActivity(
-                        mShotEditionViewModel.imagePickedFormat,
-                        mShotEditionViewModel.imagePickedUriSource,
-                        mShotEditionViewModel.imagePickedFileName,
-                        mShotEditionViewModel.imageSize));
+                        mShotEditionViewModel.getImagePickedFormat(),
+                        mShotEditionViewModel.getImagePickedUriSource(),
+                        mShotEditionViewModel.getImagePickedFileName(),
+                        mShotEditionViewModel.getImageSize()));
 
         viewModel.getPickCropImgErrorCmd().observe(this,
                 errorCode -> Toast.makeText(this, "oops :"+errorCode , Toast.LENGTH_SHORT).show());
@@ -303,7 +303,7 @@ public class EditShotActivity extends BaseActivity {
         croppedImagePreview.setImageResource(R.drawable.add_image_illustration);
     }
 
-    private void setUpEditionUI(final boolean isTransactionPostponed,Object object) {
+    private void setUpEditionUI(final boolean isTransactionPostponed, Object object) {
         if (isTransactionPostponed) postponeEnterTransition();
         Glide.with(this)
                 .asBitmap()
@@ -326,12 +326,11 @@ public class EditShotActivity extends BaseActivity {
                     }
                 })
                 .into(croppedImagePreview);
-
-        mTagEditor.setText(getTagList(object));
         mShotTitleEditor.setText(getTitle(object));
         String description = getDescription(object);
         if (description!=null)
             mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description));
+        mTagEditor.setText(getTagList(object));
     }
 
 

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
+import gnu.trove.TIntArrayList;
 import io.reactivex.disposables.CompositeDisposable;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
@@ -58,21 +59,21 @@ public class ShotEditionViewModel extends ViewModel implements
 
     //RX disposable
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
+
     //Manage source and Edition mode (new or update)
     private int mSource = -1;
     private int mEditionMode = -1;
     private Object mObjectSource = null;
     private SingleLiveEvent<Void> mSetUpUiCmd = new SingleLiveEvent<>();
-
     //Pick and Crop Image
     private SingleLiveEvent<Void> mPickShotCommand = new SingleLiveEvent<>();
     private SingleLiveEvent<Void> mCropImageCmd = new SingleLiveEvent<>();
     private SingleLiveEvent<Void> mRequestPermCmd = new SingleLiveEvent<>();
     private SingleLiveEvent<Void> mCheckPerm = new SingleLiveEvent<>();
-    public Uri imagePickedUriSource = null; //NOT LIVEDATA - NOT RELATED TO UI
-    public String imagePickedFileName = null; //NOT LIVEDATA - NOT RELATED TO UI
-    public String imagePickedFormat = null; //NOT LIVEDATA - NOT RELATED TO UI
-    public int[] imageSize = null; //NOT LIVEDATA - NOT RELATED TO UI
+    private Uri imagePickedUriSource = null; //NOT LIVEDATA - NOT RELATED TO UI
+    private String imagePickedFileName = null; //NOT LIVEDATA - NOT RELATED TO UI
+    private String imagePickedFormat = null; //NOT LIVEDATA - NOT RELATED TO UI
+    private int[] imageSize = null; //NOT LIVEDATA - NOT RELATED TO UI
     private MutableLiveData<Uri> croppedImageUri = new MutableLiveData<>();
     private SingleLiveEvent<Integer> pickCropImgErrorCmd = new SingleLiveEvent<>();
     //Listen change in editText
@@ -105,7 +106,10 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     public void onImagePreviewClicked() {
-        mPickShotCommand.call();
+        if (getEditionMode()==Constants.EDIT_MODE_UPDATE_SHOT)
+            Timber.d("not allowed to change image already published");
+        else
+            mPickShotCommand.call();
     }
 
     public void onImagePicked() {
@@ -141,25 +145,22 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     public void onStoreDraftClicked() {
-        if (getCroppedImageUri().getValue()!=null && getImagePickedFormat() !=null) {
-            mCheckPerm.call();
-        } else {
-            registerOrUpdateDraft(mApplication, false);
-        }
-
-        /*if (getTitle().getValue() == null || getTitle().getValue().isEmpty()) {
+        if (getTitle().getValue() == null || getTitle().getValue().isEmpty()) {
             //TODO - single live event
             //mEditShotView.showMessageEmptyTitle();
         } else {
-            if (croppedImageUri.getValue() != null && imagePickedFormat != null) {
-                //TODO - single live event
-                //mEditShotView.checkPermissionExtStorage();
+            if (getCroppedImageUri().getValue() != null && getImagePickedFormat() != null) {
+                mCheckPerm.call();
             } else {
                 registerOrUpdateDraft(mApplication, false);
             }
-        }*/
+        }
     }
 
+    /*
+    *********************************************************************************************
+    * PRIVATE METHODS
+    *********************************************************************************************/
     private void initTasks() {
         if (mStoreDrafTask!=null && mPublishTask!=null && mGetSourceTask!=null) {
             Timber.d("tasks initialized");
@@ -180,31 +181,36 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     private void registerOrUpdateDraft(Context context, boolean isRegisteringImage) {
-        if (mSource == Constants.SOURCE_DRAFT) {
-            if (isRegisteringImage) {
-                mStoreDrafTask.storeDraftImage(context,
-                        getImagePickedFormat(), getCroppedImageUri().getValue());
-            } else {
-                mStoreDrafTask.updateInfoDraft(
-                        mObjectSource,
-                        ((ShotDraft)mObjectSource).getImageUrl(), ((ShotDraft)mObjectSource).getImageFormat(),
-                        getTitle().getValue(), getDescription().getValue(),
-                        getTags().getValue(), getEditionMode());
-            }
-        } else if (mSource == Constants.SOURCE_SHOT) {
-            mStoreDrafTask.saveInfoDraft(mObjectSource,
-                    ((Shot) mObjectSource).getImageUrl(), null,
-                    getTitle().getValue(), getDescription().getValue(),
-                    getTags().getValue(), getEditionMode());
-        } else if (mSource == Constants.SOURCE_FAB) {
-            if (isRegisteringImage) {
-                mStoreDrafTask.storeDraftImage(context,
-                        getImagePickedFormat(), getCroppedImageUri().getValue());
-            }
-            else
-                mStoreDrafTask.saveInfoDraft(mObjectSource,
-                        null, null, getTitle().getValue(), getDescription().getValue(),
-                        getTags().getValue(), getEditionMode());
+        switch (mSource) {
+            case Constants.SOURCE_DRAFT:
+                if (isRegisteringImage) {
+                    mStoreDrafTask.storeDraftImage(context,
+                            getImagePickedFormat(), getCroppedImageUri().getValue());
+                } else {
+                    mStoreDrafTask.updateInfoDraft(
+                            mObjectSource,
+                            ((ShotDraft)mObjectSource).getImageUrl(), ((ShotDraft)mObjectSource).getImageFormat(),
+                            getTitle().getValue(), getDescription().getValue(),
+                            getTags().getValue(), getEditionMode());
+                }
+                break;
+
+                case Constants.SOURCE_FAB:
+                    if (isRegisteringImage)
+                        mStoreDrafTask.storeDraftImage(context, getImagePickedFormat(),
+                                getCroppedImageUri().getValue());
+                    else
+                        mStoreDrafTask.saveInfoDraft(mObjectSource,
+                                null, null, getTitle().getValue(), getDescription().getValue(),
+                                getTags().getValue(), getEditionMode());
+                    break;
+
+                    case Constants.SOURCE_SHOT:
+                        mStoreDrafTask.saveInfoDraft(mObjectSource,
+                                ((Shot) mObjectSource).getImageUrl(), null,
+                                getTitle().getValue(), getDescription().getValue(),
+                                getTags().getValue(), getEditionMode());
+                        break;
         }
     }
 
