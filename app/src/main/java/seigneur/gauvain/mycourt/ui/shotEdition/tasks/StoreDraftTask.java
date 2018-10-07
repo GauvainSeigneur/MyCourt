@@ -18,101 +18,83 @@ import seigneur.gauvain.mycourt.utils.Constants;
 import timber.log.Timber;
 
 public class StoreDraftTask {
-    //TODO - concat storeDraft image and SaveDraft in DB
-    private CompositeDisposable mCompositeDisposable;
-    private StoreRequestListener mStoreRequestListener;
-    private ShotDraftRepository mShotDraftRepository;
+
+    private CompositeDisposable     mCompositeDisposable;
+    private StoreRequestListener    mStoreRequestListener;
+    private ShotDraftRepository     mShotDraftRepository;
 
     @Inject
     public StoreDraftTask(CompositeDisposable compositeDisposable,
-            ShotDraftRepository shotDraftRepository,
-            StoreRequestListener requestListener) {
+                          ShotDraftRepository shotDraftRepository,
+                          StoreRequestListener requestListener) {
         this.mCompositeDisposable=compositeDisposable;
         this.mShotDraftRepository=shotDraftRepository;
         this.mStoreRequestListener=requestListener;
     }
 
-
-    //Store image in "My Court" folder in external storage and get the URI to save it in DB
+    /**
+     * Store cropped image in external storage and get Uri of the this file to save it in DB
+     * @param context - use Application context
+     * @param imageCroppedFormat - manage cropping according to the format
+     * @param croppedFileUri -  uri of the image after being cropped
+     */
     public void storeDraftImage(Context context,
                                 String imageCroppedFormat,
                                 Uri croppedFileUri) {
         mCompositeDisposable.add(
                 mShotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
-                .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t)) //todo : to comment this
+                .onErrorResumeNext(t -> t instanceof NullPointerException ?
+                        Single.error(t):Single.error(t)) //todo : to comment this
                 .subscribe(
-                        //TODO -listener !!!
                         uri -> mStoreRequestListener.onSaveImageSuccess(uri),
-                        this::doOnCopyImageError
+                        this::onDraftSavingError
                 )
         );
     }
 
-
-    public void saveDraft(Object sourceObject,
-                              @Nullable String imageUri,
-                              @Nullable String imageFormat,
-                              String title,
-                              String desc,
-                              ArrayList<String> tags,
-                              int typeOfDraft) {
+    /**
+     * Save draft in db
+     * @param sourceObject - can be Shot or ShotDraft
+     * @param imageUri - uri of the image (on Dribbble.com/from My Court folder/or null)
+     * @param imageFormat - can be jpeg, png, gif or null
+     * @param title - title of shot
+     * @param desc - description of the shot
+     * @param tags - list of tags of the shot
+     * @param typeOfDraft - can be NEW_SHOT_DRAFT OR UPDATE
+     */
+    public void saveInfoDraft(Object sourceObject, @Nullable String imageUri, @Nullable String imageFormat,
+                              String title, String desc, ArrayList<String> tags, int typeOfDraft) {
         Timber.d("save draft called");
-        //just update a draft
-        ShotDraft shotDraft =  createShotDraft(
-                getDraftId(sourceObject), imageUri,imageFormat,
-                getShotId(sourceObject),
-                title,desc, getProfile(sourceObject), tags,
-                typeOfDraft, getDateOfPublication(sourceObject), getDateOfUpdate(sourceObject));
-        mCompositeDisposable.add(
-                mShotDraftRepository.storeShotDraft(shotDraft)
-                        .subscribe(
-                                this::onDraftSaved, //todo Listener
-                                this::onDraftSavingError //todo Listener
-                        )
-        );
-
-    }
-    //Save only info of draft
-    public void saveInfoDraft(
-                          Object sourceObject,
-                          @Nullable String imageUri,
-                          @Nullable String imageFormat,
-                          String title,
-                          String desc,
-                          ArrayList<String> tags,
-                          int typeOfDraft) {
-        Timber.d("save draft called");
-            //just update a draft
-            ShotDraft shotDraft =  createShotDraft(
-                    getDraftId(sourceObject), imageUri,imageFormat,
+            ShotDraft shotDraft =  createShotDraft(getDraftId(sourceObject),
+                    imageUri,imageFormat,
                     getShotId(sourceObject),
                     title,desc, getProfile(sourceObject), tags,
                     typeOfDraft, getDateOfPublication(sourceObject), getDateOfUpdate(sourceObject));
         mCompositeDisposable.add(
                     mShotDraftRepository.storeShotDraft(shotDraft)
                             .subscribe(
-                                    this::onDraftSaved, //todo Listener
-                                    this::onDraftSavingError //todo Listener
+                                    this::onDraftSaved,
+                                    this::onDraftSavingError
                             )
             );
     }
 
-    //update draft in db
-    public void updateInfoDraft(
-            Object sourceObject,
-            @Nullable String imageUri,
-            @Nullable String imageFormat,
-            String title,
-            String desc,
-            ArrayList<String> tags,
-            int typeOfDraft) {
-        Timber.d("update draft called");
-        ShotDraft shotDraft =  createShotDraft(
-                getDraftId(sourceObject),
-                imageUri,
-                imageFormat,
-                getShotId(sourceObject),title,desc, getProfile(sourceObject), tags, typeOfDraft,
-                getDateOfPublication(sourceObject),
+    /**
+     * Update a current draft in DB
+     * @param sourceObject - can be Shot or ShotDraft
+     * @param imageUri - uri of the image (on Dribbble.com/from My Court folder/or null)
+     * @param imageFormat - can be jpeg, png, gif or null
+     * @param title - title of shot
+     * @param desc - description of the shot
+     * @param tags - list of tags of the shot
+     * @param typeOfDraft - can be NEW_SHOT_DRAFT OR UPDATE
+     */
+    public void updateInfoDraft(Object sourceObject, @Nullable String imageUri,
+                                @Nullable String imageFormat, String title, String desc,
+                                ArrayList<String> tags, int typeOfDraft) {
+        ShotDraft shotDraft = createShotDraft(
+                getDraftId(sourceObject), imageUri, imageFormat, getShotId(sourceObject),title,
+                desc, getProfile(sourceObject), tags, typeOfDraft, getDateOfPublication(sourceObject),
                 getDateOfUpdate(sourceObject));
         mCompositeDisposable.add(
                 mShotDraftRepository.updateShotDraft(shotDraft)
@@ -125,22 +107,11 @@ public class StoreDraftTask {
     }
 
     /**
-     * Indicates to user that an error occurred while trying to copy Image in MyCourt folder
-     * @param t - throwable
-     */
-    public void doOnCopyImageError(Throwable t)  {
-        Timber.d(t);
-    }
-
-    /**
      * Draft has been saved/updated in DB
      */
     public void onDraftSaved() {
+        mStoreRequestListener.onStoreDraftSucceed();
         Timber.d("draft saved");
-        //mTempDataRepository.setDraftsChanged(true); //TODO LIVE DATA
-        //TODO SINGLE LIVE EVENT
-        /*if (mEditShotView!=null)
-            mEditShotView.notifyPostSaved();*/
     }
 
     /**
@@ -149,50 +120,42 @@ public class StoreDraftTask {
      */
     public void onDraftSavingError(Throwable t) {
         Timber.d(t);
+        mStoreRequestListener.onFailed();
     }
 
     /*
-     *********************************************************************************************
-     * CREATE DRAFT OBJECT
-     *********************************************************************************************/
+    *********************************************************************************************
+    * CREATE DRAFT OBJECT
+    *********************************************************************************************/
     /**
      * Create Shot draft object to insert or update a ShotDraft
      * @param primaryKey - unique identifier
      * @param imageUri - image url
      * @param imageFormat _ jpeg, png, gif
-     * @return ShotDraft
+     * @param id
+     * @param title
+     * @param desc
+     * @param profile
+     * @param tags
+     * @param typeOfDraft
+     * @param dateOfPublication //todo - for phase 2 : allow user to schedule publishing
+     * @param dateOfUpdate
+     * @return
      */
-    public ShotDraft createShotDraft(int primaryKey,
-                                      @Nullable String imageUri,
-                                      @Nullable String imageFormat,
-                                      String id,
-                                      String title,
-                                      String desc,
-                                      boolean profile,
-                                      ArrayList<String> tags,
-                                      int typeOfDraft,
-                                      @Nullable Date dateOfPublication,
-                                      @Nullable Date dateOfUpdate) {
-        return new ShotDraft(
-                primaryKey,
-                imageUri,
-                imageFormat,
-                id,
-                title, //todo - is live data here
-                desc,
-                profile,
-                null, //todo - for phase 2 : allow user to schedule publishing
-                tags,
+    public ShotDraft createShotDraft(int primaryKey, @Nullable String imageUri, @Nullable String imageFormat,
+                                     String id, String title, String desc, boolean profile, ArrayList<String> tags,
+                                     int typeOfDraft, @Nullable Date dateOfPublication, @Nullable Date dateOfUpdate) {
+
+        return new ShotDraft(primaryKey, imageUri, imageFormat, id, title, desc,
+                profile, null, tags,
                 -1, //todo - for phase 2 : manage team
-                typeOfDraft,
-                dateOfPublication,
-                dateOfUpdate
+                typeOfDraft, dateOfPublication, dateOfUpdate
         );
     }
 
     /**
      *
-     * @param objectSource
+     * @param objectSource - can be Shot/ShotDraft or null
      * @return
      */
     private int getDraftId(Object objectSource) {
@@ -208,7 +171,7 @@ public class StoreDraftTask {
 
     /**
      * get shot id
-     * @param objectSource
+     * @param objectSource - can be Shot/ShotDraft or null
      * @return
      */
     private String getShotId(Object objectSource) {
@@ -223,7 +186,7 @@ public class StoreDraftTask {
 
     /**
      * get profile of the shot - todo manage it in UI for future
-     * @param objectSource
+     * @param objectSource - can be Shot/ShotDraft or null
      * @return
      */
     private boolean getProfile(Object objectSource) {
@@ -238,7 +201,7 @@ public class StoreDraftTask {
 
     /**
      * Get date of publication for this draft
-     * @param objectSource
+     * @param objectSource - can be Shot/ShotDraft or null
      * @return
      */
     private Date getDateOfPublication(Object objectSource) {
@@ -253,7 +216,7 @@ public class StoreDraftTask {
 
     /**
      *
-     * @param objectSource
+     * @param objectSource - can be Shot/ShotDraft or null
      * @return
      */
     private Date getDateOfUpdate(Object objectSource) {
@@ -266,6 +229,7 @@ public class StoreDraftTask {
         }
     }
 
+
     /**
      * CALLBACK FOR VIEWMODEL
      */
@@ -273,9 +237,7 @@ public class StoreDraftTask {
 
         void onSaveImageSuccess(String uri);
 
-        void onStoreDraftSucees();
-
-        void onUpdateDraftSuccess();
+        void onStoreDraftSucceed();
 
         void onFailed();
     }

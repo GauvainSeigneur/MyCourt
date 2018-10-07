@@ -200,9 +200,9 @@ public class PublishTask {
     }
 
     /*
-     *************************************************************************
-     * MANAGE NETWORK EXCEPTION
-     *************************************************************************/
+    *************************************************************************
+    * MANAGE NETWORK EXCEPTION
+    *************************************************************************/
     private void handleNetworkOperationError(final Throwable error, int eventID) {
         mNetworkErrorHandler.handleNetworkErrors(error,eventID, new NetworkErrorHandler.onRXErrorListener() {
             @Override

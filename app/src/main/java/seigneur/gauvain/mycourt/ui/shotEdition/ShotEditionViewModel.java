@@ -24,16 +24,10 @@ import seigneur.gauvain.mycourt.ui.shotEdition.tasks.StoreDraftTask;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.ListUtils;
-import seigneur.gauvain.mycourt.utils.MyTextUtils;
 import seigneur.gauvain.mycourt.utils.SingleLiveEvent;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import timber.log.Timber;
 
-/**
- * PRESENTER REFACTORING INTO VIEWMODEL
- * FILES TO BIG - Difficult to read
- * split it into task files : fetch source and set up UI / store / update / publish
- */
 public class ShotEditionViewModel extends ViewModel implements
         StoreDraftTask.StoreRequestListener,
         GetSourceTask.SourceCallback,
@@ -57,6 +51,11 @@ public class ShotEditionViewModel extends ViewModel implements
     @Inject
     Application mApplication;
 
+    //task files
+    private StoreDraftTask mStoreDrafTask;
+    private GetSourceTask mGetSourceTask;
+    private PublishTask mPublishTask;
+
     //RX disposable
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     //Manage source and Edition mode (new or update)
@@ -77,14 +76,9 @@ public class ShotEditionViewModel extends ViewModel implements
     private MutableLiveData<Uri> croppedImageUri = new MutableLiveData<>();
     private SingleLiveEvent<Integer> pickCropImgErrorCmd = new SingleLiveEvent<>();
     //Listen change in editText
-    private MutableLiveData<String> mTitle = new MutableLiveData<>();       //todo - MAY BE NOT LIVEDATA as Edit Text UI survive to config change
-    private MutableLiveData<String> mDescription = new MutableLiveData<>();  //todo - MAY BE NOT LIVEDATA as Edit Text UI survive to config change
-    private MutableLiveData<ArrayList<String>> mTags = new MutableLiveData<>();   //todo - MAY BE NOT LIVEDATA as Edit Text UI survive to config change
-
-    //task files
-    private StoreDraftTask mStoreDrafTask;
-    private GetSourceTask mGetSourceTask;
-    private PublishTask mPublishTask;
+    private MutableLiveData<String> mTitle = new MutableLiveData<>();
+    private MutableLiveData<String> mDescription = new MutableLiveData<>();
+    private MutableLiveData<ArrayList<String>> mTags = new MutableLiveData<>();
 
     @Inject
     public ShotEditionViewModel() {
@@ -97,11 +91,10 @@ public class ShotEditionViewModel extends ViewModel implements
         compositeDisposable.clear();
     }
 
-
     /*
-     *********************************************************************************************
-     * PUBLIC METHODS CALLED IN VIEW
-     *********************************************************************************************/
+    *********************************************************************************************
+    * PUBLIC METHODS CALLED IN VIEW
+    *********************************************************************************************/
     public void init() {
         initTasks();
         if (croppedImageUri.getValue() == null)
@@ -109,25 +102,6 @@ public class ShotEditionViewModel extends ViewModel implements
         //here set as LiveData all data from source
         if (mSource == -1)
             mGetSourceTask.getOriginOfEditRequest();
-    }
-
-    private void initTasks() {
-        if (mStoreDrafTask!=null && mPublishTask!=null && mGetSourceTask!=null) {
-            Timber.d("tasks initialized");
-        } else {
-
-            Timber.d("tasks null");
-        }
-
-        if (mPublishTask==null)
-            mPublishTask=new PublishTask(compositeDisposable, mShotRepository, mShotDraftRepository,
-                    mNetworkErrorHandler, mConnectivityReceiver,
-                    this);
-        if (mStoreDrafTask==null)
-            mStoreDrafTask  = new StoreDraftTask(compositeDisposable, mShotDraftRepository,this);
-        if (mGetSourceTask==null)
-            mGetSourceTask  = new GetSourceTask(mTempDataRepository, compositeDisposable,this);
-
     }
 
     public void onImagePreviewClicked() {
@@ -186,6 +160,53 @@ public class ShotEditionViewModel extends ViewModel implements
         }*/
     }
 
+    private void initTasks() {
+        if (mStoreDrafTask!=null && mPublishTask!=null && mGetSourceTask!=null) {
+            Timber.d("tasks initialized");
+        } else {
+
+            Timber.d("tasks null");
+        }
+
+        if (mPublishTask==null)
+            mPublishTask=new PublishTask(compositeDisposable, mShotRepository, mShotDraftRepository,
+                    mNetworkErrorHandler, mConnectivityReceiver,
+                    this);
+        if (mStoreDrafTask==null)
+            mStoreDrafTask  = new StoreDraftTask(compositeDisposable, mShotDraftRepository,this);
+        if (mGetSourceTask==null)
+            mGetSourceTask  = new GetSourceTask(mTempDataRepository, compositeDisposable,this);
+
+    }
+
+    private void registerOrUpdateDraft(Context context, boolean isRegisteringImage) {
+        if (mSource == Constants.SOURCE_DRAFT) {
+            if (isRegisteringImage) {
+                mStoreDrafTask.storeDraftImage(context,
+                        getImagePickedFormat(), getCroppedImageUri().getValue());
+            } else {
+                mStoreDrafTask.updateInfoDraft(
+                        mObjectSource,
+                        ((ShotDraft)mObjectSource).getImageUrl(), ((ShotDraft)mObjectSource).getImageFormat(),
+                        getTitle().getValue(), getDescription().getValue(),
+                        getTags().getValue(), getEditionMode());
+            }
+        } else if (mSource == Constants.SOURCE_SHOT) {
+            mStoreDrafTask.saveInfoDraft(mObjectSource,
+                    ((Shot) mObjectSource).getImageUrl(), null,
+                    getTitle().getValue(), getDescription().getValue(),
+                    getTags().getValue(), getEditionMode());
+        } else if (mSource == Constants.SOURCE_FAB) {
+            if (isRegisteringImage) {
+                mStoreDrafTask.storeDraftImage(context,
+                        getImagePickedFormat(), getCroppedImageUri().getValue());
+            }
+            else
+                mStoreDrafTask.saveInfoDraft(mObjectSource,
+                        null, null, getTitle().getValue(), getDescription().getValue(),
+                        getTags().getValue(), getEditionMode());
+        }
+    }
 
     /*
     *********************************************************************************************
@@ -292,39 +313,6 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     /*
-     *********************************************************************************************
-     * STORE DRAFT IN DB
-     *********************************************************************************************/
-    private void registerOrUpdateDraft(Context context, boolean isRegisteringImage) {
-        if (mSource == Constants.SOURCE_DRAFT) {
-            if (isRegisteringImage) {
-                mStoreDrafTask.storeDraftImage(context,
-                        getImagePickedFormat(), getCroppedImageUri().getValue());
-            } else {
-                mStoreDrafTask.updateInfoDraft(
-                        mObjectSource,
-                        ((ShotDraft)mObjectSource).getImageUrl(), ((ShotDraft)mObjectSource).getImageFormat(),
-                        getTitle().getValue(), getDescription().getValue(),
-                        getTags().getValue(), getEditionMode());
-            }
-        } else if (mSource == Constants.SOURCE_SHOT) {
-            mStoreDrafTask.saveInfoDraft(mObjectSource,
-                    ((Shot) mObjectSource).getImageUrl(), null,
-                    getTitle().getValue(), getDescription().getValue(),
-                    getTags().getValue(), getEditionMode());
-        } else if (mSource == Constants.SOURCE_FAB) {
-            if (isRegisteringImage) {
-                mStoreDrafTask.storeDraftImage(context,
-                        getImagePickedFormat(), getCroppedImageUri().getValue());
-            }
-            else
-                mStoreDrafTask.saveInfoDraft(mObjectSource,
-                        null, null, getTitle().getValue(), getDescription().getValue(),
-                        getTags().getValue(), getEditionMode());
-        }
-    }
-
-    /*
     *********************************************************************************************
     * GetSourceTaskCallback
     *********************************************************************************************/
@@ -355,7 +343,6 @@ public class ShotEditionViewModel extends ViewModel implements
     @Override
     public void onSaveImageSuccess(String uri) {
         if (mSource==Constants.SOURCE_DRAFT) {
-            Toast.makeText(mApplication, "edition mode :"+getEditionMode(), Toast.LENGTH_SHORT).show();
             mStoreDrafTask.updateInfoDraft(mObjectSource,
                     uri, getImagePickedFormat(),
                     getTitle().getValue(), getDescription().getValue(),
@@ -368,12 +355,7 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     @Override
-    public void onStoreDraftSucees() {
-
-    }
-
-    @Override
-    public void onUpdateDraftSuccess() {
+    public void onStoreDraftSucceed() {
 
     }
 
@@ -382,6 +364,10 @@ public class ShotEditionViewModel extends ViewModel implements
 
     }
 
+    /*
+    *********************************************************************************************
+    * PublishTaskCallBack
+    *********************************************************************************************/
     @Override
     public void onTestGood() {
         Toast.makeText(mApplication, "ontestgood", Toast.LENGTH_SHORT).show();
