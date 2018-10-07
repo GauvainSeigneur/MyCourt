@@ -22,12 +22,6 @@ public class UserViewModel extends ViewModel {
     @Inject
     UserRepository mUserRepository;
 
-    @Inject
-    EnCryptor mEnCryptor;
-
-    @Inject
-    DeCryptor mDeCryptor;
-
     private CompositeDisposable mCompositeDisposable    = new CompositeDisposable();
     private MutableLiveData<User> userMutableLiveData   = new MutableLiveData<>();
     private SingleLiveEvent<Void> mShowSourceCommand    = new SingleLiveEvent<>();

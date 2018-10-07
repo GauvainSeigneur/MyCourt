@@ -96,7 +96,7 @@ public class PinViewModel extends ViewModel implements
         }*/
     }
 
-    public void onNewPinConfirmed(String pin) {@
+    public void onNewPinConfirmed(String pin) {
         mStorePinTask.cryptAndStorePin(pin);
     }
 

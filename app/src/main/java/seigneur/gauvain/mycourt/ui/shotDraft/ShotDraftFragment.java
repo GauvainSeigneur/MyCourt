@@ -33,6 +33,7 @@ import butterknife.Unbinder;
 import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
+import seigneur.gauvain.mycourt.ui.base.BaseFragment;
 import seigneur.gauvain.mycourt.ui.main.MainViewModel;
 import seigneur.gauvain.mycourt.ui.shotEdition.EditShotActivity;
 import timber.log.Timber;
@@ -41,8 +42,7 @@ import timber.log.Timber;
 /**
  * Created by gse on 22/11/2017.
  */
-
-public class ShotDraftFragment extends Fragment implements  Toolbar.OnMenuItemClickListener {
+public class ShotDraftFragment extends BaseFragment implements  Toolbar.OnMenuItemClickListener {
 
    /* @Inject
     ShotDraftPresenter mShotDraftPresenter;*/
@@ -70,15 +70,12 @@ public class ShotDraftFragment extends Fragment implements  Toolbar.OnMenuItemCl
     private ShotDraftListCallback mcallabck;
     private ShotDraftsListAdapter mShotDraftsListAdapter;
 
-    Unbinder mUnbinder;
-
-    private View mRootview;
-
     List<ShotDraft> shotDraftsSaved = new ArrayList<ShotDraft>();
 
-    /**
-     * FRAGMENT LIFE CYCLE
-     */
+    /*
+    ************************************************************************************
+    *  Fragment lifecycle
+    ************************************************************************************/
     @SuppressWarnings("deprecation")
     @Override
     public void onAttach(Activity activity) {
@@ -99,30 +96,29 @@ public class ShotDraftFragment extends Fragment implements  Toolbar.OnMenuItemCl
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //new instance
-        Timber.d("onCreate new instance");
+        Timber.d("onCreate");
         //provide ViewModel
         mShotDraftViewModel = ViewModelProviders.of(this, viewModelFactory).get(ShotDraftViewModel.class);
         mShotDraftViewModel.fetchShotDrafts();
-
         mcallabck = new ShotDraftListCallback() {
             @Override
             public void onShotDraftClicked(ShotDraft shotDraft,int position) {
                 mShotDraftViewModel.onShotDraftClicked(shotDraft, position);
-               // mShotDraftPresenter.onShotDraftClicked(shotDraft, position); //TODO SINGLE EVENT
+                // mShotDraftPresenter.onShotDraftClicked(shotDraft, position); //TODO SINGLE EVENT
 
             }
         };
         mShotDraftsListAdapter= new ShotDraftsListAdapter(getContext(), shotDraftsSaved, mcallabck);
     }
 
+    @Override
+    protected int getFragmentLayout() {
+        return R.layout.fragment_shot_draft;
+    }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public void onCreateView(View inRootView, Bundle inSavedInstanceState){
         Timber.d("onCreateView");
-        mRootview = inflater.inflate(getFragmentLayout(), container, false );
-        mUnbinder= ButterKnife.bind(this, mRootview);
         toolbar.inflateMenu(R.menu.menu_shot_detail);
         toolbar.setOnMenuItemClickListener(this);
         shotDraftRV.setLayoutManager(new GridLayoutManager(getContext(),2));
@@ -141,9 +137,8 @@ public class ShotDraftFragment extends Fragment implements  Toolbar.OnMenuItemCl
                 startActivity(intent);
             }
         });
-
-        return mRootview;
     }
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -223,14 +218,6 @@ public class ShotDraftFragment extends Fragment implements  Toolbar.OnMenuItemCl
         }
         return false;
     }
-
-    /**
-     * BASE FRAGMENT METHODS
-     */
-    protected int getFragmentLayout() {
-        return R.layout.fragment_shot_draft;
-    }
-
 
     public void stopRefresh() {
        // if (mRefreshDraftLayout.isRefreshing())

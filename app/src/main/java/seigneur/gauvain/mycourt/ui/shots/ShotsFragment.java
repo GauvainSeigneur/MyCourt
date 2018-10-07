@@ -31,6 +31,7 @@ import butterknife.Unbinder;
 import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.Shot;
+import seigneur.gauvain.mycourt.ui.base.BaseFragment;
 import seigneur.gauvain.mycourt.ui.shotDetail.ShotDetailActivity;
 import seigneur.gauvain.mycourt.ui.shots.list.adapter.ShotItemCallback;
 import seigneur.gauvain.mycourt.ui.shots.list.adapter.ShotListAdapter;
@@ -42,7 +43,7 @@ import timber.log.Timber;
 /**
  * Created by gse on 22/11/2017.
  */
-public class ShotsFragment extends Fragment implements ShotItemCallback {
+public class ShotsFragment extends BaseFragment implements ShotItemCallback {
 
     @BindView(R.id.usersSwipeRefreshLayout)
     SwipeRefreshLayout usersSwipeRefreshLayout;
@@ -63,9 +64,7 @@ public class ShotsFragment extends Fragment implements ShotItemCallback {
     ProgressBar loadingProgressBar;
 
     private ShotListAdapter shotListAdapter;
-
-    private Unbinder mUnbinder;
-    public View mRootview;
+    
     private LinearLayoutManager mLinearLayoutManager;
 
     @Inject
@@ -73,10 +72,13 @@ public class ShotsFragment extends Fragment implements ShotItemCallback {
 
     private ShotsViewModel shotsViewModel;
 
+    /*
+     ************************************************************************************
+     *  Fragment lifecycle
+     ************************************************************************************/
     @SuppressWarnings("deprecation")
     @Override
     public void onAttach(Activity activity) {
-        Timber.d("onAttach");
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             AndroidSupportInjection.inject(this);
         }
@@ -85,41 +87,30 @@ public class ShotsFragment extends Fragment implements ShotItemCallback {
 
     @Override
     public void onAttach(Context context) {
-        Timber.d("onAttach");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             AndroidSupportInjection.inject(this);
-
         }
         super.onAttach(context);
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Timber.d("onCreate");
-
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        Timber.d("onCreateView");
-        mRootview = inflater.inflate(getFragmentLayout(), container, false );
-        mUnbinder= ButterKnife.bind(this, mRootview);
-        //usersViewModel = ViewModelProviders.of(this).get(ShotsViewModel.class);
         shotsViewModel = ViewModelProviders.of(this, viewModelFactory).get(ShotsViewModel.class);
         shotsViewModel.init();
-        initAdapter();
-        initSwipeToRefresh();
-        return mRootview;
     }
 
+    @Override
+    protected int getFragmentLayout() {
+        return R.layout.fragment_shots;
+    }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        Timber.d("onViewCreated");
+    public void onCreateView(View inRootView, Bundle inSavedInstanceState){
+        Timber.d("onCreateView");
+        initAdapter();
+        initSwipeToRefresh();
     }
 
     @Override
@@ -129,15 +120,10 @@ public class ShotsFragment extends Fragment implements ShotItemCallback {
         subscribeToSingleEvent(shotsViewModel);
     }
 
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         mUnbinder.unbind();
-    }
-
-    protected int getFragmentLayout() {
-        return R.layout.fragment_shots;
     }
 
     private void initAdapter() {
