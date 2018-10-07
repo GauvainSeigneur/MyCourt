@@ -11,8 +11,14 @@ import timber.log.Timber;
 public class GetSourceTask {
 
     private SourceCallback mSourceCallback;
+    private TempDataRepository mTempDataRepository;
+    private CompositeDisposable mCompositeDisposable;
 
-    public GetSourceTask(SourceCallback sourceCallback) {
+    public GetSourceTask(TempDataRepository tempDataRepository,
+                         CompositeDisposable compositeDisposable,
+                         SourceCallback sourceCallback) {
+        this.mTempDataRepository=tempDataRepository;
+        this.mCompositeDisposable=compositeDisposable;
         this.mSourceCallback=sourceCallback;
     }
 
@@ -21,29 +27,26 @@ public class GetSourceTask {
     * Manage source
     *********************************************************************************************/
     // Check whether if the activity is opened from draft registered in database or other
-    public void getOriginOfEditRequest(CompositeDisposable compositeDisposable,
-                                        TempDataRepository tempDataRepository) {
-        compositeDisposable
-                .add(Single.just(tempDataRepository.getDraftCallingSource())
+    public void getOriginOfEditRequest() {
+        mCompositeDisposable
+                .add(Single.just(mTempDataRepository.getDraftCallingSource())
                         .subscribe(
-                                source -> manageSource(compositeDisposable, tempDataRepository, source),
+                                source -> manageSource(source),
                                 this::manageSourceTypeError)
                 );
     }
 
-    private void manageSource(CompositeDisposable compositeDisposable,
-                              TempDataRepository tempDataRepository,
-                              int source) {
+    private void manageSource(int source) {
         mSourceCallback.source(source);
         switch (source) {
             //user wishes to continue edit a stored draft
             case Constants.SOURCE_DRAFT:
-                getShotDraft(compositeDisposable,tempDataRepository); //edition mode stored in draft, get draft to know edition mode
+                getShotDraft(); //edition mode stored in draft, get draft to know edition mode
                 break;
             //User wishes to update a published shot
             case Constants.SOURCE_SHOT:
                 mSourceCallback.EditMode(Constants.EDIT_MODE_UPDATE_SHOT);
-                getShot(compositeDisposable,tempDataRepository);
+                getShot();
                 break;
             //User wishes to create a shot
             case Constants.SOURCE_FAB:
@@ -62,8 +65,8 @@ public class GetSourceTask {
     *********************************************************************************************
     * Get shot object if source is Constants.SOURCE_SHOT
     *********************************************************************************************/
-    private void getShot(CompositeDisposable compositeDisposable,TempDataRepository tempDataRepository) {
-        compositeDisposable.add(Single.just(tempDataRepository.getShot())
+    private void getShot() {
+        mCompositeDisposable.add(Single.just(mTempDataRepository.getShot())
                 .subscribe(this::manageShotInfo, this::onGetShotError));
     }
 
@@ -80,8 +83,8 @@ public class GetSourceTask {
     *********************************************************************************************
     * Get ShotDraft object if source is Constants.SOURCE_SHOT
     *********************************************************************************************/
-    private void getShotDraft(CompositeDisposable compositeDisposable,TempDataRepository tempDataRepository) {
-        compositeDisposable.add(Single.just(tempDataRepository.getShotDraft())
+    private void getShotDraft() {
+        mCompositeDisposable.add(Single.just(mTempDataRepository.getShotDraft())
                 .subscribe(
                         this::manageShotDraftInfo,
                         this::onGetShotDraftError

@@ -6,18 +6,12 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.net.Uri;
-import android.support.annotation.Nullable;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
-import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
@@ -25,9 +19,11 @@ import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.ShotRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.ui.shotEdition.tasks.GetSourceTask;
+import seigneur.gauvain.mycourt.ui.shotEdition.tasks.PublishTask;
 import seigneur.gauvain.mycourt.ui.shotEdition.tasks.StoreDraftTask;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
+import seigneur.gauvain.mycourt.utils.ListUtils;
 import seigneur.gauvain.mycourt.utils.MyTextUtils;
 import seigneur.gauvain.mycourt.utils.SingleLiveEvent;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
@@ -40,7 +36,8 @@ import timber.log.Timber;
  */
 public class ShotEditionViewModel extends ViewModel implements
         StoreDraftTask.StoreRequestListener,
-        GetSourceTask.SourceCallback {
+        GetSourceTask.SourceCallback,
+        PublishTask.PublishTaskCallBack {
 
     @Inject
     ShotDraftRepository mShotDraftRepository;
@@ -87,12 +84,17 @@ public class ShotEditionViewModel extends ViewModel implements
     //task files
     private StoreDraftTask mStoreDrafTask;
     private GetSourceTask mGetSourceTask;
+    private PublishTask mPublishTask;
 
     @Inject
     public ShotEditionViewModel() {
-        //Task have same scope of ViewModel
-        mStoreDrafTask = new StoreDraftTask(this);
-        mGetSourceTask = new GetSourceTask(this);
+    }
+
+    public void test() {
+        if (mPublishTask!=null)
+            mPublishTask.test();
+        else
+            Toast.makeText(mApplication, "mPublishTask is null", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -151,11 +153,30 @@ public class ShotEditionViewModel extends ViewModel implements
     * PUBLIC METHODS CALLED IN VIEW
     *********************************************************************************************/
     public void init() {
+        initTasks();
         if (croppedImageUri.getValue() == null)
             croppedImageUri.setValue(null); //just notify UI
         //here set as LiveData all data from source
         if (mSource == -1)
-            mGetSourceTask.getOriginOfEditRequest(compositeDisposable, mTempDataRepository);
+            mGetSourceTask.getOriginOfEditRequest();
+    }
+
+    private void initTasks() {
+        if (mStoreDrafTask!=null && mPublishTask!=null && mGetSourceTask!=null) {
+            Timber.d("tasks initialized");
+        } else {
+
+            Timber.d("tasks null");
+        }
+
+        if (mPublishTask==null)
+            mPublishTask=new PublishTask(mNetworkErrorHandler, mConnectivityReceiver,
+                    this);
+        if (mStoreDrafTask==null)
+            mStoreDrafTask  = new StoreDraftTask(compositeDisposable, mShotDraftRepository,this);
+        if (mGetSourceTask==null)
+            mGetSourceTask  = new GetSourceTask(mTempDataRepository, compositeDisposable,this);
+
     }
 
     public void onImagePreviewClicked() {
@@ -183,7 +204,7 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     public void onTagChanged(String tag) {
-        mTags.setValue(tagListWithoutQuote(tag));
+        mTags.setValue(ListUtils.tagListWithoutQuote(tag));
     }
 
     public void requestPerm() {
@@ -281,29 +302,27 @@ public class ShotEditionViewModel extends ViewModel implements
     private void registerOrUpdateDraft(Context context, boolean isRegisteringImage) {
         if (mSource == Constants.SOURCE_DRAFT) {
             if (isRegisteringImage) {
-                mStoreDrafTask.storeDraftImage(context,compositeDisposable, mShotDraftRepository,
+                mStoreDrafTask.storeDraftImage(context,
                         getImagePickedFormat(), getCroppedImageUri().getValue());
             } else {
                 mStoreDrafTask.updateInfoDraft(
-                        compositeDisposable, mShotDraftRepository, mObjectSource,
+                        mObjectSource,
                         ((ShotDraft)mObjectSource).getImageUrl(), ((ShotDraft)mObjectSource).getImageFormat(),
                         getTitle().getValue(), getDescription().getValue(),
                         getTags().getValue(), getEditionMode());
             }
         } else if (mSource == Constants.SOURCE_SHOT) {
-            mStoreDrafTask.saveInfoDraft(
-                    compositeDisposable, mShotDraftRepository,mObjectSource,
+            mStoreDrafTask.saveInfoDraft(mObjectSource,
                     ((Shot) mObjectSource).getImageUrl(), null,
                     getTitle().getValue(), getDescription().getValue(),
                     getTags().getValue(), getEditionMode());
         } else if (mSource == Constants.SOURCE_FAB) {
             if (isRegisteringImage) {
-                mStoreDrafTask.storeDraftImage(context,compositeDisposable, mShotDraftRepository,
+                mStoreDrafTask.storeDraftImage(context,
                         getImagePickedFormat(), getCroppedImageUri().getValue());
             }
             else
-                mStoreDrafTask.saveInfoDraft(
-                        compositeDisposable, mShotDraftRepository, mObjectSource,
+                mStoreDrafTask.saveInfoDraft(mObjectSource,
                         null, null, getTitle().getValue(), getDescription().getValue(),
                         getTags().getValue(), getEditionMode());
         }
@@ -341,57 +360,6 @@ public class ShotEditionViewModel extends ViewModel implements
         Timber.d(t);
     }
 
-    /*
-    *********************************************************************************************
-    * CREATE DRAFT OBJECT - todo may be move it in task and just get a ShotDraft object from this file
-    *********************************************************************************************/
-    //info that can't be change
-    private String getShotId(int source) {
-        switch (source) {
-            case Constants.SOURCE_SHOT:
-                return ((Shot) mObjectSource).getId();
-            case Constants.SOURCE_DRAFT:
-                return ((ShotDraft) mObjectSource).getShotId();
-            default:
-                return "undefined";
-        }
-    }
-
-    //todo - for future, manage it in UI
-    private boolean getProfile(int source) {
-        switch (source) {
-            case Constants.SOURCE_SHOT:
-                return ((Shot) mObjectSource).isLow_profile();
-            case Constants.SOURCE_DRAFT:
-                return ((ShotDraft) mObjectSource).isLowProfile();
-            default:
-                return false;
-        }
-    }
-
-    //Todo - manage this from UI (only of new draft)
-    private Date getDateOfPublication(int source) {
-        switch (source) {
-            case Constants.SOURCE_SHOT:
-                return ((Shot) mObjectSource).getPublishDate();
-            case Constants.SOURCE_DRAFT:
-                return ((ShotDraft) mObjectSource).getDateOfPublication();
-            default:
-                return null;
-        }
-    }
-
-
-    private Date getDateOfUpdate(int source) {
-        switch (source) {
-            case Constants.SOURCE_SHOT:
-                return ((Shot) mObjectSource).getUpdateDate();
-            case Constants.SOURCE_DRAFT:
-                return ((ShotDraft) mObjectSource).getDateOfUpdate();
-            default:
-                return null;
-        }
-    }
 
     /*
     *********************************************************************************************
@@ -425,14 +393,12 @@ public class ShotEditionViewModel extends ViewModel implements
     public void onSaveImageSuccess(String uri) {
         if (mSource==Constants.SOURCE_DRAFT) {
             Toast.makeText(mApplication, "edition mode :"+getEditionMode(), Toast.LENGTH_SHORT).show();
-            mStoreDrafTask.updateInfoDraft(
-                    compositeDisposable, mShotDraftRepository, mObjectSource,
+            mStoreDrafTask.updateInfoDraft(mObjectSource,
                     uri, getImagePickedFormat(),
                     getTitle().getValue(), getDescription().getValue(),
                     getTags().getValue(), getEditionMode());
         } else {
-            mStoreDrafTask.saveInfoDraft(
-                    compositeDisposable, mShotDraftRepository, mObjectSource,
+            mStoreDrafTask.saveInfoDraft(mObjectSource,
                     uri, getImagePickedFormat(), getTitle().getValue(), getDescription().getValue(),
                     getTags().getValue(), getEditionMode());
         }
@@ -453,41 +419,9 @@ public class ShotEditionViewModel extends ViewModel implements
 
     }
 
-    /*
-     *********************************************************************************************
-     * UTILS   METHODS - TODO - move it into utils file!!!
-     *********************************************************************************************/
-    private static ArrayList<String> tagListWithoutQuote(String tagString) {
-        ArrayList<String> listWithQuote = tempTagList(tagString);
-        String[] output = new String[listWithQuote.size()];
-        StringBuilder builder;
-        for (int i = 0; i < listWithQuote.size(); i++) {
-            builder = new StringBuilder();
-            output[i] = builder.toString();
-            output[i] = listWithQuote.get(i).replaceAll("\"", "");
-        }
-
-        return new ArrayList<>(Arrays.asList(output));
+    @Override
+    public void onTestGood() {
+        Toast.makeText(mApplication, "ontestgood", Toast.LENGTH_SHORT).show();
     }
-
-    //Create taglist according to Dribbble pattern
-    private static ArrayList<String> tempTagList(String tagString) {
-        ArrayList<String> tempList = new ArrayList<>();
-        //create the list just one time, not any time the tags changed
-        if (tagString != null && !tagString.isEmpty()) {
-            Pattern p = Pattern.compile(MyTextUtils.tagRegex);
-            Matcher m = p.matcher(tagString);
-            if (MyTextUtils.isDoubleQuoteCountEven(tagString)) {
-                // number is even or 0
-                while (m.find()) {
-                    tempList.add(m.group(0));
-                }
-            } else {
-                //todo-  number is odd: warn user and stop
-            }
-        }
-        return tempList;
-    }
-
 
 }

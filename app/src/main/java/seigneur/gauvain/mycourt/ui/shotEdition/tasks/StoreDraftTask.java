@@ -19,23 +19,26 @@ import timber.log.Timber;
 
 public class StoreDraftTask {
     //TODO - concat storeDraft image and SaveDraft in DB
-
-   private StoreRequestListener mStoreRequestListener;
+    private CompositeDisposable mCompositeDisposable;
+    private StoreRequestListener mStoreRequestListener;
+    private ShotDraftRepository mShotDraftRepository;
 
     @Inject
-    public StoreDraftTask(StoreRequestListener requestListener) {
+    public StoreDraftTask(CompositeDisposable compositeDisposable,
+            ShotDraftRepository shotDraftRepository,
+            StoreRequestListener requestListener) {
+        this.mCompositeDisposable=compositeDisposable;
+        this.mShotDraftRepository=shotDraftRepository;
         this.mStoreRequestListener=requestListener;
     }
 
 
     //Store image in "My Court" folder in external storage and get the URI to save it in DB
     public void storeDraftImage(Context context,
-                                CompositeDisposable compositeDisposable,
-                                ShotDraftRepository shotDraftRepository,
                                 String imageCroppedFormat,
                                 Uri croppedFileUri) {
-        compositeDisposable.add(
-                shotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
+        mCompositeDisposable.add(
+                mShotDraftRepository.storeImageAndReturnItsUri(imageCroppedFormat,croppedFileUri,context)
                 .onErrorResumeNext(t -> t instanceof NullPointerException ? Single.error(t):Single.error(t)) //todo : to comment this
                 .subscribe(
                         //TODO -listener !!!
@@ -46,9 +49,7 @@ public class StoreDraftTask {
     }
 
 
-    public void saveDraft(CompositeDisposable compositeDisposable,
-                              ShotDraftRepository shotDraftRepository,
-                              Object sourceObject,
+    public void saveDraft(Object sourceObject,
                               @Nullable String imageUri,
                               @Nullable String imageFormat,
                               String title,
@@ -62,8 +63,8 @@ public class StoreDraftTask {
                 getShotId(sourceObject),
                 title,desc, getProfile(sourceObject), tags,
                 typeOfDraft, getDateOfPublication(sourceObject), getDateOfUpdate(sourceObject));
-        compositeDisposable.add(
-                shotDraftRepository.storeShotDraft(shotDraft)
+        mCompositeDisposable.add(
+                mShotDraftRepository.storeShotDraft(shotDraft)
                         .subscribe(
                                 this::onDraftSaved, //todo Listener
                                 this::onDraftSavingError //todo Listener
@@ -72,8 +73,7 @@ public class StoreDraftTask {
 
     }
     //Save only info of draft
-    public void saveInfoDraft(CompositeDisposable compositeDisposable,
-                          ShotDraftRepository shotDraftRepository,
+    public void saveInfoDraft(
                           Object sourceObject,
                           @Nullable String imageUri,
                           @Nullable String imageFormat,
@@ -88,8 +88,8 @@ public class StoreDraftTask {
                     getShotId(sourceObject),
                     title,desc, getProfile(sourceObject), tags,
                     typeOfDraft, getDateOfPublication(sourceObject), getDateOfUpdate(sourceObject));
-            compositeDisposable.add(
-                    shotDraftRepository.storeShotDraft(shotDraft)
+        mCompositeDisposable.add(
+                    mShotDraftRepository.storeShotDraft(shotDraft)
                             .subscribe(
                                     this::onDraftSaved, //todo Listener
                                     this::onDraftSavingError //todo Listener
@@ -99,8 +99,6 @@ public class StoreDraftTask {
 
     //update draft in db
     public void updateInfoDraft(
-            CompositeDisposable compositeDisposable,
-            ShotDraftRepository shotDraftRepository,
             Object sourceObject,
             @Nullable String imageUri,
             @Nullable String imageFormat,
@@ -116,8 +114,8 @@ public class StoreDraftTask {
                 getShotId(sourceObject),title,desc, getProfile(sourceObject), tags, typeOfDraft,
                 getDateOfPublication(sourceObject),
                 getDateOfUpdate(sourceObject));
-        compositeDisposable.add(
-                shotDraftRepository.updateShotDraft(shotDraft)
+        mCompositeDisposable.add(
+                mShotDraftRepository.updateShotDraft(shotDraft)
                         .subscribe(
                                 this::onDraftSaved, //todo Listener
                                 this::onDraftSavingError //todo Listener

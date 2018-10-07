@@ -111,6 +111,11 @@ public class EditShotActivity extends BaseActivity {
         mShotEditionViewModel.onStoreDraftClicked();
     }
 
+    @OnClick(R.id.btn_publish)
+    public void publish() {
+        mShotEditionViewModel.test();
+    }
+
     /*
     *********************************************************************************************
     * EVENT WHICH VIEW WILL SUBSCRIBE
