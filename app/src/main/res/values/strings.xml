@@ -6,6 +6,7 @@
     <string name="title_post">Free throw</string>
     <string name="title_draft">Drafts</string>
     <string name="title_my_account">Locker room</string>
+    <string name="title_about">About</string>
     <string name="title_activity_shot_detail">ShotDetailActivity</string>
 
     <!--todo: to chnage it-->
