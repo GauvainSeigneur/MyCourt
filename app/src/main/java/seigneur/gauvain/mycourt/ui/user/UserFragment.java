@@ -132,14 +132,12 @@ public class UserFragment extends BaseFragment {
 
     @Override
     public void onCreateView(View inRootView, Bundle inSavedInstanceState){
-        initMathData();
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Timber.d("onViewCreated");
-        appBarLayout.addOnOffsetChangedListener(appBarOffsetListener);
     }
 
     @Override
@@ -147,6 +145,9 @@ public class UserFragment extends BaseFragment {
         super.onActivityCreated(savedInstanceState);
         //listen livedata
         subscribeToLiveData(mUserViewModel);
+        initMathData();
+        appBarLayout.addOnOffsetChangedListener(appBarOffsetListener);
+        appBarLayout.setExpanded(true);
 
     }
 
