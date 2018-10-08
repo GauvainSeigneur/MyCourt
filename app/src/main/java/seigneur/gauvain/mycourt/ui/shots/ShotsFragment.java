@@ -64,7 +64,7 @@ public class ShotsFragment extends BaseFragment implements ShotItemCallback {
     ProgressBar loadingProgressBar;
 
     private ShotListAdapter shotListAdapter;
-    
+
     private LinearLayoutManager mLinearLayoutManager;
 
     @Inject
