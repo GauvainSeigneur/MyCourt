@@ -6,38 +6,36 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.main.view.MainActivity">
+    tools:context=".ui.main.MainActivity">
 
     <FrameLayout
         android:id="@+id/fragment_place_holder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="56dp"/>
+        android:layout_height="match_parent"/>
 
-    <!--android:background="?android:attr/windowBackground"
-
-     app:itemHorizontalTranslationEnabled="false"
-        app:labelVisibilityMode="unlabeled"
-        app:itemIconSize="24dp"
-        app:itemIconTint="@drawable/selector_item_bottom_nav"
-        app:itemTextColor="@drawable/selector_item_bottom_nav"
-        android:background="@color/colorPrimary"
-
-    -->
-    <android.support.design.widget.BottomNavigationView
-        android:id="@+id/navigation"
-        style="@style/Widget.MyCourt.BottomNavigationTheme"
+    <android.support.design.bottomappbar.BottomAppBar
+        android:id="@+id/bottom_app_bar"
+        android:backgroundTint="@color/colorPrimaryLight"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        app:menu="@menu/navigation"/>
+        app:contentInsetStart="0dp"
+        app:contentInsetEnd="0dp"
+        android:layout_gravity="bottom">
+
+        <android.support.design.widget.BottomNavigationView
+            android:id="@+id/navigation"
+            style="@style/Widget.MyCourt.BottomNavigationTheme"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_gravity="bottom"
+            app:menu="@menu/navigation"/>
+
+    </android.support.design.bottomappbar.BottomAppBar>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_add_shot"
         app:fabSize="normal"
-        android:layout_gravity="top|end"
-        app:layout_anchor="@id/navigation"
-        app:layout_anchorGravity="top|end"
+        app:layout_anchor="@id/bottom_app_bar"
         app:useCompatPadding="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

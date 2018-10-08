@@ -183,17 +183,15 @@ public class MainActivity extends BaseActivity implements HasSupportFragmentInje
     }
 
     private void initFragmentManager(Bundle savedInstanceState) {
-        showFAB(true);
         mFragmentStateManager = new FragmentStateManager(mFragmentContainer, getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
                 switch(position) {
                     case 0:
-                        //return new ShotsFragment();
                         return new ShotsFragment();
                     case 1:
                         return new ShotDraftFragment();
-                    case 2:
+                    case 3:
                         return new UserFragment();
                 }
                 //return new ShotsFragment();
@@ -208,14 +206,15 @@ public class MainActivity extends BaseActivity implements HasSupportFragmentInje
     int getNavPositionFromMenuItem(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.navigation_home:
-                showFAB(true);
                 return 0;
             case R.id.navigation_dashboard:
-                showFAB(true);
                 return 1;
-            case R.id.navigation_notifications:
-                showFAB(false);
+            case R.id.blank_nav_item:
                 return 2;
+            case R.id.navigation_notifications:
+                return 3;
+            case R.id.navigation_about:
+                return 4;
             default:
                 return -1;
         }
@@ -225,14 +224,5 @@ public class MainActivity extends BaseActivity implements HasSupportFragmentInje
         Toast.makeText(this, "go back on top", Toast.LENGTH_SHORT).show();
     }
 
-    public void showFAB(boolean show) {
-        if (show && !isFAbVisible) {
-            mFabAddShot.show();
-            isFAbVisible=true;
-        } else if (!show && isFAbVisible) {
-            mFabAddShot.hide();
-            isFAbVisible = false;
-        }
-    }
 
 }

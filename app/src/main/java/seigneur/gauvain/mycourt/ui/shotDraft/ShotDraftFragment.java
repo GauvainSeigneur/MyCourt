@@ -64,9 +64,6 @@ public class ShotDraftFragment extends BaseFragment implements  Toolbar.OnMenuIt
     @BindView(R.id.rv_shot_draft)
     RecyclerView shotDraftRV;
 
-    @BindView(R.id.fab_add)
-    FloatingActionButton fabAdd;
-
     private ShotDraftListCallback mcallabck;
     private ShotDraftsListAdapter mShotDraftsListAdapter;
 
@@ -127,14 +124,6 @@ public class ShotDraftFragment extends BaseFragment implements  Toolbar.OnMenuIt
             @Override
             public void onRefresh() {
                 mShotDraftViewModel.onRefresh(true);
-            }
-        });
-
-        fabAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getContext(), EditShotActivity.class);
-                startActivity(intent);
             }
         });
     }

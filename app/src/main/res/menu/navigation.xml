@@ -12,6 +12,12 @@
         android:title="@string/title_draft" />
 
     <item
+        android:id="@+id/blank_nav_item"
+        android:enabled="false"
+        android:icon="@drawable/blank_drawable"
+        android:title="" />
+
+    <item
         android:id="@+id/navigation_notifications"
         android:icon="@drawable/ic_locker_room_icon_black_2_24dp"
         android:title="@string/title_my_account" />

@@ -43,8 +43,9 @@
                 android:id="@+id/rvShots"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="12dp"
-                tools:listitem="@layout/list_item_shot" />
+                tools:listitem="@layout/list_item_shot"
+                android:clipToPadding="false"
+                android:paddingBottom="56dp"/>
 
         </android.support.v4.widget.SwipeRefreshLayout>
 
