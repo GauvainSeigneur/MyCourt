@@ -52,7 +52,7 @@ public class ListUtils {
         //create the list just one time, not any time the tags changed
         if (tagString != null && !tagString.isEmpty()) {
             Pattern p = Pattern.compile(MyTextUtils.tagRegex);
-            Matcher m = p.matcher(tagString);
+            Matcher m = p.matcher(tagString.toLowerCase());
             if (MyTextUtils.isDoubleQuoteCountEven(tagString)) {
                 // number is even or 0
                 while (m.find()) {

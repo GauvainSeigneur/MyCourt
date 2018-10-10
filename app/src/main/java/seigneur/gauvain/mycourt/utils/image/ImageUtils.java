@@ -57,7 +57,30 @@ public class ImageUtils {
         options.setActiveWidgetColor(activity.getResources().getColor(R.color.colorAccent));
         //if image is Gif, it can't be cropped. so check if the px size is in accordance to
         //Dribbble specifications
-        if (ImageCroppedFormat!=null && ImageCroppedFormat.equals("gif")){
+        //Aparrently the max size of of image is not required anymore
+        if (ImageCroppedFormat!=null && ImageCroppedFormat.equals("gif")) {
+            //check if image aspect ratio is 4/3
+            double gifRatio=(double)imageSize[1]/(double)imageSize[0];
+            Timber.d("4/3 :"+gifRatio);
+            if (gifRatio==0.75) {
+                options.setHideBottomControls(true);
+                options.setAllowedGestures(0,0,0);
+                UCrop.of(source, destination)
+                        .useSourceImageAspectRatio() //use source aspect ratio
+                        .withOptions(options)
+                        .start(activity);
+                Toast.makeText(activity, "gif can't be cropped", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(activity, "gif can't be cropped. the format needs to be 4/3", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            UCrop.of(source, destination)
+                    .withAspectRatio(4, 3)
+                    .withOptions(options)
+                    .start(activity);
+        }
+
+        /*if (ImageCroppedFormat!=null && ImageCroppedFormat.equals("gif")){
             if (imageSize[0]==800 && imageSize[1]==600 || imageSize[0]==400
                     && imageSize[1]==300 ) {
                 options.setHideBottomControls(true);
@@ -89,7 +112,7 @@ public class ImageUtils {
                         .start(activity);
                 Timber.d("crop normal mode");
             }
-        }
+        }*/
     }
 
     /**

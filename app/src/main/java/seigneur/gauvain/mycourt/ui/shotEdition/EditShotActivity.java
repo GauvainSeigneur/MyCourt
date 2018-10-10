@@ -1,6 +1,7 @@
 package seigneur.gauvain.mycourt.ui.shotEdition;
 
 import android.Manifest;
+import android.app.Application;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -57,6 +58,9 @@ public class EditShotActivity extends BaseActivity {
     @Inject
     ViewModelProvider.Factory viewModelFactory;
 
+    @Inject
+    Application mApplication;
+
     private ShotEditionViewModel mShotEditionViewModel;
 
     @BindView(R.id.toolbar)
@@ -108,12 +112,13 @@ public class EditShotActivity extends BaseActivity {
 
     @OnClick(R.id.btn_publish)
     public void publish() {
+        mShotEditionViewModel.onPublishClicked();
     }
 
     /*
-    *********************************************************************************************
-    * EVENT WHICH VIEW WILL SUBSCRIBE
-    *********************************************************************************************/
+     *********************************************************************************************
+     * EVENT WHICH VIEW WILL SUBSCRIBE
+     *********************************************************************************************/
     private void subscribeToLiveData(ShotEditionViewModel viewModel) {
         viewModel.getCroppedImageUri().observe(this, this::displayShotImagePreview);
 
@@ -158,9 +163,9 @@ public class EditShotActivity extends BaseActivity {
     }
 
     /*
-    *********************************************************************************************
-    * INNER
-    *********************************************************************************************/
+     *********************************************************************************************
+     * INNER
+     *********************************************************************************************/
     @OnClick(R.id.cropped_img_preview)
     public void shotPreviewClick() {
         mShotEditionViewModel.onImagePreviewClicked();
@@ -178,8 +183,8 @@ public class EditShotActivity extends BaseActivity {
                 mShotEditionViewModel.onImagePicked();
             }
             else
-                if (requestCode == UCrop.REQUEST_CROP)
-                    mShotEditionViewModel.onImageCropped(UCrop.getOutput(data));
+            if (requestCode == UCrop.REQUEST_CROP)
+                mShotEditionViewModel.onImageCropped(UCrop.getOutput(data));
         } else {
             if (resultCode == UCrop.RESULT_ERROR)
                 mShotEditionViewModel.onPickcropError(0);
@@ -214,26 +219,6 @@ public class EditShotActivity extends BaseActivity {
         }
     }
 
-
-    public void displayShotImagePreview(Uri uriImageCropped) {
-        if (uriImageCropped!=null) {
-            Glide
-                    .with(this)
-                    .asDrawable()
-                    .load(uriImageCropped)
-                    .apply(new RequestOptions()
-                                    .skipMemoryCache(true)
-                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                    .placeholder(R.mipmap.ic_launcher)
-                            //.error(R.mipmap.ic_launcher)
-                    )
-                    .into(croppedImagePreview);
-        } else {
-            croppedImagePreview.setImageResource(R.drawable.add_image_illustration);
-        }
-    }
-
-
     public void checkPermissionExtStorage() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             //todo single live event
@@ -263,7 +248,7 @@ public class EditShotActivity extends BaseActivity {
 
         if (object!=null)  {
             mToolbar.setTitle("Edit a shot");
-            setUpEditionUI(true, object);
+            setUpEditionUI(object);
         } else {
             mToolbar.setTitle("Create a shot");
             setUpCreationModeUI();
@@ -296,41 +281,48 @@ public class EditShotActivity extends BaseActivity {
     }
 
     /*
-    *********************************************************************************************
-    * UI - MANAGE EDITION MODE
-    *********************************************************************************************/
+     *********************************************************************************************
+     * UI - MANAGE EDITION MODE
+     *********************************************************************************************/
     private void setUpCreationModeUI() {
         croppedImagePreview.setImageResource(R.drawable.add_image_illustration);
     }
 
-    private void setUpEditionUI(final boolean isTransactionPostponed, Object object) {
-        if (isTransactionPostponed) postponeEnterTransition();
-        Glide.with(this)
-                .asBitmap()
-                .load(getImageUrl(object))
-                .apply(new RequestOptions()
-                        .error(R.drawable.ic_my_shot_black_24dp)
-                )
-                .listener(new RequestListener<Bitmap>() {
-                    @Override
-                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                        if (isTransactionPostponed) startPostponedEnterTransition();
-                        Toast.makeText(EditShotActivity.this, "error loading image", Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                        if (isTransactionPostponed) startPostponedEnterTransition();
-                        return false;
-                    }
-                })
-                .into(croppedImagePreview);
+    private void setUpEditionUI(Object object) {
+        displayShotImagePreview(getImageUrl(object));
         mShotTitleEditor.setText(getTitle(object));
         String description = getDescription(object);
         if (description!=null)
             mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description));
         mTagEditor.setText(getTagList(object));
+    }
+
+
+    public void displayShotImagePreview(Uri uriImageCropped) {
+        if (uriImageCropped!=null) {
+            Glide.with(mApplication)
+                    .asBitmap()
+                    .load(uriImageCropped)
+                    .apply(new RequestOptions()
+                            .error(R.drawable.ic_my_shot_black_24dp)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    )
+                    .listener(new RequestListener<Bitmap>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                            Toast.makeText(EditShotActivity.this, "error loading image", Toast.LENGTH_SHORT).show();
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                            return false;
+                        }
+                    })
+                    .into(croppedImagePreview);
+        } else {
+            croppedImagePreview.setImageResource(R.drawable.add_image_illustration);
+        }
     }
 
 
@@ -352,16 +344,21 @@ public class EditShotActivity extends BaseActivity {
     public Uri getImageUrl(Object object) {
         if (object instanceof Shot){
             Shot shot = (Shot) object;
+
+            mShotEditionViewModel.onImageCropped(Uri.parse(shot.getImageUrl()));
             return Uri.parse(shot.getImageUrl());
         }
         else if (object instanceof ShotDraft) {
             ShotDraft shotDraft = (ShotDraft) object;
             if (shotDraft.getImageUrl()!=null) {
                 if (shotDraft.getDraftType()==Constants.EDIT_MODE_NEW_SHOT) {
-                    return FileProvider.getUriForFile(
+                    Uri imageuri =FileProvider.getUriForFile(
                             this,
                             this.getString(R.string.file_provider_authorities),
                             new File(shotDraft.getImageUrl()));
+
+                    mShotEditionViewModel.onImageCropped(imageuri);
+                    return imageuri;
                 }
                 else {
                     Toast.makeText(this, "is sshotdraft not new"+shotDraft.getDraftType(), Toast.LENGTH_SHORT).show();

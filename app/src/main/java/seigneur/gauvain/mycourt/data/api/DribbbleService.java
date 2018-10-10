@@ -74,7 +74,7 @@ public interface DribbbleService {
             @Part MultipartBody.Part file,
             @Part("title") String title,
             @Part("description") String description,
-            @Part("items[]") List<String> tags
+            @Part("tags[]") List<String> tags
     );
 
 

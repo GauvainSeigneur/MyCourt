@@ -32,7 +32,7 @@ import timber.log.Timber;
 public class ShotEditionViewModel extends ViewModel implements
         StoreDraftTask.StoreRequestListener,
         GetSourceTask.SourceCallback,
-        PublishTask.PublishTaskCallBack {
+        PublishTask.PublishCallBack {
 
     @Inject
     ShotDraftRepository mShotDraftRepository;
@@ -98,9 +98,6 @@ public class ShotEditionViewModel extends ViewModel implements
     *********************************************************************************************/
     public void init() {
         initTasks();
-        if (croppedImageUri.getValue() == null)
-            croppedImageUri.setValue(null); //just notify UI
-        //here set as LiveData all data from source
         if (mSource == -1)
             mGetSourceTask.getOriginOfEditRequest();
     }
@@ -157,6 +154,20 @@ public class ShotEditionViewModel extends ViewModel implements
         }
     }
 
+    public void onPublishClicked() {
+
+        ShotDraft shotDraft = (ShotDraft) mObjectSource;
+        mPublishTask.postShot(
+                mApplication,
+                Uri.parse(shotDraft.imageUri), // for draft
+                //getCroppedImageUri().getValue(), //when image is changed
+                //getImagePickedFormat(),
+                "png",
+                getTitle().getValue(),
+                getDescription().getValue(),
+                getTags().getValue());
+    }
+
     /*
     *********************************************************************************************
     * PRIVATE METHODS
@@ -195,22 +206,22 @@ public class ShotEditionViewModel extends ViewModel implements
                 }
                 break;
 
-                case Constants.SOURCE_FAB:
-                    if (isRegisteringImage)
-                        mStoreDrafTask.storeDraftImage(context, getImagePickedFormat(),
-                                getCroppedImageUri().getValue());
-                    else
-                        mStoreDrafTask.saveInfoDraft(mObjectSource,
-                                null, null, getTitle().getValue(), getDescription().getValue(),
-                                getTags().getValue(), getEditionMode());
-                    break;
+            case Constants.SOURCE_FAB:
+                if (isRegisteringImage)
+                    mStoreDrafTask.storeDraftImage(context, getImagePickedFormat(),
+                            getCroppedImageUri().getValue());
+                else
+                    mStoreDrafTask.saveInfoDraft(mObjectSource,
+                            null, null, getTitle().getValue(), getDescription().getValue(),
+                            getTags().getValue(), getEditionMode());
+                break;
 
-                    case Constants.SOURCE_SHOT:
-                        mStoreDrafTask.saveInfoDraft(mObjectSource,
-                                ((Shot) mObjectSource).getImageUrl(), null,
-                                getTitle().getValue(), getDescription().getValue(),
-                                getTags().getValue(), getEditionMode());
-                        break;
+            case Constants.SOURCE_SHOT:
+                mStoreDrafTask.saveInfoDraft(mObjectSource,
+                        ((Shot) mObjectSource).getImageUrl(), null,
+                        getTitle().getValue(), getDescription().getValue(),
+                        getTags().getValue(), getEditionMode());
+                break;
         }
     }
 
@@ -259,9 +270,9 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     /*
-    *********************************************************************************************
-    * GETTER AND SETTER - CAN BE CALLED BY VIEW AND VIEWMODEL
-    *********************************************************************************************/
+     *********************************************************************************************
+     * GETTER AND SETTER - CAN BE CALLED BY VIEW AND VIEWMODEL
+     *********************************************************************************************/
     public Uri getImagePickedUriSource() {
         return imagePickedUriSource;
     }
@@ -319,9 +330,9 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     /*
-    *********************************************************************************************
-    * GetSourceTaskCallback
-    *********************************************************************************************/
+     *********************************************************************************************
+     * GetSourceTaskCallback
+     *********************************************************************************************/
     @Override
     public void source(int source) {
         setSource(source);
@@ -340,19 +351,30 @@ public class ShotEditionViewModel extends ViewModel implements
     @Override
     public void objectSource(Object object) {
         setObjectSource(object);
+        //todo - refactor by single event - shot or shotdarft, more visible for user...
+        if (object instanceof  Shot) {
+
+        } else if (object instanceof  ShotDraft) {
+
+        }
+
     }
 
     /*
-    *********************************************************************************************
-    * StoreTaskCallback
-    *********************************************************************************************/
+     *********************************************************************************************
+     * StoreTaskCallback
+     *********************************************************************************************/
     @Override
     public void onSaveImageSuccess(String uri) {
         if (mSource==Constants.SOURCE_DRAFT) {
-            mStoreDrafTask.updateInfoDraft(mObjectSource,
-                    uri, getImagePickedFormat(),
-                    getTitle().getValue(), getDescription().getValue(),
-                    getTags().getValue(), getEditionMode());
+            mStoreDrafTask.updateInfoDraft(
+                    mObjectSource,
+                    uri,
+                    getImagePickedFormat(),
+                    getTitle().getValue(),
+                    getDescription().getValue(),
+                    getTags().getValue(),
+                    getEditionMode());
         } else {
             mStoreDrafTask.saveInfoDraft(mObjectSource,
                     uri, getImagePickedFormat(), getTitle().getValue(), getDescription().getValue(),
@@ -371,12 +393,12 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     /*
-    *********************************************************************************************
-    * PublishTaskCallBack
-    *********************************************************************************************/
+     *********************************************************************************************
+     * PublishTaskCallBack
+     *********************************************************************************************/
     @Override
-    public void onTestGood() {
-        Toast.makeText(mApplication, "ontestgood", Toast.LENGTH_SHORT).show();
+    public void onPublishSuccess() {
+        Toast.makeText(mApplication, "publish succeed", Toast.LENGTH_SHORT).show();
     }
 
 }

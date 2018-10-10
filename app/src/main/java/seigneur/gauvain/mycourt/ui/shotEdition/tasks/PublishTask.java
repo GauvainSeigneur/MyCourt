@@ -35,7 +35,7 @@ public class PublishTask {
 
     private ConnectivityReceiver mConnectivityReceiver;
 
-    private PublishTaskCallBack mPublishTaskCallBack;
+    private PublishCallBack mPublishCallBack;
 
     private ShotDraftRepository mShotDraftRepository;
 
@@ -45,20 +45,20 @@ public class PublishTask {
                        ShotDraftRepository shotDraftRepository,
                        NetworkErrorHandler networkErrorHandler,
                        ConnectivityReceiver connectivityReceiver,
-                       PublishTaskCallBack publishTaskCallBack) {
+                       PublishCallBack publishCallBack) {
         this.mCompositeDisposable=compositeDisposable;
         this.mShotRepository=shotRepository;
         this.mShotDraftRepository=shotDraftRepository;
         this.mNetworkErrorHandler=networkErrorHandler;
         this.mConnectivityReceiver=connectivityReceiver;
-        this.mPublishTaskCallBack=publishTaskCallBack;
+        this.mPublishCallBack=publishCallBack;
     }
 
     /*
     *************************************************************************
     * NETWORK OPERATION - POST SHOT ON DRIBBBLE
     *************************************************************************/
-    private void postShot(Context context,
+    public void postShot(Context context,
                           Uri fileUri,
                           String imageFormat,
                           String titleString,
@@ -154,6 +154,7 @@ public class PublishTask {
      * manage UI and DB items on Post/Updated Succeed
      */
     private void onPublishOrUpdateSucceed() {
+        mPublishCallBack.onPublishSuccess();
         /*
         if (source==Constants.SOURCE_DRAFT) {
             //deleteDraft();  // reactivate
@@ -235,9 +236,9 @@ public class PublishTask {
     /**
      * CALLBACK FOR VIEWMODEL
      */
-    public interface PublishTaskCallBack {
+    public interface PublishCallBack {
 
-        void onTestGood();
+        void onPublishSuccess();
     }
 
 
