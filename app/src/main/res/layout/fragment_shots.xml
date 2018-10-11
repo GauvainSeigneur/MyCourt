@@ -24,16 +24,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <include
-            android:id="@+id/globalNetworkState"
-            layout="@layout/list_item_network_state"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/usersSwipeRefreshLayout" />
-
         <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/usersSwipeRefreshLayout"
             android:layout_width="match_parent"
@@ -48,6 +38,17 @@
                 android:paddingBottom="56dp"/>
 
         </android.support.v4.widget.SwipeRefreshLayout>
+
+        <include
+            android:id="@+id/globalNetworkState"
+            layout="@layout/list_item_network_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@+id/usersSwipeRefreshLayout" />
 
     </android.support.constraint.ConstraintLayout>
 

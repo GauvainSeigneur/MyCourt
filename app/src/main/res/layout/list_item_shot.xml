@@ -2,24 +2,25 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-        <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
-            android:id="@+id/shot_image"
-            android:elevation="8dp"
-            android:foreground="@drawable/rect_ripple"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"/>
+    <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
+        android:id="@+id/shot_image"
+        android:elevation="8dp"
+        android:foreground="@drawable/rect_ripple"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"/>
 
-        <TextView
-            android:id="@+id/shot_gif_label"
-            android:layout_margin="@dimen/padding_16"
-            android:visibility="invisible"
-            android:layout_gravity="top|end"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
-            android:padding="@dimen/padding_8"
-            android:text="GIF"/>
+    <TextView
+        android:id="@+id/shot_gif_label"
+        android:layout_margin="@dimen/padding_16"
+        android:visibility="invisible"
+        android:layout_gravity="top|end"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:padding="@dimen/padding_8"
+        android:text="GIF"/>
 
 </FrameLayout>

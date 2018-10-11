@@ -18,6 +18,7 @@ import seigneur.gauvain.mycourt.ui.shots.list.data.datasource.ShotsDataSource;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.SingleLiveEvent;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
+import timber.log.Timber;
 
 
 public class ShotsViewModel extends ViewModel {

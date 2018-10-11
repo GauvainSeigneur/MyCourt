@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -65,7 +66,7 @@ public class ShotsFragment extends BaseFragment implements ShotItemCallback {
 
     private ShotListAdapter shotListAdapter;
 
-    private LinearLayoutManager mLinearLayoutManager;
+    private GridLayoutManager mGridLayoutManager;
 
     @Inject
     ViewModelProvider.Factory viewModelFactory;
@@ -127,13 +128,30 @@ public class ShotsFragment extends BaseFragment implements ShotItemCallback {
     }
 
     private void initAdapter() {
-        mLinearLayoutManager = new LinearLayoutManager(getContext(),
-                LinearLayoutManager.VERTICAL, false);
+        mGridLayoutManager = new GridLayoutManager(getContext(),2);
         shotListAdapter = new ShotListAdapter(this);
-        mRvShots.setLayoutManager(mLinearLayoutManager);
+        mRvShots.setLayoutManager(mGridLayoutManager);
         mRvShots.setAdapter(shotListAdapter);
+
+        mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                switch(shotListAdapter.getItemViewType(position)){
+                    case ShotListAdapter.ITEM:
+                        return position == 0 ? 2 : 1;
+                    case ShotListAdapter.LOADING:
+                        return 2;
+                    default:
+                        return 1;
+                }
+            }
+        });
+
         shotsViewModel.shotList.observe(this, shotListAdapter::submitList);
         shotsViewModel.getNetworkState().observe(this, shotListAdapter::setNetworkState);
+
+
+
     }
 
     /**
@@ -161,12 +179,11 @@ public class ShotsFragment extends BaseFragment implements ShotItemCallback {
         shotsViewModel.getShotClickEvent().observe(
                 this,
                 position -> {
-
                     ActivityOptions options = null;
                     Intent i = new Intent(getActivity(), ShotDetailActivity.class);
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                         options = ActivityOptions.makeSceneTransitionAnimation((Activity) getActivity(),
-                                mLinearLayoutManager.findViewByPosition(position),
+                                mGridLayoutManager.findViewByPosition(position),
                                 getActivity().getString(R.string.shot_transition_name));
                         getContext().startActivity(i, options.toBundle());
                     }
@@ -187,14 +204,9 @@ public class ShotsFragment extends BaseFragment implements ShotItemCallback {
             errorMessageTextView.setText(networkState.getMessage());
         }
 
-        //loading and retry
-        /*if (shotListAdapter!=null) {
-            retryLoadingButton.setVisibility(shotListAdapter.getItemCount()>0 ? View.GONE : View.VISIBLE);
-            loadingProgressBar.setVisibility(shotListAdapter.getItemCount()>0 ? View.GONE : View.VISIBLE);
-        }*/
         retryLoadingButton.setVisibility(networkState.getStatus() == Status.FAILED ? View.VISIBLE : View.GONE);
         loadingProgressBar.setVisibility(networkState.getStatus() == Status.RUNNING ? View.VISIBLE : View.GONE);
-
+        globalNetworkState.setVisibility(networkState.getStatus() == Status.SUCCESS ? View.GONE : View.VISIBLE);
         usersSwipeRefreshLayout.setEnabled(networkState.getStatus() == Status.SUCCESS);
     }
 

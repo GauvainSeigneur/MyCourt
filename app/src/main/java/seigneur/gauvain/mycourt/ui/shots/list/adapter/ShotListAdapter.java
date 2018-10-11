@@ -19,6 +19,9 @@ public class ShotListAdapter extends PagedListAdapter<Shot, RecyclerView.ViewHol
 
     private ShotItemCallback shotItemCallback;
 
+    public static final int ITEM = 0;
+    public static final int LOADING = 1;
+
     private int pos;
 
     public ShotListAdapter(ShotItemCallback shotItemCallback) {
@@ -30,9 +33,9 @@ public class ShotListAdapter extends PagedListAdapter<Shot, RecyclerView.ViewHol
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
-            case R.layout.list_item_shot:
+            case ITEM:
                 return ShotViewHolder.create(parent,shotItemCallback);
-            case R.layout.list_item_network_state:
+            case LOADING:
                 return NetworkStateViewHolder.create(parent, shotItemCallback);
             default:
                 throw new IllegalArgumentException("unknown view type");
@@ -42,10 +45,10 @@ public class ShotListAdapter extends PagedListAdapter<Shot, RecyclerView.ViewHol
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         switch (getItemViewType(position)) {
-            case R.layout.list_item_shot:
+            case ITEM:
                 ((ShotViewHolder) holder).bindTo(getItem(position));
                 break;
-            case R.layout.list_item_network_state:
+            case LOADING:
                 ((NetworkStateViewHolder) holder).bindTo(networkState);
                 break;
         }
@@ -58,9 +61,9 @@ public class ShotListAdapter extends PagedListAdapter<Shot, RecyclerView.ViewHol
     @Override
     public int getItemViewType(int position) {
         if (hasExtraRow() && position == getItemCount() - 1) {
-            return R.layout.list_item_network_state;
+            return LOADING;
         } else {
-            return R.layout.list_item_shot;
+            return ITEM;
         }
     }
 
