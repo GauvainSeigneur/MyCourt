@@ -91,7 +91,10 @@ public class EditShotActivity extends BaseActivity {
         ButterKnife.bind(this);
         //provide Dependencies
         AndroidInjection.inject(this);
-
+        //Listen EditText
+        mShotTitleEditor.addTextChangedListener(titleWatcher);
+        mTagEditor.addTextChangedListener(tagWtacher);
+        mShotDescriptionEditor.addTextChangedListener(descriptionWatcher);
         //Provide ViewModel
         mShotEditionViewModel = ViewModelProviders.of(this, viewModelFactory).get(ShotEditionViewModel.class);
         mShotEditionViewModel.init();
@@ -99,10 +102,6 @@ public class EditShotActivity extends BaseActivity {
         subscribeToLiveData(mShotEditionViewModel);
         subscribeToSingleEvent(mShotEditionViewModel);
 
-        //Listen EditText
-        mShotTitleEditor.addTextChangedListener(titleWatcher);
-        mTagEditor.addTextChangedListener(tagWtacher);
-        mShotDescriptionEditor.addTextChangedListener(descriptionWatcher);
     }
 
     @OnClick(R.id.btn_store)
@@ -137,9 +136,9 @@ public class EditShotActivity extends BaseActivity {
 
     private void subscribeToSingleEvent(ShotEditionViewModel viewModel) {
 
-        viewModel.getSetUpUiCmd().observe(this,
-                call -> setUpShotEditionUI(
-                        mShotEditionViewModel.getObjectSource())
+        viewModel.getSetUpUiCmd().observe(
+                this,
+                call -> setUpEditionUI(mShotEditionViewModel.getObjectSource())
         );
 
         viewModel.getPickShotCommand().observe(this, call -> openImagePicker());
@@ -240,21 +239,6 @@ public class EditShotActivity extends BaseActivity {
         finishAfterTransition();
     }
 
-    public void setUpShotEditionUI(Object object) {
-        //Listen text change
-        mShotTitleEditor.addTextChangedListener(titleWatcher);
-        mTagEditor.addTextChangedListener(tagWtacher);
-        mShotDescriptionEditor.addTextChangedListener(descriptionWatcher);
-
-        if (object!=null)  {
-            mToolbar.setTitle("Edit a shot");
-            setUpEditionUI(object);
-        } else {
-            mToolbar.setTitle("Create a shot");
-            setUpCreationModeUI();
-        }
-    }
-
     public void openImagePicker() {
         ImagePicker.pickImage(this, Constants.PICK_IMAGE_REQUEST);
     }
@@ -284,28 +268,40 @@ public class EditShotActivity extends BaseActivity {
      *********************************************************************************************
      * UI - MANAGE EDITION MODE
      *********************************************************************************************/
-    private void setUpCreationModeUI() {
-        croppedImagePreview.setImageResource(R.drawable.add_image_illustration);
-    }
-
     private void setUpEditionUI(Object object) {
-        displayShotImagePreview(getImageUrl(object));
-        mShotTitleEditor.setText(getTitle(object));
-        String description = getDescription(object);
-        if (description!=null)
-            mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description));
-        mTagEditor.setText(getTagList(object));
+        if (object!=null) {
+            if (EditUtils.getDraftType(object)==Constants.EDIT_MODE_UPDATE_SHOT)
+                mToolbar.setTitle("Edit a shot");
+            else
+                mToolbar.setTitle("Create a shot");
+            //notify viewModel so we Ui display image
+            Uri imageUri = EditUtils.getImageUrl(this, object);
+            mShotEditionViewModel.onImageCropped(imageUri);
+            //notify view model about format of image
+            mShotEditionViewModel.setImagePickedFormat(EditUtils.getImageFormat(object));
+            //set up String in Edit Text
+            mShotTitleEditor.setText(EditUtils.getTitle(object));
+            String description = EditUtils.getDescription(object);
+            if (description!=null)
+                mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description));
+
+            mTagEditor.setText(EditUtils.getTagList(object));
+        } else {
+            mToolbar.setTitle("Create a shot");
+            //set an image but doesn't notify viewmodel
+            croppedImagePreview.setImageResource(R.drawable.add_image_illustration);
+        }
+
     }
 
-
-    public void displayShotImagePreview(Uri uriImageCropped) {
+    private void displayShotImagePreview(Uri uriImageCropped) {
         if (uriImageCropped!=null) {
             Glide.with(mApplication)
                     .asBitmap()
                     .load(uriImageCropped)
                     .apply(new RequestOptions()
-                            .error(R.drawable.ic_my_shot_black_24dp)
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                    .error(R.drawable.ic_my_shot_black_24dp)
+                            // .diskCacheStrategy(DiskCacheStrategy.ALL)
                     )
                     .listener(new RequestListener<Bitmap>() {
                         @Override
@@ -323,97 +319,6 @@ public class EditShotActivity extends BaseActivity {
         } else {
             croppedImagePreview.setImageResource(R.drawable.add_image_illustration);
         }
-    }
-
-
-    //get title from data sent by presenter
-    //todo - mange this in Viewmodel to alwas send the same livedata
-    public String getTitle(Object object){
-        if (object instanceof Shot) {
-            Shot shot = (Shot) object;
-            return shot.getTitle();
-        } else if(object instanceof ShotDraft) {
-            ShotDraft shotDraft = (ShotDraft) object;
-            return shotDraft.getTitle();
-        } else {
-            return null;
-        }
-    }
-
-    //get image uri from data sent by presenter
-    public Uri getImageUrl(Object object) {
-        if (object instanceof Shot){
-            Shot shot = (Shot) object;
-
-            mShotEditionViewModel.onImageCropped(Uri.parse(shot.getImageUrl()));
-            return Uri.parse(shot.getImageUrl());
-        }
-        else if (object instanceof ShotDraft) {
-            ShotDraft shotDraft = (ShotDraft) object;
-            if (shotDraft.getImageUrl()!=null) {
-                if (shotDraft.getDraftType()==Constants.EDIT_MODE_NEW_SHOT) {
-                    Uri imageuri =FileProvider.getUriForFile(
-                            this,
-                            this.getString(R.string.file_provider_authorities),
-                            new File(shotDraft.getImageUrl()));
-
-                    mShotEditionViewModel.onImageCropped(imageuri);
-                    return imageuri;
-                }
-                else {
-                    Toast.makeText(this, "is sshotdraft not new"+shotDraft.getDraftType(), Toast.LENGTH_SHORT).show();
-                    return Uri.parse(shotDraft.getImageUrl());
-                }
-
-            }
-            else
-                return null;
-        }
-        else
-            return null;
-    }
-
-    //get tags from data sent by presenter
-    public StringBuilder getTagList(Object object){
-        StringBuilder stringBuilder = new StringBuilder();
-        if (object instanceof Shot) {
-            Shot shot = (Shot) object;
-            stringBuilder = adaptTagListToEditText(shot.getTagList());
-        } else if(object instanceof ShotDraft) {
-            ShotDraft shotDraft = (ShotDraft) object;
-            stringBuilder =adaptTagListToEditText(shotDraft.getTagList());
-        }
-        return stringBuilder;
-    }
-
-    /**
-     * Check if a tag contains more than one word, if true, add double quote to it,
-     * @param tagList - list from Shot or ShotDraft
-     * @return string from list with each item separated by a comma
-     */
-    private StringBuilder adaptTagListToEditText (ArrayList<String> tagList) {
-        StringBuilder listString = new StringBuilder();
-        Pattern multipleWordTagPattern = Pattern.compile(MyTextUtils.multipleWordtagRegex);
-        for (String s : tagList) {
-            Matcher wordMatcher = multipleWordTagPattern.matcher(s);
-            if (!wordMatcher.matches()) {
-                s = "\""+ s +"\"";
-            }
-            listString.append(s+", ");
-        }
-        return listString;
-    }
-
-    public String getDescription(Object object){
-        String desc = null;
-        if (object instanceof Shot) {
-            Shot shot = (Shot) object;
-            desc= Html.fromHtml(shot.getDescription()).toString();
-        } else if(object instanceof ShotDraft) {
-            ShotDraft shotDraft = (ShotDraft) object;
-            desc =  shotDraft.getDescription();
-        }
-        return desc;
     }
 
     public void showMessageEmptyTitle() {
@@ -470,5 +375,3 @@ public class EditShotActivity extends BaseActivity {
     };
 
 }
-
-

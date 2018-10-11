@@ -93,9 +93,9 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     /*
-    *********************************************************************************************
-    * PUBLIC METHODS CALLED IN VIEW
-    *********************************************************************************************/
+     *********************************************************************************************
+     * PUBLIC METHODS CALLED IN VIEW
+     *********************************************************************************************/
     public void init() {
         initTasks();
         if (mSource == -1)
@@ -130,7 +130,7 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     public void onTagChanged(String tag) {
-        mTags.setValue(ListUtils.tagListWithoutQuote(tag));
+        mTags.setValue(EditUtils.tagListWithoutQuote(tag));
     }
 
     public void requestPerm() {
@@ -155,23 +155,36 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     public void onPublishClicked() {
-
-        ShotDraft shotDraft = (ShotDraft) mObjectSource;
-        mPublishTask.postShot(
-                mApplication,
-                Uri.parse(shotDraft.imageUri), // for draft
-                //getCroppedImageUri().getValue(), //when image is changed
-                //getImagePickedFormat(),
-                "png",
-                getTitle().getValue(),
-                getDescription().getValue(),
-                getTags().getValue());
+        Toast.makeText(mApplication, "mEditionMode :"+mEditionMode, Toast.LENGTH_SHORT).show();
+        if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
+            String shotId =null;
+            if (mObjectSource instanceof Shot) {
+                Shot shot = (Shot) mObjectSource;
+                shotId = shot.getId();
+            } else if (mObjectSource instanceof ShotDraft) {
+                ShotDraft shotDraft = (ShotDraft) mObjectSource;
+                shotId = shotDraft.getShotId();
+            }
+            mPublishTask.updateShot(
+                    shotId,
+                    getTitle().getValue(),
+                    getDescription().getValue(),
+                    getTags().getValue(), false);
+        }
+        else
+            mPublishTask.postShot(
+                    mApplication,
+                    getCroppedImageUri().getValue(), //when image is changed
+                    getImagePickedFormat(),
+                    getTitle().getValue(),
+                    getDescription().getValue(),
+                    getTags().getValue());
     }
 
     /*
-    *********************************************************************************************
-    * PRIVATE METHODS
-    *********************************************************************************************/
+     *********************************************************************************************
+     * PRIVATE METHODS
+     *********************************************************************************************/
     private void initTasks() {
         if (mStoreDrafTask!=null && mPublishTask!=null && mGetSourceTask!=null) {
             Timber.d("tasks initialized");
@@ -226,9 +239,9 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     /*
-    *********************************************************************************************
-    * EVENT WHICH VIEW WILL SUBSCRIBE
-    *********************************************************************************************/
+     *********************************************************************************************
+     * EVENT WHICH VIEW WILL SUBSCRIBE
+     *********************************************************************************************/
     public SingleLiveEvent<Void> getPickShotCommand() {
         return mPickShotCommand;
     }
@@ -351,13 +364,6 @@ public class ShotEditionViewModel extends ViewModel implements
     @Override
     public void objectSource(Object object) {
         setObjectSource(object);
-        //todo - refactor by single event - shot or shotdarft, more visible for user...
-        if (object instanceof  Shot) {
-
-        } else if (object instanceof  ShotDraft) {
-
-        }
-
     }
 
     /*

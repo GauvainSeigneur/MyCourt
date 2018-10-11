@@ -3,14 +3,13 @@ package seigneur.gauvain.mycourt.ui.shotEdition.tasks;
 import android.content.Context;
 import android.net.Uri;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.inject.Inject;
 
 import io.reactivex.disposables.CompositeDisposable;
-import okhttp3.MediaType;
+import okhttp3.Headers;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.HttpException;
@@ -21,7 +20,6 @@ import seigneur.gauvain.mycourt.data.repository.ShotRepository;
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.HttpUtils;
-import seigneur.gauvain.mycourt.utils.image.ImageUtils;
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler;
 import timber.log.Timber;
 
@@ -55,15 +53,15 @@ public class PublishTask {
     }
 
     /*
-    *************************************************************************
-    * NETWORK OPERATION - POST SHOT ON DRIBBBLE
-    *************************************************************************/
+     *************************************************************************
+     * NETWORK OPERATION - POST SHOT ON DRIBBBLE
+     *************************************************************************/
     public void postShot(Context context,
-                          Uri fileUri,
-                          String imageFormat,
-                          String titleString,
-                          String descriptionString,
-                          ArrayList<String> tagList) {
+                         Uri fileUri,
+                         String imageFormat,
+                         String titleString,
+                         String descriptionString,
+                         ArrayList<String> tagList) {
         MultipartBody.Part body = HttpUtils.createFilePart(context,fileUri,imageFormat,"image");
         //add to HashMap key and RequestBody
         HashMap<String, RequestBody> map = new HashMap<>();
@@ -89,11 +87,14 @@ public class PublishTask {
      * response must be 202 to be publish on Dribbble
      * @param response - body response from Dribbble
      */
-    private void onPostSucceed(Response<Shot> response) {
+    private void onPostSucceed(Response<Void> response) {
         switch(response.code()) {
             case Constants.ACCEPTED:
-                Timber.d("post succeed");
-                //todo - do something in UI
+                Headers headers = response.headers();
+                //todo - use location get shot id and send attachment after with RX
+                String location = headers.get("location");
+                if (location!=null)
+                    Timber.d("post succeed. location: "+location);
                 onPublishOrUpdateSucceed();
                 break;
             default:
@@ -111,10 +112,10 @@ public class PublishTask {
     }
 
     /*
-    *************************************************************************
-    * NETWORK OPERATION - UPDATE SHOT ON DRIBBBLE
-    *************************************************************************/
-    private void updateShot(
+     *************************************************************************
+     * NETWORK OPERATION - UPDATE SHOT ON DRIBBBLE
+     *************************************************************************/
+    public void updateShot (
             String shotId,
             String title, String desc, ArrayList<String> tags, boolean profile) {
         mCompositeDisposable.add(
@@ -168,9 +169,9 @@ public class PublishTask {
 
 
     /*
-    *************************************************************************
-    * DB OPERATION - DELETE DRAFT AFTER PUBLISH OR UPDATE
-    *************************************************************************/
+     *************************************************************************
+     * DB OPERATION - DELETE DRAFT AFTER PUBLISH OR UPDATE
+     *************************************************************************/
     private void deleteDraft() {
         /*mCompositeDisposable.add(
                 mShotDraftRepository.deleteDraft(((ShotDraft) mObjectSource).getId())
@@ -201,9 +202,9 @@ public class PublishTask {
     }
 
     /*
-    *************************************************************************
-    * MANAGE NETWORK EXCEPTION
-    *************************************************************************/
+     *************************************************************************
+     * MANAGE NETWORK EXCEPTION
+     *************************************************************************/
     private void handleNetworkOperationError(final Throwable error, int eventID) {
         mNetworkErrorHandler.handleNetworkErrors(error,eventID, new NetworkErrorHandler.onRXErrorListener() {
             @Override

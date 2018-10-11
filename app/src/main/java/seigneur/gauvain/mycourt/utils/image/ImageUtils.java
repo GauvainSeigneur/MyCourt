@@ -17,6 +17,7 @@ import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Range;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
@@ -56,13 +57,12 @@ public class ImageUtils {
         options.setToolbarColor(activity.getResources().getColor(R.color.colorPrimary));
         options.setActiveWidgetColor(activity.getResources().getColor(R.color.colorAccent));
         //if image is Gif, it can't be cropped. so check if the px size is in accordance to
-        //Dribbble specifications
-        //Aparrently the max size of of image is not required anymore
+        //Must be a 4:3 ratio between 400×300 and 1600×1200
         if (ImageCroppedFormat!=null && ImageCroppedFormat.equals("gif")) {
             //check if image aspect ratio is 4/3
             double gifRatio=(double)imageSize[1]/(double)imageSize[0];
             Timber.d("4/3 :"+gifRatio);
-            if (gifRatio==0.75) {
+            if (gifRatio==0.75 && imageSize[0]<=1600 && imageSize[1]<=1200 && imageSize[0]>400 && imageSize[1]>=300) {
                 options.setHideBottomControls(true);
                 options.setAllowedGestures(0,0,0);
                 UCrop.of(source, destination)
@@ -71,12 +71,13 @@ public class ImageUtils {
                         .start(activity);
                 Toast.makeText(activity, "gif can't be cropped", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(activity, "gif can't be cropped. the format needs to be 4/3", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "gif can't be cropped and the format needs to be 4/3 (eg. 400px*300px)", Toast.LENGTH_SHORT).show();
             }
         } else {
             UCrop.of(source, destination)
                     .withAspectRatio(4, 3)
                     .withOptions(options)
+                    .withMaxResultSize(1600, 1200)
                     .start(activity);
         }
 

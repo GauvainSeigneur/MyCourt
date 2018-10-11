@@ -1,6 +1,5 @@
 package seigneur.gauvain.mycourt.data.repository;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,13 +13,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.http.Part;
 import seigneur.gauvain.mycourt.data.api.DribbbleService;
 import seigneur.gauvain.mycourt.data.model.Shot;
-import seigneur.gauvain.mycourt.utils.ConnectivityReceiver;
 
 public class ShotRepository {
 
@@ -47,13 +42,13 @@ public class ShotRepository {
                                    String description,
                                    ArrayList<String> tags,
                                    boolean isLowProfile
-                                   ) {
+    ) {
         return mDribbbleService.updateShot(id,title, description, tags, isLowProfile)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Response<Shot>> publishANewShot(
+    public Observable<Response<Void>> publishANewShot(
             HashMap<String, RequestBody> map,
             MultipartBody.Part file,
             String title,
