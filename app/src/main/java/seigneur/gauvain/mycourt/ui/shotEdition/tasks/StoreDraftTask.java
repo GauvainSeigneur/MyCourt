@@ -24,8 +24,6 @@ public class StoreDraftTask {
     private CompositeDisposable     mCompositeDisposable;
     private StoreRequestListener    mStoreRequestListener;
     private ShotDraftRepository     mShotDraftRepository;
-    private Shot mShot;
-
 
     @Inject
     public StoreDraftTask(CompositeDisposable compositeDisposable,
@@ -57,39 +55,9 @@ public class StoreDraftTask {
     }
 
     /**
-     * Save draft in db
-     * @param sourceObject - can be Shot or ShotDraft
-     * @param imageUri - uri of the image (on Dribbble.com/from My Court folder/or null)
-     * @param imageFormat - can be jpeg, png, gif or null
-     * @param title - title of shot
-     * @param desc - description of the shot
-     * @param tags - list of tags of the shot
-     * @param typeOfDraft - can be NEW_SHOT_DRAFT OR UPDATE
+     * Save Draft in DB
+     * @param draft - draft created at the beginning of activity
      */
-    public void saveInfoDraft(Object sourceObject, @Nullable String imageUri, @Nullable String imageFormat,
-                              String title, String desc, ArrayList<String> tags, int typeOfDraft) {
-
-
-        Timber.d("save draft called");
-            if (sourceObject instanceof Shot) {
-                mShot = (Shot) sourceObject;
-                mShot.setTitle(title);
-                mShot.setDescription(desc);
-                mShot.setTagList(tags);
-            } else {
-                 mShot = new Shot(null, title,desc, tags);
-            }
-            Draft draft = createDraft(typeOfDraft,imageUri, imageFormat, null, mShot);
-            Timber.d("draft created: "+draft.shot.getTitle());
-            mCompositeDisposable.add(
-                        mShotDraftRepository.storeShotDraft(draft)
-                                .subscribe(
-                                        this::onDraftSaved,
-                                        this::onDraftSavingError
-                                )
-                );
-    }
-
     public void save(Draft draft) {
         mCompositeDisposable.add(
                 mShotDraftRepository.storeShotDraft(draft)
@@ -102,31 +70,11 @@ public class StoreDraftTask {
     }
 
 
-    public void update(Draft draft) {
-        mCompositeDisposable.add(
-                mShotDraftRepository.updateShotDraft(draft)
-                        .subscribe(
-                                this::onDraftSaved, //todo Listener
-                                this::onDraftSavingError //todo Listener
-                        )
-        );
-
-    }
-
     /**
-     * Update a current draft in DB
+     * Update draft in db
+     * @param draft - draft created at the beginning of activity
      */
-    public void updateInfoDraft(Object sourceObject, @Nullable String imageUri,
-                                @Nullable String imageFormat, String title, String desc,
-                                ArrayList<String> tags, int typeOfDraft) {
-
-        Draft draft = (Draft) sourceObject;
-        draft.setImageUri(imageUri);
-        draft.setImageFormat(imageFormat);
-        draft.shot.setTitle(title);
-        draft.shot.setDescription(desc);
-        draft.shot.setTagList(tags);
-
+    public void update(Draft draft) {
         mCompositeDisposable.add(
                 mShotDraftRepository.updateShotDraft(draft)
                         .subscribe(
@@ -153,30 +101,6 @@ public class StoreDraftTask {
         Timber.d(t);
         mStoreRequestListener.onFailed();
     }
-
-    /*
-    *********************************************************************************************
-    * CREATE DRAFT OBJECT
-    *********************************************************************************************/
-    /**
-     * Create a draft object to store it in DB
-     * @param typeOfDraft
-     * @param imageUri
-     * @param imageFormat
-     * @param schedulingDate
-     * @param shot
-     * @return
-     */
-    public Draft createDraft(
-            int typeOfDraft,
-            @Nullable String imageUri,
-            @Nullable String imageFormat,
-            @Nullable  Date schedulingDate,
-            @Nullable Shot shot //todo - can relly be Nullable?
-            ) {
-        return new Draft(typeOfDraft, imageUri, imageFormat, schedulingDate, shot);
-    }
-
 
     /**
      * CALLBACK FOR VIEWMODEL
