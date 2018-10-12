@@ -10,6 +10,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
+import seigneur.gauvain.mycourt.data.model.Draft;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
@@ -124,7 +125,7 @@ public class ShotDetailViewModel extends ViewModel {
      * Manage if ShotDraft is found in db
      * @param shotDraft - shotDRaft found in db
      */
-    private void doIfDraftFoundInDB(ShotDraft shotDraft) {
+    private void doIfDraftFoundInDB(Draft shotDraft) {
         Timber.d("Draft already exists");
         mTempDataRepository.setDraftCallingSource(Constants.SOURCE_DRAFT);  //TODO - PUBLISH OPERATOR RX
         mTempDataRepository.setShotDraft(shotDraft);                        //TODO - PUBLISH OPERATOR RX

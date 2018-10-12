@@ -43,6 +43,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import dagger.android.AndroidInjection;
 import seigneur.gauvain.mycourt.R;
+import seigneur.gauvain.mycourt.data.model.Draft;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.ui.base.BaseActivity;
@@ -138,7 +139,7 @@ public class EditShotActivity extends BaseActivity {
 
         viewModel.getSetUpUiCmd().observe(
                 this,
-                call -> setUpEditionUI(mShotEditionViewModel.getObjectSource())
+                call -> setUpEditionUI(mShotEditionViewModel.getmTempDraft())
         );
 
         viewModel.getPickShotCommand().observe(this, call -> openImagePicker());
@@ -268,29 +269,20 @@ public class EditShotActivity extends BaseActivity {
      *********************************************************************************************
      * UI - MANAGE EDITION MODE
      *********************************************************************************************/
-    private void setUpEditionUI(Object object) {
-        if (object!=null) {
-            if (EditUtils.getDraftType(object)==Constants.EDIT_MODE_UPDATE_SHOT)
-                mToolbar.setTitle("Edit a shot");
-            else
-                mToolbar.setTitle("Create a shot");
-            //notify viewModel so we Ui display image
-            Uri imageUri = EditUtils.getImageUrl(this, object);
-            mShotEditionViewModel.onImageCropped(imageUri);
-            //notify view model about format of image
-            mShotEditionViewModel.setImagePickedFormat(EditUtils.getImageFormat(object));
-            //set up String in Edit Text
-            mShotTitleEditor.setText(EditUtils.getTitle(object));
-            String description = EditUtils.getDescription(object);
-            if (description!=null)
-                mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description));
-
-            mTagEditor.setText(EditUtils.getTagList(object));
-        } else {
+    private void setUpEditionUI(Draft draft) {
+        if (draft.getTypeOfDraft()==Constants.EDIT_MODE_NEW_SHOT) {
             mToolbar.setTitle("Create a shot");
-            //set an image but doesn't notify viewmodel
-            croppedImagePreview.setImageResource(R.drawable.add_image_illustration);
+        } else {
+            mToolbar.setTitle("Edit a shot");
         }
+        if (draft.getImageUri()==null)
+            croppedImagePreview.setImageResource(R.drawable.add_image_illustration);
+        mShotEditionViewModel.onImageCropped(EditUtils.getImageUrl(this, draft));
+        mShotTitleEditor.setText(draft.getShot().getTitle());
+        String description = draft.getShot().getDescription();
+        if (description!=null)
+            mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description));
+        mTagEditor.setText(EditUtils.getTagList(draft));
 
     }
 

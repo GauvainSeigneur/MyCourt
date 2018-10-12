@@ -6,16 +6,18 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.inject.Inject;
 
 import gnu.trove.TIntArrayList;
 import io.reactivex.disposables.CompositeDisposable;
+import seigneur.gauvain.mycourt.data.model.Draft;
 import seigneur.gauvain.mycourt.data.model.Shot;
-import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.ShotRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
@@ -59,11 +61,8 @@ public class ShotEditionViewModel extends ViewModel implements
 
     //RX disposable
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
-
     //Manage source and Edition mode (new or update)
-    private int mSource = -1;
-    private int mEditionMode = -1;
-    private Object mObjectSource = null;
+    private Draft mTempDraft;
     private SingleLiveEvent<Void> mSetUpUiCmd = new SingleLiveEvent<>();
     //Pick and Crop Image
     private SingleLiveEvent<Void> mPickShotCommand = new SingleLiveEvent<>();
@@ -98,12 +97,12 @@ public class ShotEditionViewModel extends ViewModel implements
      *********************************************************************************************/
     public void init() {
         initTasks();
-        if (mSource == -1)
+       if (mTempDraft == null)
             mGetSourceTask.getOriginOfEditRequest();
     }
 
     public void onImagePreviewClicked() {
-        if (getEditionMode()==Constants.EDIT_MODE_UPDATE_SHOT)
+        if (mTempDraft.getTypeOfDraft()==Constants.EDIT_MODE_UPDATE_SHOT)
             Timber.d("not allowed to change image already published");
         else
             mPickShotCommand.call();
@@ -155,18 +154,18 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     public void onPublishClicked() {
-        Toast.makeText(mApplication, "mEditionMode :"+mEditionMode, Toast.LENGTH_SHORT).show();
-        if (mEditionMode==Constants.EDIT_MODE_UPDATE_SHOT) {
+        if (mTempDraft.getTypeOfDraft()==Constants.EDIT_MODE_UPDATE_SHOT) {
             String shotId =null;
-            if (mObjectSource instanceof Shot) {
+            /*/if (mObjectSource instanceof Shot) {
                 Shot shot = (Shot) mObjectSource;
                 shotId = shot.getId();
-            } else if (mObjectSource instanceof ShotDraft) {
-                ShotDraft shotDraft = (ShotDraft) mObjectSource;
-                shotId = shotDraft.getShotId();
-            }
+            } else if (mObjectSource instanceof Draft) {
+                Draft shotDraft = (Draft) mObjectSource;
+                shotId = shotDraft.getShot().getId();
+            }*/
+            //todo - finish and test !!!
             mPublishTask.updateShot(
-                    shotId,
+                    mTempDraft.getShot().getId(),
                     getTitle().getValue(),
                     getDescription().getValue(),
                     getTags().getValue(), false);
@@ -205,43 +204,35 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     private void registerOrUpdateDraft(Context context, boolean isRegisteringImage) {
-        switch (mSource) {
-            case Constants.SOURCE_DRAFT:
-                if (isRegisteringImage) {
-                    mStoreDrafTask.storeDraftImage(context,
-                            getImagePickedFormat(), getCroppedImageUri().getValue());
-                } else {
-                    mStoreDrafTask.updateInfoDraft(
-                            mObjectSource,
-                            ((ShotDraft)mObjectSource).getImageUrl(), ((ShotDraft)mObjectSource).getImageFormat(),
-                            getTitle().getValue(), getDescription().getValue(),
-                            getTags().getValue(), getEditionMode());
-                }
-                break;
-
-            case Constants.SOURCE_FAB:
-                if (isRegisteringImage)
-                    mStoreDrafTask.storeDraftImage(context, getImagePickedFormat(),
-                            getCroppedImageUri().getValue());
-                else
-                    mStoreDrafTask.saveInfoDraft(mObjectSource,
-                            null, null, getTitle().getValue(), getDescription().getValue(),
-                            getTags().getValue(), getEditionMode());
-                break;
-
-            case Constants.SOURCE_SHOT:
-                mStoreDrafTask.saveInfoDraft(mObjectSource,
-                        ((Shot) mObjectSource).getImageUrl(), null,
-                        getTitle().getValue(), getDescription().getValue(),
-                        getTags().getValue(), getEditionMode());
-                break;
+        //todo - new way - to finalize :
+        if (isRegisteringImage) {
+            mStoreDrafTask.storeDraftImage(context,
+                    getImagePickedFormat(), getCroppedImageUri().getValue());
+        } else {
+            String imageUri=null;
+            if (getCroppedImageUri().getValue()!=null)
+                imageUri =getCroppedImageUri().getValue().toString();
+            mTempDraft.changeInfoFromEdit(imageUri,
+                    getImagePickedFormat(),
+                    getTitle().getValue(),
+                    getDescription().getValue(),
+                    getTags().getValue());
+            if (mTempDraft.getDraftID()==0) {
+                //new draft, so save it in db
+                //todo - store
+                mStoreDrafTask.save(mTempDraft);
+            } else {
+                //it is draft ftech from db, update it
+                //todo - update
+                mStoreDrafTask.update(mTempDraft);
+            }
         }
     }
 
     /*
-     *********************************************************************************************
-     * EVENT WHICH VIEW WILL SUBSCRIBE
-     *********************************************************************************************/
+    *********************************************************************************************
+    * EVENT WHICH VIEW WILL SUBSCRIBE
+    *********************************************************************************************/
     public SingleLiveEvent<Void> getPickShotCommand() {
         return mPickShotCommand;
     }
@@ -283,9 +274,13 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     /*
-     *********************************************************************************************
-     * GETTER AND SETTER - CAN BE CALLED BY VIEW AND VIEWMODEL
-     *********************************************************************************************/
+    *********************************************************************************************
+    * GETTER AND SETTER - CAN BE CALLED BY VIEW AND VIEWMODEL
+    *********************************************************************************************/
+    public Draft getmTempDraft() {
+        return mTempDraft;
+    }
+
     public Uri getImagePickedUriSource() {
         return imagePickedUriSource;
     }
@@ -318,52 +313,19 @@ public class ShotEditionViewModel extends ViewModel implements
         this.imageSize = imageSize;
     }
 
-    public int getEditionMode() {
-        return mEditionMode;
-    }
-
-    public void setEditionMode(int mEditionMode) {
-        this.mEditionMode = mEditionMode;
-    }
-
-    public Object getObjectSource() {
-        return mObjectSource;
-    }
-
-    public void setObjectSource(Object mObjectSource) {
-        this.mObjectSource = mObjectSource;
-    }
-
-    public int getSource() {
-        return mSource;
-    }
-
-    public void setSource(int mSource) {
-        this.mSource = mSource;
-    }
-
     /*
-     *********************************************************************************************
-     * GetSourceTaskCallback
-     *********************************************************************************************/
-    @Override
-    public void source(int source) {
-        setSource(source);
-    }
-
-    @Override
-    public void EditMode(int mode) {
-        setEditionMode(mode);
-    }
-
+    *********************************************************************************************
+    * GetSourceTaskCallback
+    *********************************************************************************************/
     @Override
     public void dataForUIReady() {
         mSetUpUiCmd.call();
     }
 
     @Override
-    public void objectSource(Object object) {
-        setObjectSource(object);
+    public void setUpTempDraft(Draft draft) {
+        mTempDraft= draft;
+        Timber.d("tempDraft created : " + mTempDraft.getDraftID());
     }
 
     /*
@@ -372,19 +334,20 @@ public class ShotEditionViewModel extends ViewModel implements
      *********************************************************************************************/
     @Override
     public void onSaveImageSuccess(String uri) {
-        if (mSource==Constants.SOURCE_DRAFT) {
-            mStoreDrafTask.updateInfoDraft(
-                    mObjectSource,
-                    uri,
-                    getImagePickedFormat(),
-                    getTitle().getValue(),
-                    getDescription().getValue(),
-                    getTags().getValue(),
-                    getEditionMode());
+        mTempDraft.changeInfoFromEdit(uri,
+                getImagePickedFormat(),
+                getTitle().getValue(),
+                getDescription().getValue(),
+                getTags().getValue());
+
+        if (mTempDraft.getDraftID()==0) {
+            //new draft, so save it in db
+            //todo - store
+            mStoreDrafTask.save(mTempDraft);
         } else {
-            mStoreDrafTask.saveInfoDraft(mObjectSource,
-                    uri, getImagePickedFormat(), getTitle().getValue(), getDescription().getValue(),
-                    getTags().getValue(), getEditionMode());
+            //it is draft ftech from db, update it
+            //todo - update
+            mStoreDrafTask.update(mTempDraft);
         }
     }
 

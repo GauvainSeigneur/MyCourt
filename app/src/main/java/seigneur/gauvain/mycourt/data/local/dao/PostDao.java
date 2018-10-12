@@ -14,25 +14,26 @@ import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
 import retrofit2.http.DELETE;
+import seigneur.gauvain.mycourt.data.model.Draft;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 
 @Dao
 public interface PostDao {
 
-    @Query("SELECT * FROM ShotDraft")
-    Maybe<List<ShotDraft>> getAllPost();
+    @Query("SELECT * FROM Draft")
+    Maybe<List<Draft>> getAllPost();
 
     @Query("SELECT * FROM ShotDraft WHERE id IN (:postIds)")
     Flowable<List<ShotDraft>> loadAllPostByIds(int[] postIds);
 
-    @Query("SELECT * FROM ShotDraft WHERE shotId IN (:shotId)")
-    Maybe<ShotDraft> getShotDraftByShotId(String shotId);
+    @Query("SELECT * FROM Draft WHERE id IN (:shotId)")
+    Maybe<Draft> getShotDraftByShotId(String shotId);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    int updateDraft(ShotDraft shotDraft);
+    int updateDraft(Draft draft);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long insertPost(ShotDraft shotDraft);
+    long insertPost(Draft draft);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long[] insertAllPost(List<ShotDraft> shotDraft);

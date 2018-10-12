@@ -2,6 +2,7 @@ package seigneur.gauvain.mycourt.ui.shotEdition.tasks;
 
 import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
+import seigneur.gauvain.mycourt.data.model.Draft;
 import seigneur.gauvain.mycourt.data.model.Shot;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
@@ -37,7 +38,6 @@ public class GetSourceTask {
     }
 
     private void manageSource(int source) {
-        mSourceCallback.source(source);
         switch (source) {
             //user wishes to continue edit a stored draft
             case Constants.SOURCE_DRAFT:
@@ -45,12 +45,13 @@ public class GetSourceTask {
                 break;
             //User wishes to update a published shot
             case Constants.SOURCE_SHOT:
-                mSourceCallback.EditMode(Constants.EDIT_MODE_UPDATE_SHOT);
                 getShot();
                 break;
             //User wishes to create a shot
             case Constants.SOURCE_FAB:
-                mSourceCallback.EditMode(Constants.EDIT_MODE_NEW_SHOT);
+                Shot shot = new Shot();
+                Draft draft = new Draft (Constants.EDIT_MODE_NEW_SHOT, null, null, null, shot);
+                mSourceCallback.setUpTempDraft(draft);
                 mSourceCallback.dataForUIReady();
                 break;
         }
@@ -58,7 +59,6 @@ public class GetSourceTask {
 
     private void manageSourceTypeError(Throwable throwable) {
         Timber.d(throwable);
-        mSourceCallback.source(-1);
     }
 
     /*
@@ -71,7 +71,9 @@ public class GetSourceTask {
     }
 
     private void manageShotInfo(Shot shot) {
-        mSourceCallback.objectSource(shot);
+        Draft draft = new Draft (Constants.EDIT_MODE_UPDATE_SHOT, shot.getImageHidpi(), null, null, shot);
+        mSourceCallback.setUpTempDraft(draft);
+
         mSourceCallback.dataForUIReady();
     }
 
@@ -92,10 +94,11 @@ public class GetSourceTask {
         );
     }
 
-    private void manageShotDraftInfo(ShotDraft shotDraft) {
-        mSourceCallback.objectSource(shotDraft);
-        mSourceCallback.EditMode(shotDraft.getDraftType());
+    private void manageShotDraftInfo(Draft shotDraft) {
+        Draft draft = shotDraft;
+        mSourceCallback.setUpTempDraft(draft);
         mSourceCallback.dataForUIReady();
+        Timber.d("typeofDraft : "+ shotDraft.getTypeOfDraft());
     }
 
     private void onGetShotDraftError(Throwable throwable) {
@@ -105,13 +108,10 @@ public class GetSourceTask {
 
     public interface SourceCallback {
 
-        void source(int source);
-
-        void EditMode(int mode);
+        void setUpTempDraft(Draft draft);
 
         void dataForUIReady();
 
-        void objectSource(Object object);
 
     }
 

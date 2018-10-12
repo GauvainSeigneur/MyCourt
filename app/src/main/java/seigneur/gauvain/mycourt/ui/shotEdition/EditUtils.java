@@ -14,8 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import seigneur.gauvain.mycourt.R;
+import seigneur.gauvain.mycourt.data.model.Draft;
 import seigneur.gauvain.mycourt.data.model.Shot;
-import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.MyTextUtils;
 
@@ -26,102 +26,34 @@ public class EditUtils {
 
     public EditUtils(){}
 
-    public static int getDraftType(@Nullable Object object) {
-        if (object instanceof ShotDraft) {
-            ShotDraft shotDraft = (ShotDraft) object;
-            return shotDraft.getDraftType();
-        } else {
-            return -1;
-        }
-    }
-
-    /**
-     * get title send by object
-     * @param object
-     * @return
-     */
-    public static String getTitle(@Nullable Object object){
-        if (object instanceof Shot) {
-            Shot shot = (Shot) object;
-            return shot.getTitle();
-        } else if(object instanceof ShotDraft) {
-            ShotDraft shotDraft = (ShotDraft) object;
-            return shotDraft.getTitle();
-        } else {
-            return null;
-        }
-    }
-
     //get image uri from data sent by presenter
-    public static Uri getImageUrl(Context context, @Nullable Object object) {
-        if (object instanceof Shot){
-            Shot shot = (Shot) object;
-            return Uri.parse(shot.getImageUrl());
-        }
-        else if (object instanceof ShotDraft) {
-            ShotDraft shotDraft = (ShotDraft) object;
-            if (shotDraft.getImageUrl()!=null) {
-                if (shotDraft.getDraftType()==Constants.EDIT_MODE_NEW_SHOT) {
-                    Uri imageuri =FileProvider.getUriForFile(
-                            context,
-                            context.getString(R.string.file_provider_authorities),
-                            new File(shotDraft.getImageUrl()));
-                    return imageuri;
-                }
-                else {
-                    return Uri.parse(shotDraft.getImageUrl());
-                }
+    public static Uri getImageUrl(Context context, Draft draft) {
+        if (draft.getImageUri()!=null) {
+            if (draft.getTypeOfDraft()==Constants.EDIT_MODE_NEW_SHOT) {
+                Uri imageuri =FileProvider.getUriForFile(
+                        context,
+                        context.getString(R.string.file_provider_authorities),
+                        new File(draft.getImageUri()));
+                return imageuri;
             }
-            else
-                return null;
-        }
-        else
+            else {
+                return Uri.parse(draft.getImageUri());
+            }
+        } else {
             return null;
-    }
-
-    public static String getImageFormat (@Nullable Object object) {
-        if (object instanceof ShotDraft) {
-            ShotDraft shotDraft = (ShotDraft) object;
-            return shotDraft.getImageFormat();
         }
-        else
-            return null;
-    }
 
-
-    /**
-     *
-     * @param object
-     * @return
-     */
-    public static String getDescription(@Nullable Object object){
-        String desc = null;
-        if (object instanceof Shot) {
-            Shot shot = (Shot) object;
-            desc= Html.fromHtml(shot.getDescription()).toString();
-        } else if(object instanceof ShotDraft) {
-            ShotDraft shotDraft = (ShotDraft) object;
-            desc =  shotDraft.getDescription();
-        }
-        return desc;
     }
 
     /**
      * get TagList and convert it in String  with Dribble pattern to send it in the right format
-     * @param object
      * @return
      */
-    public static StringBuilder getTagList (@Nullable Object object){
+    public static StringBuilder getTagList (@Nullable Draft draft){
         StringBuilder stringBuilder = new StringBuilder();
-        if (object instanceof Shot) {
-            Shot shot = (Shot) object;
-            stringBuilder = adaptTagListToEditText(shot.getTagList());
-        } else if(object instanceof ShotDraft) {
-            ShotDraft shotDraft = (ShotDraft) object;
-            ArrayList<String> tagList =shotDraft.getTagList();
+            ArrayList<String> tagList =draft.shot.getTagList();
             if (tagList!=null)
                 stringBuilder =adaptTagListToEditText(tagList);
-        }
         return stringBuilder;
     }
 

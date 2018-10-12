@@ -16,6 +16,7 @@ import com.bumptech.glide.request.RequestOptions;
 import java.io.File;
 import java.util.List;
 import seigneur.gauvain.mycourt.R;
+import seigneur.gauvain.mycourt.data.model.Draft;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.utils.Constants;
 
@@ -24,7 +25,7 @@ import seigneur.gauvain.mycourt.utils.Constants;
  */
 public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHolder> {
 
-    private List<ShotDraft> data;
+    private List<Draft> data;
     private Context context;
     public ShotDraftViewHolder shotDraftViewHolder;
     public ShotDraftListCallback mCallback;
@@ -35,7 +36,7 @@ public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHol
      * @param data      - list of ShotDraft object
      * @param callback  - ShotDraftListCallback implementation
      */
-    public ShotDraftsListAdapter(Context context, @NonNull List<ShotDraft> data, ShotDraftListCallback callback) {
+    public ShotDraftsListAdapter(Context context, @NonNull List<Draft> data, ShotDraftListCallback callback) {
         this.context = context;
         this.data = data;
         this.mCallback=callback;
@@ -50,14 +51,14 @@ public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHol
 
     @Override
     public void onBindViewHolder(final ShotDraftViewHolder holder, final int position) {
-        ShotDraft item = data.get(position);
-        holder.shotDraftTitle.setText(item.getTitle());
-        if (item.getDraftType()== Constants.EDIT_MODE_NEW_SHOT) {
+        Draft item = data.get(position);
+        holder.shotDraftTitle.setText(item.shot.getTitle());
+        if (item.getTypeOfDraft()== Constants.EDIT_MODE_NEW_SHOT) {
             holder.shotDraftType.setText("NEW");
         } else {
             holder.shotDraftType.setText("UPDATE");
         }
-        if (data.get(position).getImageUrl()!=null) {
+        if (data.get(position).getImageUri()!=null) {
             Glide
                     .with(context)
                     .asDrawable()
@@ -96,14 +97,14 @@ public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHol
      * @param item - shotDraft item
      * @return uri of the image
      */
-    private Uri getImageUri(ShotDraft item){
-        if(item.getImageUrl()!=null)
-                if (item.getDraftType()==Constants.EDIT_MODE_NEW_SHOT)
+    private Uri getImageUri(Draft item){
+        if(item.getImageUri()!=null)
+                if (item.getTypeOfDraft()==Constants.EDIT_MODE_NEW_SHOT)
                     return FileProvider.getUriForFile(context,
                             context.getString(R.string.file_provider_authorities),
-                            new File(item.getImageUrl()));
+                            new File(item.getImageUri()));
                 else
-                    return Uri.parse(item.getImageUrl());
+                    return Uri.parse(item.getImageUri());
             else
                 return null;
     }

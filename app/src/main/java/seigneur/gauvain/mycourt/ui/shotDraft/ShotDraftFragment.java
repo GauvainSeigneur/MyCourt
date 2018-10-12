@@ -32,6 +32,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
+import seigneur.gauvain.mycourt.data.model.Draft;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.ui.base.BaseFragment;
 import seigneur.gauvain.mycourt.ui.main.MainViewModel;
@@ -67,7 +68,7 @@ public class ShotDraftFragment extends BaseFragment implements  Toolbar.OnMenuIt
     private ShotDraftListCallback mcallabck;
     private ShotDraftsListAdapter mShotDraftsListAdapter;
 
-    List<ShotDraft> shotDraftsSaved = new ArrayList<ShotDraft>();
+    List<Draft> shotDraftsSaved = new ArrayList<Draft>();
 
     /*
     ************************************************************************************
@@ -99,7 +100,7 @@ public class ShotDraftFragment extends BaseFragment implements  Toolbar.OnMenuIt
         mShotDraftViewModel.fetchShotDrafts();
         mcallabck = new ShotDraftListCallback() {
             @Override
-            public void onShotDraftClicked(ShotDraft shotDraft,int position) {
+            public void onShotDraftClicked(Draft shotDraft,int position) {
                 mShotDraftViewModel.onShotDraftClicked(shotDraft, position);
                 // mShotDraftPresenter.onShotDraftClicked(shotDraft, position); //TODO SINGLE EVENT
 
@@ -162,9 +163,9 @@ public class ShotDraftFragment extends BaseFragment implements  Toolbar.OnMenuIt
         mShotDraftViewModel.getDrafts()
                 .observe(
                         this,
-                        new Observer <List<ShotDraft>>() {
+                        new Observer <List<Draft>>() {
                             @Override
-                            public void onChanged(@Nullable List<ShotDraft> drafts) {
+                            public void onChanged(@Nullable List<Draft> drafts) {
                                 if (drafts!=null) {
                                     showEmptyView(false);
                                     showDraftList(drafts, false);//todo - fix this
@@ -213,7 +214,7 @@ public class ShotDraftFragment extends BaseFragment implements  Toolbar.OnMenuIt
             mRefreshDraftLayout.setRefreshing(false);
     }
 
-    public void showDraftList(List<ShotDraft> shotDraft, boolean isRefreshing) {
+    public void showDraftList(List<Draft> shotDraft, boolean isRefreshing) {
         if (isRefreshing)
             mShotDraftsListAdapter.clear(); //todo - use diffutils instead of this, is not perform
 

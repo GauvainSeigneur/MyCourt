@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Maybe;
 import io.reactivex.disposables.CompositeDisposable;
+import seigneur.gauvain.mycourt.data.model.Draft;
 import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
@@ -29,9 +30,9 @@ public class ShotDraftViewModel extends ViewModel {
 
     private final SingleLiveEvent<Void> mStopRefreshEvent = new SingleLiveEvent<>();
 
-    private final SingleLiveEvent<ShotDraft> mItemClicked = new SingleLiveEvent<>();
+    private final SingleLiveEvent<Draft> mItemClicked = new SingleLiveEvent<>();
 
-    private final MutableLiveData<List<ShotDraft>> mShotDrafts = new MutableLiveData<>();
+    private final MutableLiveData<List<Draft>> mShotDrafts = new MutableLiveData<>();
 
     private boolean isRefreshing;
 
@@ -44,7 +45,7 @@ public class ShotDraftViewModel extends ViewModel {
         mCompositeDisposable.clear();
     }
 
-    public LiveData<List<ShotDraft>> getDrafts() {
+    public LiveData<List<Draft>> getDrafts() {
         return mShotDrafts;
     }
 
@@ -52,7 +53,7 @@ public class ShotDraftViewModel extends ViewModel {
         return mShotDraftRepository.onDraftDBChanged;
     }
 
-    public SingleLiveEvent<ShotDraft> getItemClickedEvent() {
+    public SingleLiveEvent<Draft> getItemClickedEvent() {
         return mItemClicked;
     }
 
@@ -85,7 +86,7 @@ public class ShotDraftViewModel extends ViewModel {
      * get ShotDrafts list from DB - Use mayBe because the list will be small
      * @return - List of ShotDraft
      */
-    private Maybe<List<ShotDraft>> fetchDrafts() {
+    private Maybe<List<Draft>> fetchDrafts() {
         Timber.d ("getPostFromDB called");
         return mShotDraftRepository.getShotDraft();
     }
@@ -94,7 +95,7 @@ public class ShotDraftViewModel extends ViewModel {
      * ShotDrafts being found in DB - do something with it
      * @param shotDrafts - list Found in DB
      */
-    private void doOnDraftFound(List<ShotDraft> shotDrafts){
+    private void doOnDraftFound(List<Draft> shotDrafts){
         Timber.d("list loaded"+shotDrafts.toString());
         //todo - live data
         mShotDrafts.setValue(shotDrafts);
@@ -127,7 +128,7 @@ public class ShotDraftViewModel extends ViewModel {
     }
 
 
-    public void onShotDraftClicked(ShotDraft shotDraft, int position) {
+    public void onShotDraftClicked(Draft shotDraft, int position) {
         mTempDataRepository.setDraftCallingSource(Constants.SOURCE_DRAFT);
         mTempDataRepository.setShotDraft(shotDraft);
         mItemClicked.setValue(shotDraft);
