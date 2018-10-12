@@ -266,9 +266,9 @@ public class EditShotActivity extends BaseActivity {
     }
 
     /*
-     *********************************************************************************************
-     * UI - MANAGE EDITION MODE
-     *********************************************************************************************/
+    *********************************************************************************************
+    * UI - MANAGE EDITION MODE
+    *********************************************************************************************/
     private void setUpEditionUI(Draft draft) {
         if (draft.getTypeOfDraft()==Constants.EDIT_MODE_NEW_SHOT) {
             mToolbar.setTitle("Create a shot");
@@ -281,7 +281,8 @@ public class EditShotActivity extends BaseActivity {
         mShotTitleEditor.setText(draft.getShot().getTitle());
         String description = draft.getShot().getDescription();
         if (description!=null)
-            mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description));
+            mShotDescriptionEditor.setText(Html.fromHtml(
+                    MyTextUtils.noTrailingwhiteLines(description).toString()));
         mTagEditor.setText(EditUtils.getTagList(draft));
 
     }
