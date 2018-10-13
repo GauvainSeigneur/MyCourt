@@ -62,8 +62,8 @@ public class StoreDraftTask {
         mCompositeDisposable.add(
                 mShotDraftRepository.storeShotDraft(draft)
                         .subscribe(
-                                this::onDraftSaved, //todo Listener
-                                this::onDraftSavingError //todo Listener
+                                this::onDraftSaved,
+                                this::onDraftSavingError
                         )
         );
 
