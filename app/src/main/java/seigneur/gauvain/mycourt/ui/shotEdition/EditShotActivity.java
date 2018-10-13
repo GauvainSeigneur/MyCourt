@@ -265,10 +265,6 @@ public class EditShotActivity extends BaseActivity {
         finish();
     }
 
-    /*
-    *********************************************************************************************
-    * UI - MANAGE EDITION MODE
-    *********************************************************************************************/
     private void setUpEditionUI(Draft draft) {
         if (draft.getTypeOfDraft()==Constants.EDIT_MODE_NEW_SHOT) {
             mToolbar.setTitle("Create a shot");
@@ -279,10 +275,10 @@ public class EditShotActivity extends BaseActivity {
             croppedImagePreview.setImageResource(R.drawable.add_image_illustration);
         mShotEditionViewModel.onImageCropped(EditUtils.getImageUrl(this, draft));
         mShotTitleEditor.setText(draft.getShot().getTitle());
-        String description = draft.getShot().getDescription();
-        if (description!=null)
-            mShotDescriptionEditor.setText(Html.fromHtml(
-                    MyTextUtils.noTrailingwhiteLines(description).toString()));
+       //todo - from html only if source is from shot... --> mange it in task!!!
+        String description=EditUtils.getDescription(draft);
+        if (description!=null && !description.isEmpty())
+            mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description));
         mTagEditor.setText(EditUtils.getTagList(draft));
 
     }

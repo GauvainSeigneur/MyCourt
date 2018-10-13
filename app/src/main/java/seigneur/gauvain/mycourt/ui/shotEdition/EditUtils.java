@@ -26,6 +26,29 @@ public class EditUtils {
 
     public EditUtils(){}
 
+    /**
+     * Manage description String
+     * @param draft
+     * @return
+     */
+    public static String getDescription(Draft draft) {
+        if (draft.getShot()!=null && draft.getShot().getDescription() != null)  {
+            //If user click on edit from a shot detail and this shot is not already in draft
+            //- by check if draft id is equal to 0 - we must manage description text as html
+            // to avoid <p> or <br> elements for example
+            if (draft.getDraftID()==0 && draft.getShot().getId()!=null &&
+                    !draft.getShot().getId().isEmpty()) {
+                return Html.fromHtml(draft.getShot().getDescription()).toString();
+            }
+            //If the source of a the temporary draft is a draft itself do not treat text as html
+            else {
+                return draft.getShot().getDescription();
+            }
+        } else {
+            return null;
+        }
+    }
+
     //get image uri from data sent by presenter
     public static Uri getImageUrl(Context context, Draft draft) {
         if (draft.getImageUri()!=null) {

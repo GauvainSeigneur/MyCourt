@@ -50,7 +50,8 @@ public class GetSourceTask {
             //User wishes to create a shot
             case Constants.SOURCE_FAB:
                 Shot shot = new Shot();
-                Draft draft = new Draft (Constants.EDIT_MODE_NEW_SHOT, null, null, null, shot);
+                Draft draft = new Draft (Constants.EDIT_MODE_NEW_SHOT,
+                        null, null, null, shot);
                 mSourceCallback.setUpTempDraft(draft);
                 mSourceCallback.dataForUIReady();
                 break;
@@ -71,7 +72,12 @@ public class GetSourceTask {
     }
 
     private void manageShotInfo(Shot shot) {
-        Draft draft = new Draft (Constants.EDIT_MODE_UPDATE_SHOT, shot.getImageHidpi(), null, null, shot);
+        Draft draft = new Draft (
+                Constants.EDIT_MODE_UPDATE_SHOT,
+                shot.getImageHidpi(),
+                null,
+                null,
+                shot);
         mSourceCallback.setUpTempDraft(draft);
 
         mSourceCallback.dataForUIReady();
