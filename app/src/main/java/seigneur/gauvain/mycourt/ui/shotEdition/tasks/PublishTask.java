@@ -53,9 +53,9 @@ public class PublishTask {
     }
 
     /*
-     *************************************************************************
-     * NETWORK OPERATION - POST SHOT ON DRIBBBLE
-     *************************************************************************/
+    *************************************************************************
+    * NETWORK OPERATION - POST SHOT ON DRIBBBLE
+    *************************************************************************/
     public void postShot(Context context,
                          Uri fileUri,
                          String imageFormat,
@@ -238,7 +238,6 @@ public class PublishTask {
      * CALLBACK FOR VIEWMODEL
      */
     public interface PublishCallBack {
-
         void onPublishSuccess();
     }
 

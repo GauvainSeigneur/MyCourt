@@ -181,9 +181,9 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     /*
-     *********************************************************************************************
-     * PRIVATE METHODS
-     *********************************************************************************************/
+    *********************************************************************************************
+    * PRIVATE METHODS
+    *********************************************************************************************/
     private void initTasks() {
         if (mStoreDrafTask!=null && mPublishTask!=null && mGetSourceTask!=null) {
             Timber.d("tasks initialized");
@@ -208,23 +208,17 @@ public class ShotEditionViewModel extends ViewModel implements
             mStoreDrafTask.storeDraftImage(context,
                     getImagePickedFormat(), getCroppedImageUri().getValue());
         } else {
+            mTempDraft.changeInfoFromEdit(
+                    mTempDraft.getImageUri(), //Image doesn't change
+                    mTempDraft.getImageFormat(), //Image doesn't change
+                    getTitle().getValue(),
+                    getDescription().getValue(),
+                    getTags().getValue());
             if (mTempDraft.getDraftID()==0) {
                 //new draft, so save it in db
-                mTempDraft.changeInfoFromEdit(
-                        null, //user doesn't crop image yet
-                        null,  //user doesn't crop image yet
-                        getTitle().getValue(),
-                        getDescription().getValue(),
-                        getTags().getValue());
                 mStoreDrafTask.save(mTempDraft);
             } else {
                 //it is draft fetch from db, update it
-                mTempDraft.changeInfoFromEdit(
-                        mTempDraft.getImageUri(), //Image doesn't change
-                        mTempDraft.getImageFormat(), //Image doesn't change
-                        getTitle().getValue(),
-                        getDescription().getValue(),
-                        getTags().getValue());
                 mStoreDrafTask.update(mTempDraft);
             }
         }
@@ -330,9 +324,9 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     /*
-     *********************************************************************************************
-     * StoreTaskCallback
-     *********************************************************************************************/
+    *********************************************************************************************
+    * StoreTaskCallback
+    *********************************************************************************************/
     @Override
     public void onSaveImageSuccess(String uri) {
         mTempDraft.changeInfoFromEdit(uri,
