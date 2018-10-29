@@ -45,7 +45,6 @@ import dagger.android.AndroidInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.Draft;
 import seigneur.gauvain.mycourt.data.model.Shot;
-import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.ui.base.BaseActivity;
 import seigneur.gauvain.mycourt.utils.Constants;
 import seigneur.gauvain.mycourt.utils.image.ImagePicker;
@@ -315,9 +314,9 @@ public class EditShotActivity extends BaseActivity {
     }
 
     /*
-     *********************************************************************************************
-     * TEXTWATCHER
-     *********************************************************************************************/
+    *********************************************************************************************
+    * TEXTWATCHER
+    *********************************************************************************************/
     private final TextWatcher titleWatcher = new TextWatcher() {
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 

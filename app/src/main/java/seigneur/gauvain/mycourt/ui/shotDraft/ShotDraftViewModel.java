@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import io.reactivex.Maybe;
 import io.reactivex.disposables.CompositeDisposable;
 import seigneur.gauvain.mycourt.data.model.Draft;
-import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.utils.Constants;

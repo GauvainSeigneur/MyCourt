@@ -5,8 +5,6 @@ import javax.inject.Singleton;
 
 import seigneur.gauvain.mycourt.data.model.Draft;
 import seigneur.gauvain.mycourt.data.model.Shot;
-import seigneur.gauvain.mycourt.data.model.ShotDraft;
-import seigneur.gauvain.mycourt.utils.SingleLiveEvent;
 
 /**
  * Class used to get reference of data which are not

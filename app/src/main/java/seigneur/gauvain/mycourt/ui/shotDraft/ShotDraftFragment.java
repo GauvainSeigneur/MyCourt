@@ -33,7 +33,6 @@ import butterknife.Unbinder;
 import dagger.android.support.AndroidSupportInjection;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.Draft;
-import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.ui.base.BaseFragment;
 import seigneur.gauvain.mycourt.ui.main.MainViewModel;
 import seigneur.gauvain.mycourt.ui.shotEdition.EditShotActivity;

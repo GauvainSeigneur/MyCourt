@@ -16,7 +16,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import seigneur.gauvain.mycourt.data.local.dao.PostDao;
 import seigneur.gauvain.mycourt.data.model.Draft;
-import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.utils.image.ImageUtils;
 import seigneur.gauvain.mycourt.utils.SingleLiveEvent;
 

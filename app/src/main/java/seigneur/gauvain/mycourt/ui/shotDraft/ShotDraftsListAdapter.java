@@ -17,7 +17,6 @@ import java.io.File;
 import java.util.List;
 import seigneur.gauvain.mycourt.R;
 import seigneur.gauvain.mycourt.data.model.Draft;
-import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.utils.Constants;
 
 /**
@@ -52,7 +51,7 @@ public class ShotDraftsListAdapter extends RecyclerView.Adapter<ShotDraftViewHol
     @Override
     public void onBindViewHolder(final ShotDraftViewHolder holder, final int position) {
         Draft item = data.get(position);
-        holder.shotDraftTitle.setText(item.shot.getTitle());
+        holder.shotDraftTitle.setText(item.getShot().getTitle());
         if (item.getTypeOfDraft()== Constants.EDIT_MODE_NEW_SHOT) {
             holder.shotDraftType.setText("NEW");
         } else {

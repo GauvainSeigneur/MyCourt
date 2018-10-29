@@ -89,7 +89,7 @@ public class SplashActivity extends BaseActivity {
     }
 
     public void goToAuthActivity() {
-        AuthUtils.openAuthActivity(SplashActivity.this);
+        AuthUtils.Companion.openAuthActivity(SplashActivity.this);
     }
 
     public void goToHome() {

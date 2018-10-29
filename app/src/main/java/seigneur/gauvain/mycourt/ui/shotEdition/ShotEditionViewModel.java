@@ -329,7 +329,8 @@ public class ShotEditionViewModel extends ViewModel implements
     *********************************************************************************************/
     @Override
     public void onSaveImageSuccess(String uri) {
-        mTempDraft.changeInfoFromEdit(uri,
+        mTempDraft.changeInfoFromEdit(
+                uri,
                 getImagePickedFormat(),
                 getTitle().getValue(),
                 getDescription().getValue(),

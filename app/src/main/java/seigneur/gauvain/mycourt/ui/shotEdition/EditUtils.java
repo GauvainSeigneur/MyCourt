@@ -74,7 +74,7 @@ public class EditUtils {
      */
     public static StringBuilder getTagList (@Nullable Draft draft){
         StringBuilder stringBuilder = new StringBuilder();
-            ArrayList<String> tagList =draft.shot.getTagList();
+            ArrayList<String> tagList = draft.getShot().getTagList();
             if (tagList!=null)
                 stringBuilder =adaptTagListToEditText(tagList);
         return stringBuilder;

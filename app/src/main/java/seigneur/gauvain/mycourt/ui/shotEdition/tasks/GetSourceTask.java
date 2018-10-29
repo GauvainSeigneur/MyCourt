@@ -4,7 +4,6 @@ import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import seigneur.gauvain.mycourt.data.model.Draft;
 import seigneur.gauvain.mycourt.data.model.Shot;
-import seigneur.gauvain.mycourt.data.model.ShotDraft;
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository;
 import seigneur.gauvain.mycourt.utils.Constants;
 import timber.log.Timber;
@@ -27,7 +26,9 @@ public class GetSourceTask {
     *********************************************************************************************
     * Manage source
     *********************************************************************************************/
-    // Check whether if the activity is opened from draft registered in database or other
+    /**
+     * Check whether if the activity is opened from draft registered in database or other
+     */
     public void getOriginOfEditRequest() {
         mCompositeDisposable
                 .add(Single.just(mTempDataRepository.getDraftCallingSource())
@@ -37,6 +38,10 @@ public class GetSourceTask {
                 );
     }
 
+    /**
+     * get shot edition info according to source of the intent which opens the activity
+     * @param source - can be draft, shot, or fab
+     */
     private void manageSource(int source) {
         switch (source) {
             //user wishes to continue edit a stored draft
@@ -50,7 +55,8 @@ public class GetSourceTask {
             //User wishes to create a shot
             case Constants.SOURCE_FAB:
                 Shot shot = new Shot();
-                Draft draft = new Draft (Constants.EDIT_MODE_NEW_SHOT,
+                Draft draft = new Draft (
+                        0, Constants.EDIT_MODE_NEW_SHOT,
                         null, null, null, shot);
                 mSourceCallback.setUpTempDraft(draft);
                 mSourceCallback.dataForUIReady();
@@ -58,6 +64,10 @@ public class GetSourceTask {
         }
     }
 
+    /**
+     * Manage error during manageSource operation
+     * @param throwable - throwable
+     */
     private void manageSourceTypeError(Throwable throwable) {
         Timber.d(throwable);
     }
@@ -73,6 +83,7 @@ public class GetSourceTask {
 
     private void manageShotInfo(Shot shot) {
         Draft draft = new Draft (
+                0,
                 Constants.EDIT_MODE_UPDATE_SHOT,
                 shot.getImageHidpi(),
                 null,
