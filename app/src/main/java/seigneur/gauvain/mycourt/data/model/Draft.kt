@@ -12,6 +12,7 @@ import java.util.Date
 @Entity
 data class Draft(
 
+
     @PrimaryKey(autoGenerate = true)
     var draftID: Long = 0, //Insert methods treat 0 as not-set while inserting the item, so Room will auto generated an ID
     var typeOfDraft: Int = 0, //NEW SHOT OR UPDATE

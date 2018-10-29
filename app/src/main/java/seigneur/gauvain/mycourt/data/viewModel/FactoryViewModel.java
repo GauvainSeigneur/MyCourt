@@ -9,10 +9,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-/**
- * Created by Philippe on 02/03/2018.
- */
-
 @Singleton
 public class FactoryViewModel implements ViewModelProvider.Factory {
 

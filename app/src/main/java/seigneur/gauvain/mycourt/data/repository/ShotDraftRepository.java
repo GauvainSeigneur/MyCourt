@@ -1,12 +1,15 @@
 package seigneur.gauvain.mycourt.data.repository;
 
+import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.net.Uri;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import io.reactivex.Completable;
@@ -21,6 +24,8 @@ import seigneur.gauvain.mycourt.utils.SingleLiveEvent;
 
 @Singleton
 public class ShotDraftRepository {
+
+    private Map<Class<? extends ViewModel>, Provider<ViewModel>> creators;
 
     @Inject
     PostDao postDao;

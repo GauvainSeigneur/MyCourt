@@ -36,14 +36,6 @@ public abstract class AppModule {
     abstract BaseActivity baseActivityInjector();
 
     /**
-     * Provides the injector for the {@link SplashActivity}, which has access to the dependencies
-     * provided by this application instance (singleton scoped objects).
-     */
-    @PerActivity
-    @ContributesAndroidInjector(modules = SplashActivityModule.class)
-    abstract SplashActivity splashActivityInjector();
-
-    /**
      * Provides the injector for the {@link MainActivity}, which has access to the dependencies
      * provided by this application instance (singleton scoped objects).
      */
@@ -82,5 +74,13 @@ public abstract class AppModule {
             PinActivityModule.class
     })
     abstract PinActivity createPinActivityInjector();
+
+    /**
+     * Provides the injector for the {@link SplashActivity}, which has access to the dependencies
+     * provided by this application instance (singleton scoped objects).
+     */
+    @PerActivity
+    @ContributesAndroidInjector(modules = SplashActivityModule.class)
+    abstract SplashActivity splashActivityInjector();
 
 }
