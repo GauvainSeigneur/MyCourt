@@ -34,15 +34,15 @@ class AuthUtils {
         const val CLIENT_SECRET = DribbbleClient.CLIENT_SECRET
         const val REDIRECT_URI = "https://mycourt.com/path" //todo change it
         const val URI_TOKEN_RETROFIT = "https://dribbble.com/oauth/token/"
-
         const val REQ_CODE = 100
-        const val KEY_SCOPE = "scope"
+
+        private const val KEY_SCOPE = "scope"
         // see http://developer.dribbble.com/v2/oauth/#scopes
-        const val SCOPE = "public+upload"
-        const val URI_AUTHORIZE = "https://dribbble.com/oauth/authorize"
-        //private static final String URI_TOKEN = "https://dribbble.com/oauth/token";
+        private const val SCOPE = "public+upload"
+        private const val URI_AUTHORIZE = "https://dribbble.com/oauth/authorize"
+
         // fix encode issue
-        val authorizeUrl: String
+        private val authorizeUrl: String
             get() {
                 var url = Uri.parse(URI_AUTHORIZE)
                         .buildUpon()

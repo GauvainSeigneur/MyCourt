@@ -21,7 +21,7 @@ public class PinViewModel extends ViewModel implements
         CheckCurrentPinTask.CheckCurrentPinCallBack, StorePinTask.StorePinCallback {
 
     @Inject
-    UserRepository mUserRepository;
+    public UserRepository mUserRepository;
 
     @Inject
     EnCryptor mEnCryptor;

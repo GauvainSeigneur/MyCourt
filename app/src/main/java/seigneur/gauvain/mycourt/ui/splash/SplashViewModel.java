@@ -92,7 +92,7 @@ public class SplashViewModel extends ViewModel {
                 .subscribe(
                         token -> {
                                 Timber.d("token found");
-                                TokenRepository.accessToken = String.valueOf(token.getAccessToken());
+                                TokenRepository.Companion.setAccessToken(String.valueOf(token.getAccessToken()));
                                 mGoToHomeCommand.call();
                                 //mSplashView.goToHome(); //todo - replace by single  event
                         },

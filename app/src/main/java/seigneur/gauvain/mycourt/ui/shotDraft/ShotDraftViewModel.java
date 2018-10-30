@@ -49,7 +49,7 @@ public class ShotDraftViewModel extends ViewModel {
     }
 
     public SingleLiveEvent<Void> dbChanged() {
-        return mShotDraftRepository.onDraftDBChanged;
+        return mShotDraftRepository.getOnDraftDBChanged();
     }
 
     public SingleLiveEvent<Draft> getItemClickedEvent() {

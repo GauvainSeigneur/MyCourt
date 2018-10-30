@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 28
@@ -21,7 +22,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+}
 
+kapt {
+    generateStubs = true
 }
 
 dependencies {
@@ -39,14 +43,14 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
     def archVersion = '1.1.1'
     implementation "android.arch.persistence.room:runtime:$archVersion"
-    annotationProcessor "android.arch.persistence.room:compiler:$archVersion"
+    kapt  "android.arch.persistence.room:compiler:$archVersion"
     // optional - RxJava support for Room
     implementation "android.arch.persistence.room:rxjava2:$archVersion"
     // ViewModel and LiveData
     implementation "android.arch.lifecycle:extensions:$archVersion"
-    //annotationProcessor "android.arch.lifecycle:compiler:$lifecycle_version" // use kapt for Kotlin
+    kapt "android.arch.lifecycle:compiler:$archVersion" // use kapt for Kotlin
     // alternately - if using Java8, use the following instead of compiler
-    implementation "android.arch.lifecycle:common-java8:$archVersion"
+    //implementation "android.arch.lifecycle:common-java8:$archVersion"
     // optional - ReactiveStreams support for LiveData
     implementation "android.arch.lifecycle:reactivestreams:$archVersion"
     // optional - Test helpers for LiveData
@@ -79,11 +83,11 @@ dependencies {
     // optional - RxJava support for Retrofit
     implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
     def butterKnifeVersion = '8.8.1'
-    annotationProcessor "com.jakewharton:butterknife-compiler:$butterKnifeVersion"
+    kapt "com.jakewharton:butterknife-compiler:$butterKnifeVersion"
     implementation "com.jakewharton:butterknife:$butterKnifeVersion"
     def daggerVersion = '2.16'
-    annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
-    annotationProcessor "com.google.dagger:dagger-android-processor:$daggerVersion"
+    kapt  "com.google.dagger:dagger-compiler:$daggerVersion"
+    kapt  "com.google.dagger:dagger-android-processor:$daggerVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
     implementation "com.google.dagger:dagger-android:$daggerVersion"
     implementation "com.google.dagger:dagger-android-support:$daggerVersion"

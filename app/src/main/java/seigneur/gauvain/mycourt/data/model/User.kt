@@ -9,12 +9,11 @@ import org.json.JSONArray
 import java.util.ArrayList
 
 //todo - for phase 3: manage teams
-
 @Entity
 data class User (
     @PrimaryKey
     @SerializedName("id")
-    var id: Int = 0,
+    var id: Int,
     var name: String,
     var login: String,
     var html_url: String,
@@ -27,7 +26,7 @@ data class User (
     @SerializedName("pro")
     var isPro: Boolean = false,
     @SerializedName("followers_count")
-    var followers_count: Int = 0,
+    var followers_count: Int,
     var type: String,
     var created_at: String
 )

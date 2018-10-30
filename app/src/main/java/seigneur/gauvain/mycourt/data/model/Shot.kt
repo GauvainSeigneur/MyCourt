@@ -8,20 +8,18 @@ import com.google.gson.annotations.SerializedName
 import java.util.ArrayList
 import java.util.Date
 
-//todo - finish this class, add team ?
+//todo - finsih it conversion into data class when other classes of the project will be in Kotlin
 class Shot {
+
     @PrimaryKey
     @ColumnInfo(name = "id")
     var id: String? = ""
-    //getter
-    // SETTER
-    //ONLY THESE FIELDS CAN BE CHANGED IN ORDER TO UPDATE THE SHOT TO DRIBBBLE
     var title: String? = ""
     var description: String? = ""
     var html_url: String? = ""
     var width: Int = 0
     var height: Int = 0
-    var images: Map<String, String>? = null; //todo
+    var images: Map<String, String>? = null //todo
     var animated: Boolean = false
     @SerializedName("tags")
     var tagList: ArrayList<String>? = null //todo
@@ -35,8 +33,10 @@ class Shot {
     constructor() {}
 
     //Constructor for drafts update of the Shot
-    constructor(id: String?, title: String?,
-                desc: String?, tags: ArrayList<String>?) {
+    constructor(id: String?,
+                title: String?,
+                desc: String?,
+                tags: ArrayList<String>?) {
         this.id = id
         this.title = title
         this.description = desc

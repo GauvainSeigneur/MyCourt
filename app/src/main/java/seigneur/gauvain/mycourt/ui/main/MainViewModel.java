@@ -130,7 +130,7 @@ public class MainViewModel extends ViewModel {
     }
 
     public void checkIfTokenIsNull() {
-        if(TokenRepository.accessToken==null)
+        if(TokenRepository.Companion.getAccessToken() ==null)
             fetchTokenFromDB();
     }
 
@@ -158,7 +158,7 @@ public class MainViewModel extends ViewModel {
      */
     private void onTokenFetched(Token token) {
         Timber.d("token found");
-        TokenRepository.accessToken = String.valueOf(token.getAccessToken());
+        TokenRepository.Companion.setAccessToken(String.valueOf(token.getAccessToken()));
     }
 
     /**

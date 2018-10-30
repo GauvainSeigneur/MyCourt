@@ -65,7 +65,7 @@ interface DribbbleService {
     @Multipart
     @POST("shots")
     fun publishANewShot(
-            @PartMap partMap: Map<String, RequestBody>, //See : https://stackoverflow.com/a/40873297
+            @PartMap partMap: Map<String, @JvmSuppressWildcards RequestBody>, //See : https://stackoverflow.com/a/40873297
             @Part file: MultipartBody.Part,
             @Part("title") title: String,
             @Part("description") description: String,

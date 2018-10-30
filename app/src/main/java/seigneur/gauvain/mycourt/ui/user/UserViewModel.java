@@ -20,7 +20,7 @@ public class UserViewModel extends ViewModel {
     ConnectivityReceiver mConnectivityReceiver;
 
     @Inject
-    UserRepository mUserRepository;
+    public UserRepository mUserRepository;
 
     private CompositeDisposable mCompositeDisposable    = new CompositeDisposable();
     private MutableLiveData<User> userMutableLiveData   = new MutableLiveData<>();
@@ -103,13 +103,13 @@ public class UserViewModel extends ViewModel {
      * and connectivity
      */
     private void manageUIFromDataSource() {
-        if (!mUserRepository.isFetchFromDBSuccess && !mUserRepository.isFetchFromAPISuccess) {
+        if (!mUserRepository.isFetchFromDBSuccess() && !mUserRepository.isFetchFromAPISuccess()) {
             isFetchFromAPI=false;
             //mUserView.showNoUserFoundView(true); //todo - replace
-        } else if (!mUserRepository.isFetchFromDBSuccess) {
+        } else if (!mUserRepository.isFetchFromDBSuccess()) {
             Timber.d("user fetch from api only");
             isFetchFromAPI=true;
-        } else if (!mUserRepository.isFetchFromAPISuccess){
+        } else if (!mUserRepository.isFetchFromAPISuccess()){
             isFetchFromAPI=false;
             Timber.d("user fetch from DB only");
         } else {
