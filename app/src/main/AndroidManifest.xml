@@ -50,7 +50,8 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity
-            android:name=".ui.pin.PinActivity"/>
+            android:name=".ui.pin.PinActivity">
+        </activity>
     </application>
 
 </manifest>
