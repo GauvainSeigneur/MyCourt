@@ -52,7 +52,7 @@ public class EditUtils {
     //get image uri from data sent by presenter
     public static Uri getImageUrl(Context context, Draft draft) {
         if (draft.getImageUri()!=null) {
-            if (draft.getTypeOfDraft()==Constants.EDIT_MODE_NEW_SHOT) {
+            if (draft.getTypeOfDraft()== Constants.EDIT_MODE_NEW_SHOT) {
                 Uri imageuri =FileProvider.getUriForFile(
                         context,
                         context.getString(R.string.file_provider_authorities),
@@ -87,7 +87,7 @@ public class EditUtils {
      */
     private static StringBuilder adaptTagListToEditText (@Nullable ArrayList<String> tagList) {
         StringBuilder listString = new StringBuilder();
-        Pattern multipleWordTagPattern = Pattern.compile(MyTextUtils.multipleWordtagRegex);
+        Pattern multipleWordTagPattern = Pattern.compile(MyTextUtils.Companion.getMultipleWordtagRegex());
         for (String s : tagList) {
             Matcher wordMatcher = multipleWordTagPattern.matcher(s);
             if (!wordMatcher.matches()) {
@@ -121,9 +121,9 @@ public class EditUtils {
         ArrayList<String> tempList = new ArrayList<>();
         //create the list just one time, not any time the tags changed
         if (tagString != null && !tagString.isEmpty()) {
-            Pattern p = Pattern.compile(MyTextUtils.tagRegex);
+            Pattern p = Pattern.compile(MyTextUtils.Companion.getTagRegex());
             Matcher m = p.matcher(tagString.toLowerCase());
-            if (MyTextUtils.isDoubleQuoteCountEven(tagString)) {
+            if (MyTextUtils.Companion.isDoubleQuoteCountEven(tagString)) {
                 // number is even or 0
                 while (m.find()) {
                     tempList.add(m.group(0));

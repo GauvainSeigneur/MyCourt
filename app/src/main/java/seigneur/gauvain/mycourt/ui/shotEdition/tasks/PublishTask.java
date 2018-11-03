@@ -3,6 +3,8 @@ package seigneur.gauvain.mycourt.ui.shotEdition.tasks;
 import android.content.Context;
 import android.net.Uri;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -62,7 +64,7 @@ public class PublishTask {
                          String titleString,
                          String descriptionString,
                          ArrayList<String> tagList) {
-        MultipartBody.Part body = HttpUtils.createFilePart(context,fileUri,imageFormat,"image");
+        MultipartBody.Part body = HttpUtils.Companion.createFilePart(context,fileUri,imageFormat,"image");
         //add to HashMap key and RequestBody
         HashMap<String, RequestBody> map = new HashMap<>();
         // executes the request
@@ -73,6 +75,12 @@ public class PublishTask {
                         titleString,
                         descriptionString,
                         tagList)
+                        .doOnError(t -> {
+                            if (t instanceof IOException) {
+                                Timber.tag("jul").d("UnknownHostException, dafuck");
+                            }
+                            handleNetworkOperationError(t,100);
+                        })
                         .subscribe(
                                 this::onPostSucceed,
                                 this::onPostFailed
@@ -80,6 +88,7 @@ public class PublishTask {
         );
     }
 
+    public void lol(){}
 
 
     /**
@@ -107,8 +116,7 @@ public class PublishTask {
      * @param t - throwable
      */
     private void onPostFailed(Throwable t) {
-        Timber.e(t);
-        handleNetworkOperationError(t,-1);
+        Timber.d("post failed: "+t);
     }
 
     /*
@@ -148,7 +156,6 @@ public class PublishTask {
      */
     private void onUpdateShotError(Throwable throwable) {
         //todo - manage UI
-        handleNetworkOperationError(throwable,-1);
     }
 
     /**
@@ -206,32 +213,37 @@ public class PublishTask {
      * MANAGE NETWORK EXCEPTION
      *************************************************************************/
     private void handleNetworkOperationError(final Throwable error, int eventID) {
-        mNetworkErrorHandler.handleNetworkErrors(error,eventID, new NetworkErrorHandler.onRXErrorListener() {
-            @Override
-            public void onUnexpectedException(Throwable throwable) {
-                Timber.d("unexpected error happened, don't know what to do...");
-            }
-
-            @Override
-            public void onNetworkException(Throwable throwable) {
-                Timber.d(throwable);
-                if (mConnectivityReceiver.isOnline()) {
-                    Timber.d("it seems that you have unexpected errors");
-                } else {
-                    Timber.d("Not connected to internet, so it is normal that you have an error");
+        Timber.tag("rxHandler").d("error handled by rx ma gueule");
+        if (mNetworkErrorHandler==null) {
+            Timber.tag("rxHandler").d("mNetworkErrorHandler is null");
+        } else {
+            Timber.tag("rxHandler").d("error is : "+error.getClass());
+            mNetworkErrorHandler.handleNetworkErrors(error,eventID, new NetworkErrorHandler.onRXErrorListener() {
+                @Override
+                public void onUnexpectedException(Throwable throwable) {
+                    Timber.tag("rxHandler").d("unexpected error happened, don't know what to do...");
                 }
 
-            }
+                @Override
+                public void onNetworkException(Throwable throwable) {
+                    if (mConnectivityReceiver.isOnline()) {
+                        Timber.tag("rxHandler").d("it seems that you have unexpected errors");
+                    } else {
+                        Timber.tag("rxHandler").d("Not connected to internet, so it is normal that you have an error");
+                    }
 
-            @Override
-            public void onHttpException(Throwable throwable) {
-                Timber.tag("HttpNetworks").d(throwable);
-                if (((HttpException) throwable).code() == 403) {
-                    //todo - access forbidden
                 }
-            }
 
-        });
+                @Override
+                public void onHttpException(Throwable throwable) {
+                    Timber.tag("rxHandler").d(throwable);
+                    if (((HttpException) throwable).code() == 403) {
+                        //todo - access forbidden
+                    }
+                }
+            });
+        }
+
     }
 
     /**

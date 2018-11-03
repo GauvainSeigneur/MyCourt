@@ -67,13 +67,13 @@ public class PinActivity extends BaseActivity {
 
     private void setStepUI(int step) {
         switch (step) {
-            case Constants.PIN_STEP_CHECK_STORED :
+            case Constants.PIN_STEP_CHECK_STORED:
                 showConfirmCurrentPinView(true);
                 break;
-            case Constants.PIN_STEP_NEW_PIN_ONE :
+            case Constants.PIN_STEP_NEW_PIN_ONE:
                 showConfirmCurrentPinView(false);
                 break;
-            case Constants.PIN_STEP_NEW_PIN_TWO :
+            case Constants.PIN_STEP_NEW_PIN_TWO:
                 showConfirmCurrentPinView(false);
                 break;
             default:

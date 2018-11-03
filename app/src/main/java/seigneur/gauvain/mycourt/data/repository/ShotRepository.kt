@@ -48,8 +48,8 @@ constructor() {
             map: HashMap<String, RequestBody>,
             file: MultipartBody.Part,
             title: String,
-            description: String,
-            tags: ArrayList<String>): Observable<Response<Void>> {
+            description: String?,
+            tags: ArrayList<String>?): Observable<Response<Void>> {
         return mDribbbleService.publishANewShot(map, file, title, description, tags)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

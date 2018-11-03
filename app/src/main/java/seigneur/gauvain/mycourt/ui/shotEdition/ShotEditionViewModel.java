@@ -102,7 +102,7 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     public void onImagePreviewClicked() {
-        if (mTempDraft.getTypeOfDraft()==Constants.EDIT_MODE_UPDATE_SHOT)
+        if (mTempDraft.getTypeOfDraft()== Constants.EDIT_MODE_UPDATE_SHOT)
             Timber.d("not allowed to change image already published");
         else
             mPickShotCommand.call();
@@ -154,7 +154,7 @@ public class ShotEditionViewModel extends ViewModel implements
     }
 
     public void onPublishClicked() {
-        if (mTempDraft.getTypeOfDraft()==Constants.EDIT_MODE_UPDATE_SHOT) {
+        if (mTempDraft.getTypeOfDraft()== Constants.EDIT_MODE_UPDATE_SHOT) {
             String shotId =null;
             /*/if (mObjectSource instanceof Shot) {
                 Shot shot = (Shot) mObjectSource;

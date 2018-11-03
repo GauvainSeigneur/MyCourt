@@ -174,10 +174,10 @@ public class EditShotActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             if (requestCode== Constants.PICK_IMAGE_REQUEST) {
-                mShotEditionViewModel.setImagePickedUriSource(ImagePicker.getImageUriFromResult(this, resultCode, data));
-                mShotEditionViewModel.setImagePickedFileName(ImagePicker.getPickedImageName(this, mShotEditionViewModel.getImagePickedUriSource()));
-                mShotEditionViewModel.setImagePickedFormat(ImageUtils.getImageExtension(this, mShotEditionViewModel.getImagePickedUriSource()));
-                mShotEditionViewModel.setImageSize(ImageUtils.imagePickedWidthHeight(this, mShotEditionViewModel.getImagePickedUriSource(), 0));
+                mShotEditionViewModel.setImagePickedUriSource(ImagePicker.INSTANCE.getImageUriFromResult(this, resultCode, data));
+                mShotEditionViewModel.setImagePickedFileName(ImagePicker.INSTANCE.getPickedImageName(this, mShotEditionViewModel.getImagePickedUriSource()));
+                mShotEditionViewModel.setImagePickedFormat(ImageUtils.Companion.getImageExtension(this, mShotEditionViewModel.getImagePickedUriSource()));
+                mShotEditionViewModel.setImageSize(ImageUtils.Companion.imagePickedWidthHeight(this, mShotEditionViewModel.getImagePickedUriSource(), 0));
 
                 mShotEditionViewModel.onImagePicked();
             }
@@ -240,14 +240,14 @@ public class EditShotActivity extends BaseActivity {
     }
 
     public void openImagePicker() {
-        ImagePicker.pickImage(this, Constants.PICK_IMAGE_REQUEST);
+        ImagePicker.INSTANCE.pickImage(this, Constants.PICK_IMAGE_REQUEST);
     }
 
     public void goToUCropActivity(String imagePickedformat,
                                   Uri imagePickedUriSource,
                                   String imagePickedFileName,
                                   int[] imageSize) {
-        ImageUtils.goToUCropActivity(imagePickedformat,
+        ImageUtils.Companion.goToUCropActivity(imagePickedformat,
                 imagePickedUriSource,
                 Uri.fromFile(new File(getCacheDir(), imagePickedFileName)),this,
                 imageSize);
@@ -265,7 +265,7 @@ public class EditShotActivity extends BaseActivity {
     }
 
     private void setUpEditionUI(Draft draft) {
-        if (draft.getTypeOfDraft()==Constants.EDIT_MODE_NEW_SHOT) {
+        if (draft.getTypeOfDraft()== Constants.EDIT_MODE_NEW_SHOT) {
             mToolbar.setTitle("Create a shot");
         } else {
             mToolbar.setTitle("Edit a shot");
@@ -277,7 +277,7 @@ public class EditShotActivity extends BaseActivity {
        //todo - from html only if source is from shot... --> mange it in task!!!
         String description=EditUtils.getDescription(draft);
         if (description!=null && !description.isEmpty())
-            mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description));
+            mShotDescriptionEditor.setText(MyTextUtils.Companion.noTrailingwhiteLines(description));
         mTagEditor.setText(EditUtils.getTagList(draft));
 
     }

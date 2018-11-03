@@ -68,8 +68,8 @@ interface DribbbleService {
             @PartMap partMap: Map<String, @JvmSuppressWildcards RequestBody>, //See : https://stackoverflow.com/a/40873297
             @Part file: MultipartBody.Part,
             @Part("title") title: String,
-            @Part("description") description: String,
-            @Part("tags[]") tags: List<String>
+            @Part("description") description: String?,
+            @Part("tags[]") tags: List<String>?
     ): Observable<Response<Void>>
 
 

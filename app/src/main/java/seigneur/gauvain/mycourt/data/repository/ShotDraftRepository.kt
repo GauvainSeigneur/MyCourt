@@ -29,17 +29,17 @@ constructor() {
     var onDraftDBChanged = SingleLiveEvent<Void>()
 
     val shotDraft: Maybe<List<Draft>>
-        get() = postDao!!.allPost
+        get() = postDao.allPost
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
 
     fun getShotDraftByShotId(ShotID: String): Maybe<Draft> {
-        return postDao!!.getShotDraftByShotId(ShotID)
+        return postDao.getShotDraftByShotId(ShotID)
     }
 
 
     fun updateShotDraft(shotDraft: Draft): Completable {
-        return Completable.fromRunnable { postDao!!.updateDraft(shotDraft) }
+        return Completable.fromRunnable { postDao.updateDraft(shotDraft) }
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnComplete {
@@ -49,7 +49,7 @@ constructor() {
     }
 
     fun storeShotDraft(shotDraft: Draft): Completable {
-        return Completable.fromRunnable { postDao!!.insertPost(shotDraft) }
+        return Completable.fromRunnable { postDao.insertPost(shotDraft) }
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnComplete {
@@ -59,7 +59,7 @@ constructor() {
     }
 
     fun deleteDraft(id: Int): Completable {
-        return Completable.fromRunnable { postDao!!.deletDraftByID(id) }
+        return Completable.fromRunnable { postDao.deletDraftByID(id) }
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnComplete {

@@ -124,7 +124,7 @@ public class ShotsFragment extends BaseFragment implements ShotItemCallback {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mUnbinder.unbind();
+        getMUnbinder().unbind();
     }
 
     private void initAdapter() {
@@ -228,6 +228,6 @@ public class ShotsFragment extends BaseFragment implements ShotItemCallback {
         //Toast.makeText(getContext(), ""+shotItem.title, Toast.LENGTH_SHORT).show();
         //mShotsPresenter.onShotClicked(shotItem, position);
     }
-    
+
 
 }
