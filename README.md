@@ -15,6 +15,7 @@ It is based on MVVM architecture & Android Architecture components.
 * Save in drafts your current work
 
 ## Technologies & pattern
+* Kotlin
 * MVVM and Observable/Observer pattern
 * Android Architecture Components - ViewModel, LiveData, Room, Paging
 * Retrofit - Http client
@@ -30,9 +31,8 @@ It is based on MVVM architecture & Android Architecture components.
 Not stable - architecture refactoring
 
 ## Todo
-* Finish converting from MVP to MVVM 
-* Convert to Kotlin
-* Future : Manage pros, Manage attachments
+* Manage pros, Manage attachments
+* Manage mp4 
 
 ## Licence
 ```
