@@ -302,7 +302,9 @@ class EditShotActivity : BaseActivity() {
         }
         if (draft.imageUri == null)
             croppedImagePreview.setImageResource(R.drawable.add_image_illustration)
-        mShotEditionViewModel.onImageCropped(EditUtils.getImageUrl(this, draft)!!)
+        val imageCroppedUri :Uri? = EditUtils.getImageUrl(this, draft)
+        if (imageCroppedUri!=null)
+            mShotEditionViewModel.onImageCropped(imageCroppedUri)
         mShotTitleEditor.setText(draft.shot.title)
         //todo - from html only if source is from shot... --> mange it in task!!!
         val description = EditUtils.getDescription(draft)
