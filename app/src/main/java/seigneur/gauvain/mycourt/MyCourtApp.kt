@@ -27,23 +27,8 @@ class MyCourtApp : Application(), HasActivityInjector {
     @Inject
     lateinit var activityInjector: DispatchingAndroidInjector<Activity>
 
-    private var applicationComponent: AppComponent? = null
-
-    override fun onCreate() {
-        super.onCreate()
-        if (LeakCanary.isInAnalyzerProcess(this)) {
-            // This process is dedicated to LeakCanary for heap analysis.
-            // You should not init your app in this process.
-            return
-        }
-        LeakCanary.install(this)
-        applicationComponent = createComponent()
-        inject() //get Application context
-        TimberLog.init() //Init timberLog
-    }
-
-    private fun createComponent(): AppComponent {
-        return DaggerAppComponent.builder()
+    private val applicationComponent: AppComponent by lazy {
+        DaggerAppComponent.builder()
                 .application(this)
                 .network(NetworkModule())
                 .sharedPrefs(SharedPrefsModule(this))
@@ -53,8 +38,20 @@ class MyCourtApp : Application(), HasActivityInjector {
                 .build()
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            // This process is dedicated to LeakCanary for heap analysis.
+            // You should not init your app in this process.
+            return
+        }
+        LeakCanary.install(this)
+        inject() //get Application context
+        TimberLog.init() //Init timberLog
+    }
+
     private fun inject() {
-        applicationComponent!!.inject(this)
+        applicationComponent.inject(this)
     }
 
     override fun activityInjector(): AndroidInjector<Activity>? {
