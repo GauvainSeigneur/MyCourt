@@ -76,9 +76,7 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
         ShotListAdapter(this)
     }
 
-    private val mGridLayoutManager: GridLayoutManager by lazy {
-        GridLayoutManager(context, 2)
-    }
+    lateinit var mGridLayoutManager: GridLayoutManager
 
     override val fragmentLayout: Int
         get() = R.layout.fragment_shots
@@ -125,17 +123,22 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
     }
 
     private fun initAdapter() {
-        mRvShots.layoutManager = mGridLayoutManager
-        mRvShots.adapter = shotListAdapter
-
-        mGridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-            override fun getSpanSize(position: Int): Int {
-                when (shotListAdapter.getItemViewType(position)) {
-                    ShotListAdapter.ITEM -> return if (position == 0) 2 else 1
-                    ShotListAdapter.LOADING -> return 2
-                    else -> return 1
+        if (mRvShots.layoutManager==null && mRvShots.adapter==null) {
+            mGridLayoutManager = GridLayoutManager(context, 2)
+            mGridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    when (shotListAdapter.getItemViewType(position)) {
+                        ShotListAdapter.ITEM -> return if (position == 0) 2 else 1
+                        ShotListAdapter.LOADING -> return 2
+                        else -> return 1
+                    }
                 }
             }
+
+            mRvShots.layoutManager =  mGridLayoutManager
+            mRvShots.adapter = shotListAdapter
+
+
         }
 
         shotsViewModel.shotList?.observe(this, Observer<PagedList<Shot>> {shotListAdapter.submitList(it)})

@@ -69,6 +69,7 @@ constructor() {
     }
 
     fun storeImageAndReturnItsUri(imageCroppedFormat: String, croppedFileUri: Uri, context: Context): Single<String> {
-        return Single.fromCallable { ImageUtils.saveImageAndGetItsFinalUri(imageCroppedFormat, croppedFileUri, context) }
+        return Single.fromCallable {
+            ImageUtils.saveImageAndGetItsFinalUri(imageCroppedFormat, croppedFileUri, context) }
     }
 }
