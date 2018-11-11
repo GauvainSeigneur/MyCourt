@@ -2,6 +2,7 @@ package seigneur.gauvain.mycourt.ui.shotEdition.tasks
 
 import android.content.Context
 import android.net.Uri
+import io.reactivex.Observable
 
 import java.io.IOException
 import java.net.UnknownHostException
@@ -17,6 +18,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.HttpException
 import retrofit2.Response
+import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository
 import seigneur.gauvain.mycourt.data.repository.ShotRepository
@@ -38,12 +40,10 @@ class PublishTask(
     *************************************************************************
     * NETWORK OPERATION - POST SHOT ON DRIBBBLE
     *************************************************************************/
-    fun postShot(context: Context,
+    fun postShot(draft: Draft,
+                 context: Context,
                  fileUri: Uri,
-                 imageFormat: String,
-                 titleString: String,
-                 descriptionString: String,
-                 tagList: ArrayList<String>) {
+                 imageFormat: String) {
         val body = HttpUtils.createFilePart(context, fileUri, imageFormat, "image")
         //add to HashMap key and RequestBody
         val map = HashMap<String, RequestBody>()
@@ -52,9 +52,9 @@ class PublishTask(
                 mShotRepository.publishANewShot(
                         map,
                         body,
-                        titleString,
-                        descriptionString,
-                        tagList)
+                        draft.shot.title!!,
+                        draft.shot.description!!,
+                        draft.shot.tagList!!)
                         .doOnError { t ->
                             if (t is IOException) {
                                 Timber.tag("jul").d("UnknownHostException, dafuck")
@@ -62,8 +62,8 @@ class PublishTask(
                             handleNetworkOperationError(t, 100)
                         }
                         .subscribe(
-                                this::onPostSucceed,
-                                this::onPostFailed
+                                Consumer { response -> onPostSucceed(response, draft) },
+                                Consumer {t -> onPostFailed(t)}
                         )
         )
     }
@@ -73,7 +73,7 @@ class PublishTask(
      * response must be 202 to be publish on Dribbble
      * @param response - body response from Dribbble
      */
-    private fun onPostSucceed(response: Response<Void>) {
+    private fun onPostSucceed(response: Response<Void>, draft: Draft) {
         when (response.code()) {
             Constants.ACCEPTED -> {
                 val headers = response.headers()
@@ -81,7 +81,7 @@ class PublishTask(
                 val location = headers.get("location")
                 if (location != null)
                     Timber.d("post succeed. location: $location")
-                onPublishOrUpdateSucceed()
+                onPublishOrUpdateSucceed(draft)
             }
             else -> Timber.d("post not succeed: " + response.code())
         }
@@ -100,18 +100,18 @@ class PublishTask(
     * NETWORK OPERATION - UPDATE SHOT ON DRIBBBLE
     *************************************************************************/
     fun updateShot(
-            shotId: String,
-            title: String, desc: String, tags: ArrayList<String>, profile: Boolean) {
+            draft: Draft,
+            profile: Boolean) {
         mCompositeDisposable.add(
                 mShotRepository.updateShot(
-                        shotId, //get it from viewmodel
-                        title,
-                        desc,
-                        tags,
+                        draft.shot.id!!, //get it from viewmodel
+                        draft.shot.title!!,
+                        draft.shot.description!!,
+                        draft.shot.tagList!!,
                         profile)
                         .subscribe(
-                                this::onUpdateShotSuccess,
-                                this::onUpdateShotError
+                                Consumer { shot ->  onUpdateShotSuccess(shot, draft) },
+                                Consumer { this.onUpdateShotError(it)}
                         )
         )
     }
@@ -120,10 +120,10 @@ class PublishTask(
      * Shot update succeed
      * @param shot - shot updated
      */
-    private fun onUpdateShotSuccess(shot: Shot) {
+    private fun onUpdateShotSuccess(shot: Shot,draft: Draft) {
         //todo must finish with a code to send to Main Activity to delete the draft
         Timber.d("success: " + shot.title!!)
-        onPublishOrUpdateSucceed()
+        onPublishOrUpdateSucceed(draft)
     }
 
     /**
@@ -137,17 +137,9 @@ class PublishTask(
     /**
      * manage UI and DB items on Post/Updated Succeed
      */
-    private fun onPublishOrUpdateSucceed() {
+    private fun onPublishOrUpdateSucceed(draft:Draft) {
+        deleteDraftAfterPublish(draft)
         mPublishCallBack.onPublishSuccess()
-        /*
-        if (source==Constants.SOURCE_DRAFT) {
-            //deleteDraft();  // reactivate
-        }
-        else {
-            //todo listener
-            //if (mEditShotView!=null)
-            //    mEditShotView.stopActivity();
-        }*/
     }
 
 
@@ -155,33 +147,23 @@ class PublishTask(
      *************************************************************************
      * DB OPERATION - DELETE DRAFT AFTER PUBLISH OR UPDATE
      *************************************************************************/
-    private fun deleteDraft() {
-        /*mCompositeDisposable.add(
-                mShotDraftRepository.deleteDraft(((ShotDraft) mObjectSource).getId())
-                        .subscribe(
-                                this::onDraftDeleted,
-                                this::onDeleteDraftFailed
-                        )
-        );*/
+    private fun deleteDraftAfterPublish(draft:Draft) {
+        mCompositeDisposable.add( mShotDraftRepository.deleteDraft(draft.draftID)
+                .subscribe(
+                        this::onDeleteSucceed,
+                        this::onDeleteError
+                )
+        )
+
+
     }
 
-    /**
-     * Draft has been deleted correctly
-     */
-    private fun onDraftDeleted() {
-        //mTempDataRepository.setDraftsChanged(true);//TODO LIVE DATA
-        //TODO SINGLE LIVE EVENT
-        /*if (mEditShotView!=null)
-            mEditShotView.stopActivity();*/
+    private fun onDeleteSucceed() {
+        Timber.d("delete succeed")
     }
 
-    /**
-     * An error happened during delete process
-     *
-     * @param t - error description
-     */
-    private fun onDeleteDraftFailed(t: Throwable) {
-        Timber.d(t)
+    private fun onDeleteError(throwable: Throwable) {
+        Timber.e(throwable)
     }
 
     /*

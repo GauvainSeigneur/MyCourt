@@ -112,7 +112,7 @@ constructor() : ViewModel(),
     fun init() {
         initTasks()
         if (mTempDraft == null)
-            mGetSourceTask!!.getOriginOfEditRequest()
+            mGetSourceTask.getOriginOfEditRequest()
     }
 
     fun onImagePreviewClicked() {
@@ -168,29 +168,17 @@ constructor() : ViewModel(),
     }
 
     fun onPublishClicked() {
+        changeTempDraftInfo() //first change info for temporary draft
         if (mTempDraft!!.typeOfDraft == Constants.EDIT_MODE_UPDATE_SHOT) {
-            val shotId: String? = null
-            /*/if (mObjectSource instanceof Shot) {
-                Shot shot = (Shot) mObjectSource;
-                shotId = shot.getId();
-            } else if (mObjectSource instanceof Draft) {
-                Draft shotDraft = (Draft) mObjectSource;
-                shotId = shotDraft.getShot().getId();
-            }*/
-            //todo - finish and test !!!
-            mPublishTask!!.updateShot(
-                    mTempDraft!!.shot.id!!,
-                    title.value!!,
-                    description.value!!,
-                    tags.value!!, false)
+            mPublishTask.updateShot(
+                    mTempDraft!!,
+                    false)
         } else
-            mPublishTask!!.postShot(
+            mPublishTask.postShot(
+                    mTempDraft!!,
                     mApplication,
                     getCroppedImageUri().value!!, //when image is changed
-                    imagePickedFormat!!,
-                    title.value!!,
-                    description.value!!,
-                    tags.value!!)
+                    imagePickedFormat!!)
     }
 
     /*
@@ -212,12 +200,7 @@ constructor() : ViewModel(),
             mStoreDrafTask.storeDraftImage(context!!,
                     imagePickedFormat!!, getCroppedImageUri().value!!)
         } else {
-            mTempDraft!!.changeInfoFromEdit(
-                    mTempDraft!!.imageUri, //Image doesn't change
-                    mTempDraft!!.imageFormat, //Image doesn't change
-                    title.value,
-                    description.value,
-                    tags.value)
+            changeTempDraftInfo()
             if (mTempDraft!!.draftID == 0L) {
                 //new draft, so save it in db
                 mStoreDrafTask.save(mTempDraft!!)
@@ -230,6 +213,15 @@ constructor() : ViewModel(),
 
     fun getCroppedImageUri(): LiveData<Uri> {
         return croppedImageUri
+    }
+
+    private fun changeTempDraftInfo() {
+        mTempDraft!!.changeInfoFromEdit(
+                mTempDraft!!.imageUri, //Image doesn't change
+                mTempDraft!!.imageFormat, //Image doesn't change
+                title.value,
+                description.value,
+                tags.value)
     }
 
     /*
