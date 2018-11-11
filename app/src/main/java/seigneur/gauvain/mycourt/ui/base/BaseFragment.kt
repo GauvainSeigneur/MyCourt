@@ -18,6 +18,7 @@ import butterknife.Unbinder
  * Fragment - dedicated to UI not DI
  */
 abstract class BaseFragment : Fragment() {
+
     lateinit var mRootview: View
 
     val parentActivity: FragmentActivity? by lazy {

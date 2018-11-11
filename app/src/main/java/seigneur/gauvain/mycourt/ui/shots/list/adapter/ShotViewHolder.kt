@@ -21,12 +21,9 @@ class ShotViewHolder private constructor(itemView: View, private val mShotItemCa
     }
 
     fun bindTo(shot: Shot) {
-        //shotname.setText(shot.getTitle());
         Glide.with(itemView.context)
                 .load(shot.imageUrl)
-                //.placeholder(R.mipmap.ic_launcher)
                 .into(shotImage)
-        //gifIcon.setVisibility(user.isSiteAdmin() ? View.VISIBLE : View.GONE);
     }
 
     override fun onClick(view: View) {
@@ -36,7 +33,6 @@ class ShotViewHolder private constructor(itemView: View, private val mShotItemCa
     }
 
     companion object {
-
         fun create(parent: ViewGroup, shotItemCallback: ShotItemCallback): ShotViewHolder {
             val layoutInflater = LayoutInflater.from(parent.context)
             val view = layoutInflater.inflate(R.layout.list_item_shot, parent, false)

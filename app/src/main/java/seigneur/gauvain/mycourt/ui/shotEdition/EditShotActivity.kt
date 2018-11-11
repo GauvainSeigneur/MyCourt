@@ -92,13 +92,10 @@ class EditShotActivity : BaseActivity() {
     *********************************************************************************************/
     private val titleWatcher = object : TextWatcher {
         override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-
         }
-
         override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
             mShotEditionViewModel.onTitleChanged(s.toString())
         }
-
         override fun afterTextChanged(s: Editable) {}
     }
 
@@ -206,16 +203,16 @@ class EditShotActivity : BaseActivity() {
      *********************************************************************************************/
     @OnClick(R.id.cropped_img_preview)
     fun shotPreviewClick() {
-        mShotEditionViewModel!!.onImagePreviewClicked()
+        mShotEditionViewModel.onImagePreviewClicked()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == Constants.PICK_IMAGE_REQUEST) {
                 mShotEditionViewModel.imagePickedUriSource = ImagePicker.getImageUriFromResult(this, resultCode, data)
-                mShotEditionViewModel.imagePickedFileName = ImagePicker.getPickedImageName(this, mShotEditionViewModel!!.imagePickedUriSource!!)
-                mShotEditionViewModel.imagePickedFormat = ImageUtils.getImageExtension(this, mShotEditionViewModel!!.imagePickedUriSource!!)
-                mShotEditionViewModel.imageSize = ImageUtils.imagePickedWidthHeight(this, mShotEditionViewModel!!.imagePickedUriSource!!, 0)
+                mShotEditionViewModel.imagePickedFileName = ImagePicker.getPickedImageName(this, mShotEditionViewModel.imagePickedUriSource!!)
+                mShotEditionViewModel.imagePickedFormat = ImageUtils.getImageExtension(this, mShotEditionViewModel.imagePickedUriSource!!)
+                mShotEditionViewModel.imageSize = ImageUtils.imagePickedWidthHeight(this, mShotEditionViewModel.imagePickedUriSource!!, 0)
 
                 mShotEditionViewModel.onImagePicked()
             } else if (requestCode == UCrop.REQUEST_CROP)

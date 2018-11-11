@@ -1,14 +1,9 @@
 package seigneur.gauvain.mycourt.data.repository
 
-import android.arch.lifecycle.ViewModel
 import android.content.Context
 import android.net.Uri
-import java.util.concurrent.Callable
-
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
-
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
@@ -26,49 +21,73 @@ constructor() {
     @Inject
     lateinit var postDao: PostDao
 
+    //Notify subscribers that an operation has been done in DB and it has changed
     var onDraftDBChanged = SingleLiveEvent<Void>()
 
+    /**
+     * Check if a list of Draft exists in DB
+     */
     val shotDraft: Maybe<List<Draft>>
         get() = postDao.allPost
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
 
+    /**
+     * get a Draft by its ID
+     */
     fun getShotDraftByShotId(ShotID: String): Maybe<Draft> {
         return postDao.getShotDraftByShotId(ShotID)
     }
 
-
+    /**
+     * Update a draft already stored in DB
+     */
     fun updateShotDraft(shotDraft: Draft): Completable {
         return Completable.fromRunnable { postDao.updateDraft(shotDraft) }
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnComplete {
-                    //notifiy With Single event
+                    //notify With Single event
                     onDraftDBChanged.call()
                 }
     }
 
+    /**
+     * Store a draft in DB
+     */
     fun storeShotDraft(shotDraft: Draft): Completable {
         return Completable.fromRunnable { postDao.insertPost(shotDraft) }
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnComplete {
-                    //notifiy With Single event
+                    //notify With Single event
                     onDraftDBChanged.call()
                 }
     }
 
-    fun deleteDraft(id: Int): Completable {
-        return Completable.fromRunnable { postDao.deletDraftByID(id) }
+    /**
+     * delete a draft from DB thank to its ID
+     */
+    fun deleteDraft(id: Long): Completable {
+        return Completable.fromRunnable {
+            postDao.deletDraftByID(id.toInt()) }
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnComplete {
-                    //notifiy With Single event
+                    //notify With Single event
                     onDraftDBChanged.call()
                 }
     }
 
-    fun storeImageAndReturnItsUri(imageCroppedFormat: String, croppedFileUri: Uri, context: Context): Single<String> {
+    /**
+     * Store an image file in a dedicated folder in external storage and return its URI in order to display it
+     * @param imageCroppedFormat
+     * @param croppedFileUri
+     * @param context
+     */
+    fun storeImageAndReturnItsUri(imageCroppedFormat: String,
+                                  croppedFileUri: Uri,
+                                  context: Context): Single<String> {
         return Single.fromCallable {
             ImageUtils.saveImageAndGetItsFinalUri(imageCroppedFormat, croppedFileUri, context) }
     }

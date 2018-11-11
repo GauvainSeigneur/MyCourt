@@ -1,10 +1,13 @@
 package seigneur.gauvain.mycourt.data.repository
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import javax.inject.Inject
 import javax.inject.Singleton
 
 import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.data.model.Shot
+import seigneur.gauvain.mycourt.utils.SingleLiveEvent
 
 /**
  * Class used to get reference of data which are not
@@ -26,5 +29,13 @@ constructor() {
 
     //Set to define the source of the edition to register the Draft in the right way
     var draftCallingSource: Int = 0
+
+    //Notify subscribers Tat action mode has been triggered or stopped
+    var editMode = MutableLiveData<Int>()
+
+
+    var deleteSelecteListCmd = SingleLiveEvent<Void>()
+
+
 
 }

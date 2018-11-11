@@ -1,5 +1,6 @@
 package seigneur.gauvain.mycourt.ui.main
 
+import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.ViewModel
 import javax.inject.Inject
 import io.reactivex.disposables.CompositeDisposable
@@ -56,6 +57,9 @@ constructor() : ViewModel() {
         return mBackNavSystemCommand
     }
 
+    val actionModeEvent: LiveData<Int>
+        get() = mTempDataRepository.editMode
+
     /*
      *********************************************************************************************
      * PUBLIC METHODS CALLED IN ACTIVITY
@@ -104,6 +108,14 @@ constructor() : ViewModel() {
 
     fun checkIfTokenIsNull() {
             fetchTokenFromDB()
+    }
+
+    fun changeEditMode(mode:Int) {
+        mTempDataRepository.editMode.value=mode
+    }
+
+    fun onDeleteClicked() {
+        mTempDataRepository.deleteSelecteListCmd.call()
     }
 
     /*

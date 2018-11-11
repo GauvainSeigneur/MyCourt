@@ -100,19 +100,19 @@ class ImageUtils {
          * @throws Exception - stream broke up
          */
         @Throws(Exception::class)
-        fun saveImageAndGetItsFinalUri(ImageCroppedFormat: String, croppedFileUri: Uri, context: Context): String {
-            Timber.d(croppedFileUri.lastPathSegment)
+        fun saveImageAndGetItsFinalUri(ImageCroppedFormat: String, croppedFileUri: Uri?, context: Context): String {
+            Timber.d(croppedFileUri?.lastPathSegment)
             //1: define path and create folder "MyCourt" inside Gallery
             val appDirectoryName = "MyCourt"
             val myCourtDraftFolder = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).absolutePath, appDirectoryName)
             myCourtDraftFolder.mkdirs()
             //2: give to image a name
             //String filename = String.format("%d_%s", Calendar.getInstance().getTimeInMillis(), croppedFileUri.getLastPathSegment())+"."+ImageCroppedFormat;
-            val filename = croppedFileUri.lastPathSegment + "." + ImageCroppedFormat
+            val filename = croppedFileUri?.lastPathSegment + "." + ImageCroppedFormat
             //3: create a file with the path of myCourtDraftFolder and the given name
             val saveFile = File(myCourtDraftFolder.absolutePath, filename)
             //4: Copy file and close process
-            val inStream = FileInputStream(File(croppedFileUri.path!!))
+            val inStream = FileInputStream(File(croppedFileUri?.path))
             val outStream = FileOutputStream(saveFile)
             val inChannel = inStream.channel
             val outChannel = outStream.channel

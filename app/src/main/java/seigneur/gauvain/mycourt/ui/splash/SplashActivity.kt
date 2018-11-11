@@ -17,6 +17,7 @@ import javax.inject.Inject
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import butterknife.Optional
 import dagger.android.AndroidInjection
 import seigneur.gauvain.mycourt.data.api.AuthUtils
 import seigneur.gauvain.mycourt.ui.AuthActivity
@@ -64,6 +65,7 @@ class SplashActivity : BaseActivity() {
         }
     }
 
+    @Optional
     @OnClick(R.id.activity_login_btn)
     fun signIn() {
         Timber.d("signin clicked")

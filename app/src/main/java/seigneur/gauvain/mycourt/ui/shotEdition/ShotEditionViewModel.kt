@@ -70,7 +70,6 @@ constructor() : ViewModel(),
                 mNetworkErrorHandler, mConnectivityReceiver,this)
     }
 
-    //Pick and Crop Image
     /*
     *********************************************************************************************
     * EVENT WHICH VIEW WILL SUBSCRIBE

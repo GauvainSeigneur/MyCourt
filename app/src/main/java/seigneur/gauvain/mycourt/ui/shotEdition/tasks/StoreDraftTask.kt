@@ -17,10 +17,10 @@ import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository
 import seigneur.gauvain.mycourt.utils.Constants
 import timber.log.Timber
 
-class StoreDraftTask @Inject
-constructor(private val mCompositeDisposable: CompositeDisposable,
-            private val mShotDraftRepository: ShotDraftRepository,
-            private val mStoreRequestListener: StoreRequestListener) {
+class StoreDraftTask(
+        private val mCompositeDisposable: CompositeDisposable,
+        private val mShotDraftRepository: ShotDraftRepository,
+        private val mStoreRequestListener: StoreRequestListener) {
 
     /**
      * Store cropped image in external storage and get Uri of the this file to save it in DB
@@ -54,8 +54,8 @@ constructor(private val mCompositeDisposable: CompositeDisposable,
         mCompositeDisposable.add(
                 mShotDraftRepository.storeShotDraft(draft)
                         .subscribe(
-                                Action { this.onDraftSaved() },
-                                Consumer<Throwable> { this.onDraftSavingError(it) }
+                                this::onDraftSaved,
+                                this::onDraftSavingError
                         )
         )
 
@@ -70,8 +70,8 @@ constructor(private val mCompositeDisposable: CompositeDisposable,
         mCompositeDisposable.add(
                 mShotDraftRepository.updateShotDraft(draft)
                         .subscribe(
-                                Action { this.onDraftSaved() }, //todo Listener
-                                Consumer<Throwable> { this.onDraftSavingError(it) } //todo Listener
+                                this::onDraftSaved, //todo Listener
+                                this::onDraftSavingError //todo Listener
                         )
         )
 

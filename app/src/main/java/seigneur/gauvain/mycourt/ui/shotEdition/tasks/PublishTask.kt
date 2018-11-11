@@ -26,13 +26,13 @@ import seigneur.gauvain.mycourt.utils.HttpUtils
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler
 import timber.log.Timber
 
-class PublishTask @Inject
-constructor(private val mCompositeDisposable: CompositeDisposable,
-            private val mShotRepository: ShotRepository,
-            private val mShotDraftRepository: ShotDraftRepository,
-            private val mNetworkErrorHandler: NetworkErrorHandler?,
-            private val mConnectivityReceiver: ConnectivityReceiver,
-            private val mPublishCallBack: PublishCallBack) {
+class PublishTask(
+        private val mCompositeDisposable: CompositeDisposable,
+        private val mShotRepository: ShotRepository,
+        private val mShotDraftRepository: ShotDraftRepository,
+        private val mNetworkErrorHandler: NetworkErrorHandler?,
+        private val mConnectivityReceiver: ConnectivityReceiver,
+        private val mPublishCallBack: PublishCallBack) {
 
     /*
     *************************************************************************
@@ -62,14 +62,11 @@ constructor(private val mCompositeDisposable: CompositeDisposable,
                             handleNetworkOperationError(t, 100)
                         }
                         .subscribe(
-                                Consumer<Response<Void>> { this.onPostSucceed(it) },
-                                Consumer<Throwable> { this.onPostFailed(it) }
+                                this::onPostSucceed,
+                                this::onPostFailed
                         )
         )
     }
-
-    fun lol() {}
-
 
     /**
      * Post operation has succeed - check the response from server
@@ -113,8 +110,8 @@ constructor(private val mCompositeDisposable: CompositeDisposable,
                         tags,
                         profile)
                         .subscribe(
-                                Consumer<Shot> { this.onUpdateShotSuccess(it) },
-                                Consumer<Throwable> { this.onUpdateShotError(it) }
+                                this::onUpdateShotSuccess,
+                                this::onUpdateShotError
                         )
         )
     }
@@ -228,6 +225,5 @@ constructor(private val mCompositeDisposable: CompositeDisposable,
     interface PublishCallBack {
         fun onPublishSuccess()
     }
-
 
 }

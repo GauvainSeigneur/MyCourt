@@ -59,7 +59,7 @@ class ShotDetailActivity : BaseActivity() {
     private var differenceHeightBigShotMiniShot: Float = 0.toFloat()
     private var differenceWidthBigShotMiniShot: Float = 0.toFloat()
     private var ratioBigShotMiniShot: Float = 0.toFloat()
-    private val mTargetElevation: Float? = null
+    //private val mTargetElevation: Float? = null
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -103,8 +103,15 @@ class ShotDetailActivity : BaseActivity() {
 
     private var twentyFourDip: Int = 0
     private var isLightStatusBar = false
-    private var view: View? = null
-    private var mWindow: Window? = null
+
+    private val mWindow: Window by lazy {
+        this.window
+    }
+
+    private val mView: View by lazy {
+        mWindow.decorView
+    }
+
     private var mTagListAdapter: TagListAdapter? = null
 
     var appBarOffsetListener: AppBarLayout.OnOffsetChangedListener = AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
@@ -117,9 +124,9 @@ class ShotDetailActivity : BaseActivity() {
         if (isLightStatusBar) {
             blackBackArrow.alpha = vRatio
             if (vRatio < 0.50) {
-                MyColorUtils.clearLightStatusBar(view!!)
+                MyColorUtils.clearLightStatusBar(mView)
             } else {
-                MyColorUtils.setLightStatusBar(view!!)
+                MyColorUtils.setLightStatusBar(mView)
             }
         }
 
@@ -169,8 +176,6 @@ class ShotDetailActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         postponeEnterTransition()
         setContentView(R.layout.activity_shot_detail)
-        mWindow = this.getWindow()
-        view = window!!.decorView
         twentyFourDip = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24f, this.resources.displayMetrics).toInt()
         ButterKnife.bind(this)
         mShotDetailViewModel.init()
@@ -282,7 +287,7 @@ class ShotDetailActivity : BaseActivity() {
                         isLightStatusBar = true
                         blackBackArrow.alpha = 1.0f
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            MyColorUtils.setLightStatusBar(view!!)
+                            MyColorUtils.setLightStatusBar(mView)
                         }
                     } else {
                         blackBackArrow.alpha = 0f

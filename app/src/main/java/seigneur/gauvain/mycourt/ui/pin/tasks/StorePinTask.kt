@@ -20,7 +20,7 @@ class StorePinTask(private val mCompositeDisposable: CompositeDisposable,
                    private val mEnCryptor: EnCryptor,
                    private val mStorePinCallback: StorePinCallback) {
 
-    private var iV: ByteArray? = null //do not set it as LiveData, we don't want to share it in the UI
+    private var iV: ByteArray? =  null//do not set it as LiveData, we don't want to share it in the UI
 
     /*
      *******************************************************************************

@@ -19,8 +19,8 @@ data class Draft(
     var schedulingDate: Date?=null,//ONLY FOR UPDATE OF AN ALREADY PUBLISHED SHOT
     //Embed shot object
     @Embedded
-    var shot: Shot
-) {
+    var shot: Shot) {
+
     fun changeInfoFromEdit(
             inImageUri: String?,
             inImageFormat: String?,
@@ -33,6 +33,5 @@ data class Draft(
         shot.description = desc
         shot.tagList = tags
     }
-
 
 }

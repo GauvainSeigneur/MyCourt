@@ -9,4 +9,6 @@ interface ShotDraftListCallback {
 
     fun onShotDraftClicked(shotDraft: Draft, position: Int)
 
+    fun onShotDraftLongClicked(position :Int)
+
 }

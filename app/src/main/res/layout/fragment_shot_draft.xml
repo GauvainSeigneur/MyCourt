@@ -20,25 +20,19 @@
 
     </android.support.design.widget.AppBarLayout>
 
-     <android.support.v4.widget.SwipeRefreshLayout
-         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-         android:id="@+id/swipe_refresh_drafts"
-         android:layout_width="match_parent"
-         android:layout_height="match_parent">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_shot_draft"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="56dp"/>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_shot_draft"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingBottom="56dp"/>
-
-        <!-- todo: add a dedicated view -->
-        <ViewStub
-            android:id="@+id/empty_free_throw_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        </android.support.v4.widget.SwipeRefreshLayout>
+    <!-- todo: add a dedicated view -->
+    <ViewStub
+        android:id="@+id/empty_free_throw_view"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -18,14 +18,3 @@ class HeaderInterceptor : Interceptor {
         return chain.proceed(builder.build())
     }
 }
-/*
-public class HeaderInterceptor implements Interceptor {
-    @Override
-    public Response intercept(Chain chain) throws IOException {
-        Request.Builder builder = chain.request().newBuilder();
-        builder.addHeader("Authorization", "Bearer "+ TokenRepository.accessToken);
-        return chain.proceed(builder.build());
-    }
-
-}*/
-

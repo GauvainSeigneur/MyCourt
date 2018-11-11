@@ -24,8 +24,8 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
         mCompositeDisposable
                 .add(Single.just(mTempDataRepository.draftCallingSource)
                         .subscribe(
-                                Consumer<Int> {manageSource(it) },
-                                Consumer<Throwable> { this.manageSourceTypeError(it) })
+                                this::manageSource,
+                                this::manageSourceTypeError)
                 )
     }
 
@@ -41,7 +41,7 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
             Constants.SOURCE_SHOT -> getShot()
             //User wishes to create a shot
             Constants.SOURCE_FAB -> {
-                val shot = Shot()
+                val shot = Shot("","","",null) //create an empty shot
                 val draft = Draft(
                         0, Constants.EDIT_MODE_NEW_SHOT,
                         null, null, null, shot)
@@ -65,7 +65,10 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
     *********************************************************************************************/
     private fun getShot() {
         mCompositeDisposable.add(Single.just(mTempDataRepository.shot)
-                .subscribe(Consumer<Shot> { this.manageShotInfo(it) }, Consumer<Throwable> { this.onGetShotError(it) }))
+                .subscribe(
+                        this::manageShotInfo,
+                        this::onGetShotError)
+        )
     }
 
     private fun manageShotInfo(shot: Shot) {
@@ -75,7 +78,6 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
                 shot.imageHidpi, null, null,
                 shot)
         mSourceCallback.setUpTempDraft(draft)
-
         mSourceCallback.dataForUIReady()
     }
 
@@ -90,8 +92,8 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
     private fun getShotDraft() {
         mCompositeDisposable.add(Single.just(mTempDataRepository.shotDraft)
                 .subscribe(
-                        Consumer<Draft> { this.manageShotDraftInfo(it) },
-                        Consumer<Throwable> { this.onGetShotDraftError(it) }
+                        this::manageShotDraftInfo,
+                        this::onGetShotDraftError
                 )
         )
     }

@@ -3,10 +3,13 @@ package seigneur.gauvain.mycourt.ui.shotDraft
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import io.reactivex.Completable
 
 import javax.inject.Inject
 
 import io.reactivex.Maybe
+import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository
@@ -15,7 +18,9 @@ import seigneur.gauvain.mycourt.utils.Constants
 import seigneur.gauvain.mycourt.utils.SingleLiveEvent
 import timber.log.Timber
 
-class ShotDraftViewModel @Inject
+class ShotDraftViewModel
+
+@Inject
 constructor() : ViewModel() {
 
     @Inject
@@ -28,22 +33,44 @@ constructor() : ViewModel() {
     private val mStopRefreshEvent = SingleLiveEvent<Void>()
     private val mShotDrafts = MutableLiveData<List<Draft>>()
     private var isRefreshing: Boolean = false
+    private val mDeleteOpeDone = SingleLiveEvent<Int>()
 
-    val itemClickedEvent = SingleLiveEvent<Draft>()
-
-    val drafts: LiveData<List<Draft>>
-        get() = mShotDrafts
 
     public override fun onCleared() {
         super.onCleared()
         mCompositeDisposable.clear()
     }
 
+    /*
+    ************************************************************************************
+    *  Live data and and events to be subscribed
+    ************************************************************************************/
     fun dbChanged(): SingleLiveEvent<Void> {
         return mShotDraftRepository.onDraftDBChanged
     }
 
+    fun deleteCickEvent(): SingleLiveEvent<Void> {
+        return mTempDataRepository.deleteSelecteListCmd
+    }
 
+    val editMode: LiveData<Int>
+        get() = mTempDataRepository.editMode
+
+    val itemClickedEvent = SingleLiveEvent<Draft>()
+
+    val drafts: LiveData<List<Draft>>
+        get() = mShotDrafts
+
+    fun getDeleteOpeResult(): SingleLiveEvent<Int> {
+        return mDeleteOpeDone
+    }
+    /*
+    ************************************************************************************
+    *  Public functions called bu subscribers
+    ************************************************************************************/
+    /**
+     * fetch draft list from DB
+     */
     fun fetchShotDrafts() {
         isRefreshing = false
         mCompositeDisposable.add(fetchDrafts()
@@ -55,19 +82,29 @@ constructor() : ViewModel() {
         )
     }
 
-    fun onRefresh(fromSwipeRefresh: Boolean) {
-        if (fromSwipeRefresh) {
-            isRefreshing = true
-            mCompositeDisposable.add(fetchDrafts()
+    /**
+     * User has clicked on Draft in the list, deal with it
+     * @param shotDraft - draft object clicked
+     * @param position - position of the item in the list
+     */
+    fun onShotDraftClicked(shotDraft: Draft, position: Int) {
+        mTempDataRepository.draftCallingSource = Constants.SOURCE_DRAFT
+        mTempDataRepository.shotDraft = shotDraft
+        itemClickedEvent.value = shotDraft
+    }
+
+    fun deleteSelectDrafts(ids: ArrayList<Long>) {
+        for ((i, element) in ids.withIndex()) {
+            val idToDelete = ids[i]
+            mCompositeDisposable.add(deleteDrafts(idToDelete)
                     .subscribe(
-                            this::doOnDraftFound,
-                            this::doOnError,
-                            this::doOnNothingFound
+                            this::onDeleteSucceed,
+                            this::onDeleteError
                     )
             )
-        } else {
-            Timber.d("not refreshing, nothing happened")
+
         }
+
     }
 
     /**
@@ -79,20 +116,16 @@ constructor() : ViewModel() {
         return mShotDraftRepository.shotDraft
     }
 
+    private fun deleteDrafts(id:Long): Completable {
+        return mShotDraftRepository.deleteDraft(id)
+    }
+
     /**
      * ShotDrafts being found in DB - do something with it
      * @param shotDrafts - list Found in DB
      */
     private fun doOnDraftFound(shotDrafts: List<Draft>) {
-        Timber.d("list loaded" + shotDrafts.toString())
-        //todo - live data
         mShotDrafts.value = shotDrafts
-
-        /*if (!shotDrafts.isEmpty()) {
-        } else {
-
-        }*/
-
     }
 
     /**
@@ -101,7 +134,6 @@ constructor() : ViewModel() {
     private fun doOnNothingFound() {
         if (isRefreshing) {
             mStopRefreshEvent.call()
-            //mShotDraftView.stopRefresh(); //SINGLE EVENT ?
         }
 
     }
@@ -115,20 +147,14 @@ constructor() : ViewModel() {
         //TODO -SINGLE EVENT?
     }
 
-
-    fun onShotDraftClicked(shotDraft: Draft, position: Int) {
-        mTempDataRepository.draftCallingSource = Constants.SOURCE_DRAFT
-        mTempDataRepository.shotDraft = shotDraft
-        itemClickedEvent.value = shotDraft
-
-        // mShotDraftView.goToShotEdition(); //TODO -SINGLE EVENT
-
+    private fun onDeleteSucceed() {
+       mDeleteOpeDone.value=0
+       Timber.d("delete succeed")
     }
 
-    /*
-     *********************************************************************************************
-     * PUBLIC METHODS CALLED IN PRESENTER
-     *********************************************************************************************/
-
+    private fun onDeleteError(throwable: Throwable) {
+        Timber.e(throwable)
+        mDeleteOpeDone.value=-1
+    }
 
 }

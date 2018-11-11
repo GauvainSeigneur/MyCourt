@@ -12,7 +12,7 @@ import seigneur.gauvain.mycourt.R
  * RecyclerView Adapter for Shot's tags
  */
 class TagListAdapter(private val context: Context, private val tags: List<String>) : RecyclerView.Adapter<TagViewHolder>() {
-    var tagViewHolder: TagViewHolder? = null
+    //var tagViewHolder: TagViewHolder? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TagViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -21,7 +21,7 @@ class TagListAdapter(private val context: Context, private val tags: List<String
     }
 
     override fun onBindViewHolder(holder: TagViewHolder, position: Int) {
-        holder.tag!!.setText(tags[position])
+        holder.tag.setText(tags[position])
     }
 
     override fun getItemCount(): Int {

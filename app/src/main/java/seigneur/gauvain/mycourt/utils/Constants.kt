@@ -8,7 +8,6 @@ object Constants {
         /**
          * API
          */
-
         const val HEADER_CACHE = "android-cache"
         const val RESPONSE_CACHE_DELAY = "ResponseCacheDelay"
         const val HEADER_SHOT_ID = "ShotID"
@@ -16,6 +15,9 @@ object Constants {
         /**
          * INTERNAL CONSTANTS
          */
+        const val CUSTOM_ACTION_MODE_OFF = 40
+        const val CUSTOM_ACTION_MODE_ON  = 41
+
         const val PIN_STEP_CHECK_STORED = 10
         const val PIN_STEP_NEW_PIN_ONE = 11
         const val PIN_STEP_NEW_PIN_TWO = 12

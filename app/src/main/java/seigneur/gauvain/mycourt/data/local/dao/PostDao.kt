@@ -23,7 +23,7 @@ interface PostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertPost(draft: Draft): Long
 
-    @Query("DELETE FROM draft WHERE id = :id")
-    fun deletDraftByID(id: Int): Int
+    @Query("DELETE FROM Draft WHERE draftID = :draftID")
+    fun deletDraftByID(draftID: Int): Int
 
 }

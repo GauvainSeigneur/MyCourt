@@ -29,7 +29,7 @@ class EditUtils {
          * @return
          */
         fun getDescription(draft: Draft): String? {
-            return if (draft.shot != null && draft.shot.description != null) {
+            return if (draft.shot.description != null) {
                 //If user click on edit from a shot detail and this shot is not already in draft
                 //- by check if draft id is equal to 0 - we must manage description text as html
                 // to avoid <p> or <br> elements for example

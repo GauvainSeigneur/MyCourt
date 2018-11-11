@@ -18,7 +18,9 @@ import seigneur.gauvain.mycourt.utils.Constants
 import seigneur.gauvain.mycourt.utils.SingleLiveEvent
 import timber.log.Timber
 
-class ShotDetailViewModel @Inject
+class ShotDetailViewModel
+
+@Inject
 constructor() : ViewModel() {
 
     @Inject
@@ -29,10 +31,10 @@ constructor() : ViewModel() {
 
     private val mCompositeDisposable = CompositeDisposable()
     private val mShot = MutableLiveData<Shot>()
-    val editClickedEvent = SingleLiveEvent<Void>()
-
     val shot: LiveData<Shot>
-        get() = mShot
+        get() = mShot //custom accessors,
+
+    val editClickedEvent = SingleLiveEvent<Void>()
 
     public override fun onCleared() {
         super.onCleared()
@@ -58,18 +60,12 @@ constructor() : ViewModel() {
         checkDraftAndGoToEdition()
     }
 
-
-    /*
-     *********************************************************************************************
-     * PRIVATE METHODS
-     *********************************************************************************************/
-
     /*
      **************************************************************************
      * Get Shot clicked
      *************************************************************************/
     private fun fetchShot() {
-        mCompositeDisposable.add(Single.just(mTempDataRepository!!.shot)
+        mCompositeDisposable.add(Single.just(mTempDataRepository.shot)
                 .subscribe(
                         this::doOnShotRetrieve, //success
                         this::doOnShotError //error
@@ -94,14 +90,14 @@ constructor() : ViewModel() {
         //todo - single live event to finish activity ?
     }
 
-    /**************************************************************************
+    /**
      * Check if the shot has already a draft saved in DB. if it has,
      * call its draft, if not, just go to Edition
      */
     private fun checkDraftAndGoToEdition() {
         if (mShot.value != null) {
             mCompositeDisposable.add(
-                    mShotDraftRepository!!.getShotDraftByShotId(mShot.value!!.id!!)
+                    mShotDraftRepository.getShotDraftByShotId(mShot.value!!.id!!)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(
