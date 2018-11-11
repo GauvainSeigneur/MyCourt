@@ -59,7 +59,7 @@ class ShotDraftsListAdapter(private val context: Context,
         val id = data[position].draftID
         if (selectedIds.contains(id)) {
             //if item is selected then,set foreground color
-            holder.shotDraftLayout.foreground = ColorDrawable(ContextCompat.getColor(context, R.color.colorAccent))
+            holder.shotDraftLayout.foreground = ColorDrawable(ContextCompat.getColor(context, R.color.colorSelectedForeground))
         } else  {
             //else remove selected item color.
             holder.shotDraftLayout.foreground = ColorDrawable(ContextCompat.getColor(context, android.R.color.transparent))

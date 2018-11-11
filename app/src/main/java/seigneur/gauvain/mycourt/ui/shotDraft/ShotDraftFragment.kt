@@ -110,7 +110,7 @@ class ShotDraftFragment : BaseFragment(), Toolbar.OnMenuItemClickListener {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        //listen livedata
+        //listen liveData
         subscribeToSingleEvents(mShotDraftViewModel)
         subscribeLiveData(mShotDraftViewModel)
     }
@@ -203,6 +203,11 @@ class ShotDraftFragment : BaseFragment(), Toolbar.OnMenuItemClickListener {
     }
 
     private fun deleteItems() {
+        //todo - delete only in recyclerview and display an snkacbar to cancel or
+        // if is not canceled , delete from DB
+        //1 - deleteSelectedIds
+        //2 - display snackbar
+        //3 - mShotDraftViewModel.deleteSelectDrafts(ArrayList(mShotDraftsListAdapter!!.selectedIds))
         mShotDraftViewModel.deleteSelectDrafts(ArrayList(mShotDraftsListAdapter!!.selectedIds))
     }
 

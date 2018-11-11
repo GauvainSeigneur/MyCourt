@@ -6,7 +6,7 @@
     -->
     <!--<color name="colorOnPrimary"></color>
     <color name="colorOnSecondary"></color>
-    <color name="colorOnBackground"></color>
+    <color name=" colorOnBackground"></color>
     <color name="colorOnSurface"></color>-->
 
     <!--<color name="colorPrimaryLight">#363643</color>
@@ -26,6 +26,7 @@
     <color name="colorBackground">@color/colorPrimary</color>
     <color name="colorError">#FF6859</color>
     <color name="colorSurface">@color/colorPrimaryLight</color>
+    <color name= "colorSelectedForeground">#80E94877</color>
 
     <!-- Text -->
     <color name="colorHeadline">#FFFFFFFF</color><!-- 100% opacity-->

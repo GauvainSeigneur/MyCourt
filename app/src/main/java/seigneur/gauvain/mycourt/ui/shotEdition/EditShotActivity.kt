@@ -195,6 +195,12 @@ class EditShotActivity : BaseActivity() {
         viewModel.requestPermCmd.observe(this,
                 Observer {  requestPermission() })
 
+        viewModel.onPublishSucceed.observe(this,
+                Observer {
+                    Toast.makeText(mApplication, "Publis suceed", Toast.LENGTH_SHORT)
+                    finishAfterTransition()
+                })
+
     }
 
     /*

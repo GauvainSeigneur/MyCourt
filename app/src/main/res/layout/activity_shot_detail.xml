@@ -109,6 +109,7 @@
                 android:src="@drawable/ic_arrow_back_black_24dp"/>
 
             <ImageView
+                android:visibility="gone"
                 android:id="@+id/black_back_arrow"
                 android:layout_gravity="center"
                 android:layout_width="28dp"

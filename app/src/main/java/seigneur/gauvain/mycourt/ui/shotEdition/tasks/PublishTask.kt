@@ -96,9 +96,9 @@ class PublishTask(
     }
 
     /*
-     *************************************************************************
-     * NETWORK OPERATION - UPDATE SHOT ON DRIBBBLE
-     *************************************************************************/
+    *************************************************************************
+    * NETWORK OPERATION - UPDATE SHOT ON DRIBBBLE
+    *************************************************************************/
     fun updateShot(
             shotId: String,
             title: String, desc: String, tags: ArrayList<String>, profile: Boolean) {

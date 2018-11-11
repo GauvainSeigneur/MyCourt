@@ -89,8 +89,8 @@ class ShotDetailActivity : BaseActivity() {
     @BindView(R.id.shot_image)
     lateinit var picture: ImageView
 
-    @BindView(R.id.black_back_arrow)
-    lateinit var blackBackArrow: ImageView
+    @BindView(R.id.white_back_arrow)
+    lateinit var backArrow: ImageView
 
     @BindView(R.id.custom_status_bar_background)
     lateinit var customStatusBarbackground: View
@@ -122,7 +122,7 @@ class ShotDetailActivity : BaseActivity() {
         customStatusBarbackground.alpha = vRatio
 
         if (isLightStatusBar) {
-            blackBackArrow.alpha = vRatio
+           // blackBackArrow.alpha = vRatio
             if (vRatio < 0.50) {
                 MyColorUtils.clearLightStatusBar(mView)
             } else {
@@ -180,13 +180,13 @@ class ShotDetailActivity : BaseActivity() {
         ButterKnife.bind(this)
         mShotDetailViewModel.init()
         //listen livedata
-        suscribeToLivedata(mShotDetailViewModel)
+        subscribeToLiveData(mShotDetailViewModel)
         //listen single events
-        suscribetoSingleEvents(mShotDetailViewModel)
+        subscribeToSingleEvents(mShotDetailViewModel)
 
     }
 
-    private fun suscribeToLivedata(viewModel: ShotDetailViewModel) {
+    private fun subscribeToLiveData(viewModel: ShotDetailViewModel) {
         viewModel.shot
                 .observe(
                         this,
@@ -197,13 +197,13 @@ class ShotDetailActivity : BaseActivity() {
                 )
     }
 
-    private fun suscribetoSingleEvents(viewModel: ShotDetailViewModel) {
+    private fun subscribeToSingleEvents(viewModel: ShotDetailViewModel) {
         // The activity observes the navigation commands in the ViewModel
         viewModel.editClickedEvent.observe(this, Observer { goToShotEdition() })
 
     }
 
-    fun loadShotImage(shot: Shot?) {
+    private fun loadShotImage(shot: Shot?) {
         loadShotImage(true, shot)
     }
 
@@ -221,43 +221,42 @@ class ShotDetailActivity : BaseActivity() {
         mShotDetailViewModel.onEditClicked()
     }
 
-    fun goToShotEdition() {
+    private fun goToShotEdition() {
         val intent = Intent(this, EditShotActivity::class.java)
         startActivity(intent)
     }
 
-    fun showErrorView(visible: Boolean) {
+    private fun showErrorView(visible: Boolean) {
         if (visible)
             Toast.makeText(this, "error", Toast.LENGTH_SHORT).show()
     }
 
 
-    fun showPaletteShot(isVisible: Boolean) {
+    private fun showPaletteShot(isVisible: Boolean) {
         //if isVisible show layout and show palette color!
     }
 
 
-    fun adaptColorToShot(resource: Drawable) {
+    private fun adaptColorToShot(resource: Drawable) {
         val bitmap = ImageUtils.drawableToBitmap(resource)
         recolorStatusBar(bitmap)
     }
 
 
-    fun initImageScrollBehavior() {
+    private fun initImageScrollBehavior() {
         initMathData()
         appBarLayout.addOnOffsetChangedListener(appBarOffsetListener)
     }
 
 
-    fun setUpShotInfo(shot: Shot?) {
+    private fun setUpShotInfo(shot: Shot?) {
         shotTitle.text = shot!!.title
         shotDescription.text = shotDescription(shot)
         shotUpdate.text = "created at:xx xx xx"
         setUpTagList(shot)
     }
 
-    fun showEditionResult(result: Int) {
-
+    private fun showEditionResult(result: Int) {
     }
 
     private fun recolorStatusBar(bitmap: Bitmap) {
@@ -285,12 +284,11 @@ class ShotDetailActivity : BaseActivity() {
 
                     if (!MyColorUtils.isDark(dominantColor)) {
                         isLightStatusBar = true
-                        blackBackArrow.alpha = 1.0f
+                        //blackBackArrow.alpha = 1.0f
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             MyColorUtils.setLightStatusBar(mView)
                         }
                     } else {
-                        blackBackArrow.alpha = 0f
                     }
                 }
     }

@@ -78,6 +78,7 @@ constructor() : ViewModel(),
     val cropImageCmd = SingleLiveEvent<Void>()
     val requestPermCmd = SingleLiveEvent<Void>()
     val checkPerm = SingleLiveEvent<Void>()
+    val onPublishSucceed = SingleLiveEvent<Void>()
     var imagePickedUriSource: Uri? = null //NOT LIVEDATA - NOT RELATED TO UI
     var imagePickedFileName: String? = null //NOT LIVEDATA - NOT RELATED TO UI
     var imagePickedFormat: String? = null //NOT LIVEDATA - NOT RELATED TO UI
@@ -286,7 +287,7 @@ constructor() : ViewModel(),
      * PublishTaskCallBack
      *********************************************************************************************/
     override fun onPublishSuccess() {
-        Toast.makeText(mApplication, "publish succeed", Toast.LENGTH_SHORT).show()
+        onPublishSucceed.call()
     }
 
 }
