@@ -7,6 +7,8 @@ import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import seigneur.gauvain.mycourt.di.scope.PerActivity
 import seigneur.gauvain.mycourt.di.scope.PerFragment
+import seigneur.gauvain.mycourt.ui.about.AboutFragment
+import seigneur.gauvain.mycourt.ui.about.AboutFragmentModule
 import seigneur.gauvain.mycourt.ui.shotDraft.ShotDraftFragment
 import seigneur.gauvain.mycourt.ui.shotDraft.ShotDraftFragmentModule
 import seigneur.gauvain.mycourt.ui.shots.ShotsFragmentModule
@@ -24,7 +26,7 @@ abstract class MainActivityModule {
      * provided by this activity and application instance (singleton scoped objects).
      */
     @PerFragment
-    @ContributesAndroidInjector(modules = arrayOf(ShotsFragmentModule::class))
+    @ContributesAndroidInjector(modules = [ShotsFragmentModule::class])
     internal abstract fun shotsFragmentInjector(): ShotsFragment
 
     /**
@@ -32,7 +34,7 @@ abstract class MainActivityModule {
      * provided by this activity and application instance (singleton scoped objects).
      */
     @PerFragment
-    @ContributesAndroidInjector(modules = arrayOf(ShotDraftFragmentModule::class))
+    @ContributesAndroidInjector(modules = [ShotDraftFragmentModule::class])
     internal abstract fun postFragmentInjector(): ShotDraftFragment
 
     /**
@@ -40,8 +42,16 @@ abstract class MainActivityModule {
      * provided by this activity and application instance (singleton scoped objects).
      */
     @PerFragment
-    @ContributesAndroidInjector(modules = arrayOf(UserFragmentModule::class))
+    @ContributesAndroidInjector(modules = [UserFragmentModule::class])
     internal abstract fun userFragmentInjector(): UserFragment
+
+    /**
+     * Provides the injector for the [UserFragment], which has access to the dependencies
+     * provided by this activity and application instance (singleton scoped objects).
+     */
+    @PerFragment
+    @ContributesAndroidInjector(modules = [AboutFragmentModule::class])
+    internal abstract fun aboutFragmentInjector(): AboutFragment
 
     /**
      * @param mainActivity the activity

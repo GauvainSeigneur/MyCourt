@@ -7,7 +7,9 @@ import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 
@@ -34,6 +36,9 @@ class SplashActivity : BaseActivity() {
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
+    @BindView(R.id.layout_login)
+    lateinit var mLoginLayout: LinearLayout
+
     @BindView(R.id.activity_login_btn)
     lateinit var loginBtn: Button
 
@@ -46,13 +51,13 @@ class SplashActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
         AndroidInjection.inject(this)
-        ButterKnife.bind(this)
         //init SplashViewModel
         mSplashViewModel.init()
+        setContentView(R.layout.activity_login)
         //Single are used to manage user click and single events messages
-        suscribetoSingleEvents(mSplashViewModel)
+        subscribeToEvents(mSplashViewModel)
+        ButterKnife.bind(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -61,7 +66,6 @@ class SplashActivity : BaseActivity() {
             val authCode = data!!.getStringExtra(AuthActivity.KEY_CODE)
             // splashPresenter.onSignInSuccess(authCode);  //todo -replace
             mSplashViewModel.onSignInSuccess(authCode)
-
         }
     }
 
@@ -72,22 +76,28 @@ class SplashActivity : BaseActivity() {
         mSplashViewModel.onSignInClicked()
     }
 
-    private fun suscribetoSingleEvents(viewModel: SplashViewModel) {
+    private fun subscribeToEvents(viewModel: SplashViewModel) {
         // The activity observes the navigation commands in the ViewModel
         viewModel.signInCommand.observe(this, Observer {
             goToAuthActivity()
-            Toast.makeText(mApplication, "toast", Toast.LENGTH_SHORT).show()
         })
 
         viewModel.goToHomeCommand.observe(this, Observer { goToHome() })
 
+        viewModel.isConnected.observe(this, Observer {
+            if (it==false)
+                mLoginLayout.visibility  = View.VISIBLE
+            else
+                mLoginLayout.visibility  = View.GONE
+        })
+
     }
 
-    fun goToAuthActivity() {
+    private fun goToAuthActivity() {
         AuthUtils.openAuthActivity(this@SplashActivity)
     }
 
-    fun goToHome() {
+    private fun goToHome() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()

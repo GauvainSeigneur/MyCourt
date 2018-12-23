@@ -274,7 +274,7 @@ class UserFragment : BaseFragment() {
 
     fun showNoTeamsView(visible: Boolean) {}
 
-    fun showUserLinks(user: User?) {
+    private fun showUserLinks(user: User?) {
         val userLinks = ArrayList<List<String>>()
         userLinks.add(mapToList(user!!.links))
         //mUserLinksList.setLayoutManager(new LinearLayoutManager(getContext()));

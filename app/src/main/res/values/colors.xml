@@ -1,33 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--
-    Not available yet
-    Colors that passes accessibility guidelines for text/iconography
-    -->
-    <!--<color name="colorOnPrimary"></color>
-    <color name="colorOnSecondary"></color>
-    <color name=" colorOnBackground"></color>
-    <color name="colorOnSurface"></color>-->
-
-    <!--<color name="colorPrimaryLight">#363643</color>
-    <color name="colorPrimary">#2b2b35</color>
-    <color name="colorPrimaryDark">#26262f</color>
+    <!--Dark theme -->
+    <color name="colorPrimaryLight">#292B33</color> <!--43464F-->
+    <color name="colorPrimary">#1E1E24</color> <!--2B2C36-->
+    <color name="colorPrimaryDark">#1E1E24</color> <!--202028-->
     <color name="colorStatusBar">@color/colorPrimary</color>
-    <color name="colorAccent">#F47DB1</color>
-    <color name="colorBackground">@color/colorPrimary</color>
-    <color name="colorError">#FF6859</color>
-    <color name="colorSurface">@color/colorPrimaryLight</color>-->
-
-    <color name="colorPrimaryLight">#43464F</color>
-    <color name="colorPrimary">#2B2C36</color>
-    <color name="colorPrimaryDark">#202028</color>
-    <color name="colorStatusBar">@color/colorPrimary</color>
-    <color name="colorAccent">#E94877</color>
+    <color name="colorAccent">#F9832B</color>
     <color name="colorBackground">@color/colorPrimary</color>
     <color name="colorError">#FF6859</color>
     <color name="colorSurface">@color/colorPrimaryLight</color>
-    <color name= "colorSelectedForeground">#80E94877</color>
-
+    <color name="colorBackgroundEdit">@color/colorPrimary</color>
+    <color name= "colorSelectedForeground">#80F9832B</color>
+    <color name="scrim">#99323232</color>
     <!-- Text -->
     <color name="colorHeadline">#FFFFFFFF</color><!-- 100% opacity-->
     <color name="colorSubHead">#CCFFFFFF</color><!-- 80% opacity-->
@@ -43,10 +27,12 @@
     <color name="colorPrimaryDark">#e6e6e6</color>
     <color name="colorStatusBar">#bfbfbf</color>
     <color name="colorAccent">#348EF7</color>
-    <color name="colorBackground">@color/colorPrimary</color>
+    <color name="colorBackground">#fcfcfc</color>
+    <color name="colorBackgroundEdit">#eaeaea</color>
     <color name="colorError">#FF6859</color>
     <color name="colorSurface">@color/colorPrimaryLight</color>
     <color name="colorOnPrimary">#FF424242</color>
+    <color name= "colorSelectedForeground">#80E94877</color>
 
     <color name="colorHeadline">#FF424242</color>
     <color name="colorSubHead">#CC424242</color>
@@ -61,7 +47,7 @@
     <color name="content_placeholder">#ffe0e0e0</color>
     <color name="mid_grey">#40808080</color>
     <color name="confirm_edition_background">#33000000</color>
-    <color name="colorWhite">#FFFFFFFF</color>
+    <color name="colorWhite">#ffffff</color>
 
     <!--Common colors -->
 

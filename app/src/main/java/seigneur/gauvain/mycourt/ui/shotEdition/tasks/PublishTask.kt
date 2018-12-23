@@ -62,8 +62,8 @@ class PublishTask(
                             handleNetworkOperationError(t, 100)
                         }
                         .subscribe(
-                                Consumer { response -> onPostSucceed(response, draft) },
-                                Consumer {t -> onPostFailed(t)}
+                                { response -> onPostSucceed(response, draft) },
+                                {t -> onPostFailed(t)}
                         )
         )
     }
@@ -97,6 +97,43 @@ class PublishTask(
 
     /*
     *************************************************************************
+    * NETWORK OPERATION - ADD ATTACHMENT TO A SHOT- TODO
+    *************************************************************************/
+    /**
+     * Dribbbles API doesn't allow to publish a shot with attachments.
+     * We can only provide attachments to an existing shot
+     * Also, we can send only one attachment per POST.
+     * So for first publication with attachment, we must concat it in two request
+     */
+
+    /**
+     * Post an attachment to an existing shot
+     * TODO - to be tested
+     */
+    fun postAttachment(
+            id :String,
+            context: Context,
+            fileUri: Uri,
+            imageFormat: String) {
+        // create RequestBody instance from file
+        val body = HttpUtils.createFilePart(context, fileUri, imageFormat, "file")
+        // executes the request
+        mCompositeDisposable.add(
+                mShotRepository.addAttachment(
+                        id,
+                        body)
+                        .doOnError { t ->
+                            Timber.tag("postAttachment").d("error: "+t)
+                        }
+                        .subscribe(
+                                { response -> Timber.d(response.message())},
+                                {t -> onPostFailed(t)}
+                        )
+        )
+    }
+
+    /*
+    *************************************************************************
     * NETWORK OPERATION - UPDATE SHOT ON DRIBBBLE
     *************************************************************************/
     fun updateShot(
@@ -110,8 +147,8 @@ class PublishTask(
                         draft.shot.tagList!!,
                         profile)
                         .subscribe(
-                                Consumer { shot ->  onUpdateShotSuccess(shot, draft) },
-                                Consumer { this.onUpdateShotError(it)}
+                                { shot ->  onUpdateShotSuccess(shot, draft) },
+                                { this.onUpdateShotError(it)}
                         )
         )
     }

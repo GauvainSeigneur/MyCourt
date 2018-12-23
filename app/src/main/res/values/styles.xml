@@ -1,16 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools" xmlns:app="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Base application theme-->
-    <style name="MyCourt" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="MyCourt" parent="Theme.AppCompat.NoActionBar">
         <!-- Colors -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:statusBarColor">@color/colorStatusBar</item>
+        <item name="android:navigationBarColor">@color/colorPrimaryLight</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:colorBackground">@color/colorBackground</item>
         <item name="android:colorEdgeEffect">@color/colorAccent</item>
-        <!--<item name="android:colorError">@color/colorError</item>
-        <item name="android:colorSurface">@color/colorError</item>-->
         <!-- transition and overlay-->
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
         <item name="android:windowAllowReturnTransitionOverlap">true</item>
@@ -19,8 +18,8 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-
         <item name="android:fontFamily">@font/raleway_medium</item>
+        <item name="android:textColorPrimary">@color/colorWhite</item>
     </style>
 
     <!-- Widgets-->
@@ -90,12 +89,13 @@
         <item name="android:windowReenterTransition">@transition/main_re_enter</item>-->
     </style>
 
+    <style name="MyCourt.EditActivityTheme">
+        <item name="android:colorBackground">@color/colorBackgroundEdit</item>
+    </style>
+
     <style name="MyCourt.DetailShotActivityTheme">
+        <item name="android:windowSharedElementsUseOverlay">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowSharedElementEnterTransition">@transition/dribbble_shot_shared_enter</item>
-        <item name="android:windowSharedElementReturnTransition">@transition/dribbble_shot_shared_return</item>
-        <item name="android:windowEnterTransition">@transition/dribbble_shot_enter</item>
-        <item name="android:windowReturnTransition">@transition/dribbble_shot_return</item>
     </style>
 
     <style name="MyCourt.SplashTheme">

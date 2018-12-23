@@ -24,6 +24,7 @@
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.NestedScrollView
+        android:id="@+id/scroll_view"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -37,6 +38,7 @@
             <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
                 android:id="@+id/cropped_img_preview"
                 android:clickable="true"
+                android:focusable="true"
                 android:background="@color/colorPrimaryLight"
                 android:foreground="@drawable/rect_ripple"
                 android:layout_width="match_parent"
@@ -106,23 +108,55 @@
 
             </android.support.design.widget.TextInputLayout>
 
-            <Button
-                android:id="@+id/btn_publish"
-                android:text="publish"
-                android:layout_margin="@dimen/padding_16"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <Button
-                android:id="@+id/btn_store"
-                android:text="store"
-                android:layout_margin="@dimen/padding_16"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
         </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>
 
+    <FrameLayout
+        android:id="@+id/bs_publish"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/bottom_sheet_behavior"
+        app:behavior_hideable="true"
+        app:behavior_peekHeight="56dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:baselineAligned="false"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:weightSum="1">
+
+            <FrameLayout
+                android:id="@+id/btn_publish"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@color/colorAccent"
+                android:layout_height="match_parent">
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/btn_store"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_width="wrap_content"
+                android:background="@color/colorPrimaryDark"
+                android:layout_height="match_parent">
+                
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:padding="@dimen/padding_8"
+                    android:tint="@color/colorAccent"
+                    android:src="@drawable/ic_save_black_24dp"/>
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>

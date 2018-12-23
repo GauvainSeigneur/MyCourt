@@ -9,17 +9,24 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.TextInputEditText
 import android.support.v4.app.ActivityCompat
 import android.os.Bundle
+import android.support.design.widget.BottomSheetBehavior
+import android.support.v4.content.ContextCompat
 import android.support.v4.content.FileProvider
+import android.support.v4.widget.NestedScrollView
 import android.support.v7.widget.Toolbar
 import android.text.Editable
 import android.text.Html
 import android.text.TextWatcher
+import android.view.View
 import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.Toast
 
 import com.bumptech.glide.Glide
@@ -83,133 +90,39 @@ class EditShotActivity : BaseActivity() {
     @BindView(R.id.cropped_img_preview)
     lateinit var croppedImagePreview: FourThreeImageView
 
+    @BindView(R.id.scroll_view)
+    lateinit var mNestedScrollView: NestedScrollView
+
+    @BindView(R.id.bs_publish)
+    lateinit var mBSPublish: FrameLayout
+
     @BindView(R.id.btn_store)
-    lateinit var storeBtn: Button
+    lateinit var storeBtn: FrameLayout
+
+    @BindView(R.id.btn_publish)
+    lateinit var publishBtn : FrameLayout
+
+    private lateinit var mBottomSheetBehaviour : BottomSheetBehavior<View>
 
     /*
     *********************************************************************************************
-    * TEXTWATCHER
+    * LIFECYCLE
     *********************************************************************************************/
-    private val titleWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-        }
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-            mShotEditionViewModel.onTitleChanged(s.toString())
-        }
-        override fun afterTextChanged(s: Editable) {}
-    }
-
-    private val tagWtacher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-            //todo - must manage tag limit in ViewmODEL
-            val tagString = s.toString()
-            val commas = s.toString().replace("[^,]".toRegex(), "").length
-            Timber.d(commas.toString() + "")
-            if (commas < 12) {
-                mShotEditionViewModel.onTagChanged(tagString)
-            } else {
-
-            }
-        }
-
-        override fun afterTextChanged(s: Editable) {}
-    }
-
-    private val descriptionWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-            mShotEditionViewModel.onDescriptionChanged(s.toString())
-        }
-
-        override fun afterTextChanged(s: Editable) {}
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
+     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_shot)
         ButterKnife.bind(this)
         //provide Dependencies
         AndroidInjection.inject(this)
-        //Listen EditText
-        mShotTitleEditor.addTextChangedListener(titleWatcher)
-        mTagEditor.addTextChangedListener(tagWtacher)
-        mShotDescriptionEditor.addTextChangedListener(descriptionWatcher)
-        //Provide ViewModel
+        //set up listeners and behaviors
+        setUpEditorListener()
+        setUpBottomSheet()
+        setUpScrollListener()
+        //Init ViewModel
         mShotEditionViewModel.init()
         //Subscribe to ViewModel data and event
         subscribeToLiveData(mShotEditionViewModel)
         subscribeToSingleEvent(mShotEditionViewModel)
-
-    }
-
-    @OnClick(R.id.btn_store)
-    fun store() {
-        mShotEditionViewModel.onStoreDraftClicked()
-    }
-
-    @OnClick(R.id.btn_publish)
-    fun publish() {
-        mShotEditionViewModel.onPublishClicked()
-    }
-
-    /*
-     *********************************************************************************************
-     * EVENT WHICH VIEW WILL SUBSCRIBE
-     *********************************************************************************************/
-    private fun subscribeToLiveData(viewModel: ShotEditionViewModel) {
-        viewModel.getCroppedImageUri().observe(this, Observer<Uri> { this.displayShotImagePreview(it) })
-
-        viewModel.title.observe(this, Observer<String> {Timber.d("title change:$it") })
-
-        viewModel.description.observe(this,  Observer<String> { Timber.d("desc change:$it") })
-
-        viewModel.tags.observe(this,  Observer<ArrayList<String>> { Timber.d("tags change:$it") })
-    }
-
-    private fun subscribeToSingleEvent(viewModel: ShotEditionViewModel) {
-
-        viewModel.setUpUiCmd.observe(
-                this, Observer { setUpEditionUI(mShotEditionViewModel.getmTempDraft()!!) }
-        )
-
-        viewModel.pickShotCommand.observe(this, Observer { openImagePicker() })
-
-        viewModel.cropImageCmd.observe(this,
-                 Observer {
-                    goToUCropActivity(
-                            mShotEditionViewModel.imagePickedFormat,
-                            mShotEditionViewModel.imagePickedUriSource,
-                            mShotEditionViewModel.imagePickedFileName,
-                            mShotEditionViewModel.imageSize)
-                })
-
-        viewModel.pickCropImgErrorCmd.observe(this,Observer<Int>
-                { Toast.makeText(this, "oops :" + it, Toast.LENGTH_SHORT).show() })
-
-        viewModel.checkPerm.observe(this,
-                Observer { checkPermissionExtStorage() })
-
-        viewModel.requestPermCmd.observe(this,
-                Observer {  requestPermission() })
-
-        viewModel.onPublishSucceed.observe(this,
-                Observer {
-                    Toast.makeText(mApplication, "Publis suceed", Toast.LENGTH_SHORT)
-                    finishAfterTransition()
-                })
-
-    }
-
-    /*
-     *********************************************************************************************
-     * INNER
-     *********************************************************************************************/
-    @OnClick(R.id.cropped_img_preview)
-    fun shotPreviewClick() {
-        mShotEditionViewModel.onImagePreviewClicked()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -219,15 +132,12 @@ class EditShotActivity : BaseActivity() {
                 mShotEditionViewModel.imagePickedFileName = ImagePicker.getPickedImageName(this, mShotEditionViewModel.imagePickedUriSource!!)
                 mShotEditionViewModel.imagePickedFormat = ImageUtils.getImageExtension(this, mShotEditionViewModel.imagePickedUriSource!!)
                 mShotEditionViewModel.imageSize = ImageUtils.imagePickedWidthHeight(this, mShotEditionViewModel.imagePickedUriSource!!, 0)
-
                 mShotEditionViewModel.onImagePicked()
             } else if (requestCode == UCrop.REQUEST_CROP)
                 mShotEditionViewModel.onImageCropped(UCrop.getOutput(data!!)!!)
         } else {
             if (resultCode == UCrop.RESULT_ERROR)
-                mShotEditionViewModel.onPickcropError(0)
-            else
-                mShotEditionViewModel.onPickcropError(1)
+                mShotEditionViewModel.onPickCropError(resultCode)
         }
     }
 
@@ -252,32 +162,143 @@ class EditShotActivity : BaseActivity() {
         }
     }
 
-    fun checkPermissionExtStorage() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            //todo single live event
+    @OnClick(R.id.btn_store)
+    fun store() {
+        mShotEditionViewModel.onStoreDraftClicked()
+    }
+
+    @OnClick(R.id.btn_publish)
+    fun publish() {
+        mShotEditionViewModel.onPublishClicked()
+    }
+
+    @OnClick(R.id.cropped_img_preview)
+    fun shotPreviewClick() {
+        mShotEditionViewModel.onImagePreviewClicked()
+    }
+
+    /*
+    *********************************************************************************************
+    * TEXTWATCHER
+    *********************************************************************************************/
+    private val titleWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) { mShotEditionViewModel.onTitleChanged(s.toString()) }
+        override fun afterTextChanged(s: Editable) {}
+    }
+
+    private val descWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) { mShotEditionViewModel.onDescriptionChanged(s.toString()) }
+        override fun afterTextChanged(s: Editable) {}
+    }
+
+    private val tagWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {  manageTagEdition(s)}
+        override fun afterTextChanged(s: Editable) {}
+    }
+
+
+    private fun manageTagEdition(s: CharSequence) {
+        val tagString = s.toString()
+        val commas = s.toString().replace("[^,]".toRegex(), "").length
+        Timber.d(commas.toString() + "")
+        if (commas < 12) {
+            mShotEditionViewModel.onTagChanged(tagString)
+        } else {
+
+        }
+    }
+
+    /*
+    *********************************************************************************************
+    * EVENT WHICH VIEW WILL SUBSCRIBE
+    *********************************************************************************************/
+    private fun subscribeToLiveData(viewModel: ShotEditionViewModel) {
+
+        viewModel.getCroppedImageUri().observe(this, Observer<Uri> {
+            this.displayShotImagePreview(it)
+            Timber.d("Uri change :$it")
+        })
+
+        viewModel.title.observe(this, Observer<String> {
+            Timber.d("title change:$it")
+        })
+
+        viewModel.description.observe(this,  Observer<String> { Timber.d("desc change:$it") })
+
+        viewModel.tags.observe(this,  Observer<ArrayList<String>> { Timber.d("tags change:$it") })
+
+        viewModel.isReadyToPubish.observe(this,  Observer<Boolean?> {
+            Timber.d("is ready to publish: $it")
+            activePublishBottomSheet(it)
+        })
+    }
+
+    private fun subscribeToSingleEvent(viewModel: ShotEditionViewModel) {
+
+        viewModel.setUpUiCmd.observe(
+                this, Observer { setUpEditionUI(mShotEditionViewModel.getTempDraft()!!) }
+        )
+
+        viewModel.pickShotCommand.observe(this, Observer { openImagePicker() })
+
+        viewModel.cropImageCmd.observe(this,
+                 Observer {
+                    goToUCropActivity(
+                            mShotEditionViewModel.imagePickedFormat,
+                            mShotEditionViewModel.imagePickedUriSource,
+                            mShotEditionViewModel.imagePickedFileName,
+                            mShotEditionViewModel.imageSize)
+                })
+
+        viewModel.pickCropImgErrorCmd.observe(this,
+                Observer { Toast.makeText(this, "oops :" + it, Toast.LENGTH_SHORT).show() })
+
+        viewModel.checkPerm.observe(this,
+                Observer { checkPermissionExtStorage() })
+
+        viewModel.requestPermCmd.observe(this,
+                Observer {  requestPermission() })
+
+        viewModel.onPublishSucceed.observe(this,
+                Observer {
+                    Toast.makeText(mApplication, "Publis suceed", Toast.LENGTH_SHORT)
+                    finishAfterTransition()
+                })
+    }
+
+    /*
+    *********************************************************************************************
+    * INNER
+    *********************************************************************************************/
+    private fun checkPermissionExtStorage() {
+        if (ActivityCompat.checkSelfPermission(this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             mShotEditionViewModel.requestPerm()
         } else {
             mShotEditionViewModel.onPermGranted()
         }
     }
 
-    fun requestPermission() {
+    private fun requestPermission() {
         requestPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 getString(R.string.permission_write_storage_rationale),
                 Constants.REQUEST_STORAGE_WRITE_ACCESS_PERMISSION)
     }
 
-    fun notifyPostSaved() {
+    private fun notifyPostSaved() {
         Toast.makeText(this, "ShotDraft saved in memory: ", Toast.LENGTH_SHORT).show()
         finishAfterTransition()
     }
 
-    fun openImagePicker() {
+    private fun openImagePicker() {
         ImagePicker.pickImage(this, Constants.PICK_IMAGE_REQUEST)
     }
 
-    fun goToUCropActivity(imagePickedformat: String?,
+    private fun goToUCropActivity(imagePickedformat: String?,
                           imagePickedUriSource: Uri?,
                           imagePickedFileName: String?,
                           imageSize: IntArray?) {
@@ -287,13 +308,13 @@ class EditShotActivity : BaseActivity() {
                 imageSize!!)
     }
 
-    fun showImageNotUpdatable() {
+    private fun showImageNotUpdatable() {
         Toast.makeText(this@EditShotActivity, "Shot can't be changed in edition mode", Toast.LENGTH_SHORT).show()
     }
 
-    fun openConfirmMenu() {}
+    private fun openConfirmMenu() {}
 
-    fun stopActivity() {
+    private fun stopActivity() {
         finish()
     }
 
@@ -342,8 +363,64 @@ class EditShotActivity : BaseActivity() {
         }
     }
 
-    fun showMessageEmptyTitle() {
+    private fun showMessageEmptyTitle() {
         Toast.makeText(this, "please define a title", Toast.LENGTH_SHORT).show()
     }
+
+    private fun setUpEditorListener() {
+        //Listen EditText
+        mShotTitleEditor.addTextChangedListener(titleWatcher)
+        mTagEditor.addTextChangedListener(tagWatcher)
+        mShotDescriptionEditor.addTextChangedListener(descWatcher)
+    }
+
+    private fun setUpBottomSheet() {
+        mBottomSheetBehaviour = BottomSheetBehavior.from(mBSPublish)
+        mBottomSheetBehaviour.state= BottomSheetBehavior.STATE_HIDDEN
+        mBottomSheetBehaviour.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+            }
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            }
+        })
+    }
+
+    private fun setUpScrollListener() {
+        mNestedScrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener {
+            v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            if (scrollY > oldScrollY) {
+                Timber.i("Scroll DOWN")
+                mBottomSheetBehaviour.state = BottomSheetBehavior.STATE_HIDDEN
+            }
+            if (scrollY < oldScrollY) {
+                Timber.i( "Scroll UP")
+                mBottomSheetBehaviour.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+
+            if (scrollY == 0) {
+                Timber.i("TOP SCROLL")
+                mBottomSheetBehaviour.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+
+            if (scrollY == v.getChildAt(0).measuredHeight - v.measuredHeight) {
+                Timber.i("BOTTOM SCROLL")
+                mBottomSheetBehaviour.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+        })
+    }
+
+    private fun activePublishBottomSheet(activate:Boolean?) {
+        if (activate==true) {
+            publishBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorAccent))
+            storeBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimaryDark))
+            mBSPublish.foreground = ColorDrawable(ContextCompat.getColor(this, android.R.color.transparent))
+        } else {
+            publishBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimaryLight))
+            storeBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimaryLight))
+           //mBSPublish.foreground = ColorDrawable(ContextCompat.getColor(this, R.color.colorError))
+        }
+    }
+
+
 
 }

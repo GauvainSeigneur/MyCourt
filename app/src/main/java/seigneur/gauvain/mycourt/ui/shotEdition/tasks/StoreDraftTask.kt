@@ -40,8 +40,8 @@ class StoreDraftTask(
                                 Single.error(t)
                         } //todo : to comment this
                         .subscribe(
-                                Consumer<String> {mStoreRequestListener.onSaveImageSuccess(it) },
-                                Consumer<Throwable> { this.onDraftSavingError(it) }
+                                {link       -> mStoreRequestListener.onSaveImageSuccess(link) },
+                                { throwable -> this.onDraftSavingError(throwable) }
                         )
         )
     }
@@ -80,7 +80,7 @@ class StoreDraftTask(
     /**
      * Draft has been saved/updated in DB
      */
-    fun onDraftSaved() {
+    private fun onDraftSaved() {
         mStoreRequestListener.onStoreDraftSucceed()
         Timber.d("draft saved")
     }
@@ -89,7 +89,7 @@ class StoreDraftTask(
      * An error occurred while trying to saved draft in db
      * @param t - throwable
      */
-    fun onDraftSavingError(t: Throwable) {
+   private fun onDraftSavingError(t: Throwable) {
         Timber.d(t)
         mStoreRequestListener.onFailed()
     }

@@ -16,7 +16,8 @@
 
     <!-- Shot Image -->
     <dimen name="shot_image_toolbar_padding">8dp</dimen>
-    <dimen name="shot_image_toolbar_height">40dp</dimen><!-- toolbar height - 8d*2 -->
+    <dimen name="shot_image_toolbar_height">40dp</dimen>
+    <dimen name="shot_detail_toolbar_height">100dp</dimen>
 
     <!-- user fragment collapsing toolbar -->
     <dimen name="avatar_big_margin_top">40dp</dimen>

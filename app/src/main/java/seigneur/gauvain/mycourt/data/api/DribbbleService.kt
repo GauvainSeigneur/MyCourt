@@ -72,6 +72,14 @@ interface DribbbleService {
             @Part("tags[]") tags: List<String>?
     ): Observable<Response<Void>>
 
+    @Multipart
+    @POST("shots/{id}/attachments")
+    fun addAttachment(
+            //if it doesn't work, use teh same method og PublishAnewShot : create a hashMap of Body Part
+            @Path(value = "id", encoded = true) id: String,
+            @Part file: MultipartBody.Part
+    ): Observable<Response<Void>>
+
 
     @POST("shots")
     @FormUrlEncoded
@@ -82,60 +90,3 @@ interface DribbbleService {
     ): Call<Project>
 
 }
-
-/*
-public interface DribbbleService {
-
-    @GET("user/shots")
-    Flowable<List<Shot>> getShots(
-    @Header(RESPONSE_CACHE_DELAY) int responseCacheDelay,
-    @Query("page") int page,
-    @Query("per_page") int pagePage
-    );
-
-    @GET("user/shots")
-    Flowable<List<Shot>> getShotAPI(
-    @Header(RESPONSE_CACHE_DELAY) int responseCacheDelay,
-    @Query("page") long page,
-    @Query("per_page") int pagePage
-    );
-
-    @GET("user/projects")
-    Flowable<List<Project>> getUserProjects();
-
-    @GET("user")
-    Single<User> getUser();
-
-    @FormUrlEncoded
-    @PUT("shots/{id}")
-    Single<Shot> updateShot(
-    @Path(value = "id", encoded = true) String id,
-    @Field("title") String title,
-    @Field("description") String description,
-    @Field("tags[]") ArrayList<String> tags,
-    @Field("low_profile") boolean isLowProfile
-    //@Field("scheduled_for") Date publishDate, //todo : to manage it for phase 2
-    // @Field("teamID") int teamID //todo : to mange it for phase 2
-    );
-
-    @Multipart
-    @POST("shots")
-    Observable<Response<Void>> publishANewShot(
-    @PartMap() Map<String, RequestBody> partMap, //See : https://stackoverflow.com/a/40873297
-    @Part MultipartBody.Part file,
-    @Part("title") String title,
-    @Part("description") String description,
-    @Part("tags[]") List<String> tags
-    );
-
-
-    @POST("shots")
-    @FormUrlEncoded
-    Call<Project> postProject(
-    @Field("title") String title,
-    @Field("body") String body,
-    @Field("userId") long userId
-    );
-
-}
-*/

@@ -15,6 +15,7 @@ import seigneur.gauvain.mycourt.ui.shots.ShotsViewModel
 import seigneur.gauvain.mycourt.ui.user.UserViewModel
 import seigneur.gauvain.mycourt.di.scope.ViewModelKey
 import seigneur.gauvain.mycourt.data.viewModel.FactoryViewModel
+import seigneur.gauvain.mycourt.ui.about.AboutViewModel
 import seigneur.gauvain.mycourt.ui.splash.SplashViewModel
 
 @Module
@@ -59,6 +60,11 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(ShotDetailViewModel::class)
     internal abstract fun bindShotDetailViewModel(shotDetailViewModel: ShotDetailViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(AboutViewModel::class)
+    internal abstract fun bindAboutViewModel(aboutViewModel: AboutViewModel): ViewModel
 
     @Binds
     internal abstract fun bindViewModelFactory(factory: FactoryViewModel): ViewModelProvider.Factory

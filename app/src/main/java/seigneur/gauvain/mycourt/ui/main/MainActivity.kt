@@ -19,11 +19,13 @@ import javax.inject.Inject
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import butterknife.Optional
 import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.support.HasSupportFragmentInjector
 import seigneur.gauvain.mycourt.R
+import seigneur.gauvain.mycourt.ui.about.AboutFragment
 import seigneur.gauvain.mycourt.ui.base.BaseActivity
 import seigneur.gauvain.mycourt.ui.shotDraft.ShotDraftFragment
 import seigneur.gauvain.mycourt.ui.shotEdition.EditShotActivity
@@ -84,6 +86,7 @@ class MainActivity : BaseActivity(), HasSupportFragmentInjector, CustomBottomAct
 
     }
 
+    @Optional
     @OnClick(R.id.fab_add_shot)
     fun goToEdition() {
         if (isEditModeActivated!!)
@@ -205,6 +208,7 @@ class MainActivity : BaseActivity(), HasSupportFragmentInjector, CustomBottomAct
                     0 -> return ShotsFragment()
                     1 -> return ShotDraftFragment()
                     3 -> return UserFragment()
+                    4 -> return AboutFragment()
                 }
                 return ShotsFragment()
             }

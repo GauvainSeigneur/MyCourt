@@ -39,8 +39,9 @@
         app:useCompatPadding="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:outlineAmbientShadowColor="@color/colorAccent"
         android:tint="#FFFFFF"
+        android:outlineAmbientShadowColor="@color/colorAccent"
+        android:outlineSpotShadowColor="@color/colorAccent"
         android:src="@drawable/ic_add_black_24dp"/>
 
 </android.support.design.widget.CoordinatorLayout>

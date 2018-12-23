@@ -16,7 +16,7 @@ import seigneur.gauvain.mycourt.ui.shots.list.data.NetworkState
 import seigneur.gauvain.mycourt.ui.shots.list.data.Status
 
 
-class NetworkStateViewHolder private constructor(
+class NetworkStateViewHolder(
         itemView: View,
         shotItemCallback: ShotItemCallback) : RecyclerView.ViewHolder(itemView) {
 

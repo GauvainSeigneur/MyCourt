@@ -55,4 +55,11 @@ constructor() {
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
+    fun addAttachment(id: String,
+                      file: MultipartBody.Part): Observable<Response<Void>> {
+        return mDribbbleService.addAttachment(id, file)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+    }
+
 }

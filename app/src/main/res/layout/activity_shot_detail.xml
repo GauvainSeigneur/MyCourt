@@ -7,17 +7,19 @@
     android:layout_height="match_parent"
     android:id="@+id/parent"
     android:fitsSystemWindows="true"
-    tools:context=".ui.shotDetail.view.ShotDetailActivity">
+    tools:context=".ui.shotDetail.ShotDetailActivity">
 
     <!--
     set android:fitsSystemWindows="false" because when it's on "true" it provokes some glitch
     with the background color of appbar on fast scroll
     -->
     <android.support.design.widget.AppBarLayout
+        android:transitionName="@string/shot_transition_name"
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="false"
+        android:stateListAnimator="@animator/appbar_always_elevated"
         android:theme="@style/MyCourt.AppBarOverlay">
 
         <android.support.design.widget.CollapsingToolbarLayout
@@ -28,11 +30,12 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:toolbarId="@+id/toolbar">
 
-            <!-- DUMMMY TOOLBAR-->
+            <!-- DUMMMY TOOLBAR
+                android:layout_height="?attr/actionBarSize"-->
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+                android:layout_height="@dimen/shot_detail_toolbar_height"
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/MyCourt.PopupOverlay" />
 
@@ -43,6 +46,21 @@
                 android:layout_height="0dp"
                 app:layout_collapseMode="parallax"
                 app:layout_collapseParallaxMultiplier="0.3"/>
+
+            <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
+                android:id="@+id/shot_image"
+                android:fitsSystemWindows="false"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="0.5"
+                android:transitionName="@string/shot_transition_name"/>
+
+            <View
+                android:id="@+id/image_scrim"
+                android:alpha="0"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -58,23 +76,16 @@
         android:layout_margin="@dimen/fab_margin"
         android:layout_gravity="bottom|end"
         android:tint="@android:color/white"
+        android:outlineAmbientShadowColor="@color/colorAccent"
+        android:outlineSpotShadowColor="@color/colorAccent"
         android:src="@drawable/ic_edit_black_24dp" />
-
-    <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
-        android:id="@+id/shot_image"
-        android:fitsSystemWindows="false"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:outlineProvider="none"
-        android:elevation="8dp"
-        android:transitionName="@string/shot_transition_name"/>
 
     <LinearLayout
         android:fitsSystemWindows="true"
         android:orientation="vertical"
         android:id="@+id/fake_app_bar"
         android:layout_width="match_parent"
-        android:elevation="8dp"
+        android:elevation="16dp"
         android:outlineProvider="none"
         android:layout_height="wrap_content">
 
@@ -87,12 +98,12 @@
                 android:id="@+id/constant_status_bar_background"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/colorPrimaryDark"/>
+                android:background="@color/colorPrimary"/>
 
             <View
                 android:id="@+id/custom_status_bar_background"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent" />
 
         </FrameLayout>
 

@@ -85,6 +85,7 @@ constructor() : ViewModel(),
     var imageSize: IntArray? = null //NOT LIVEDATA - NOT RELATED TO UI
     private val croppedImageUri = MutableLiveData<Uri>()
     val pickCropImgErrorCmd = SingleLiveEvent<Int>()
+    val isReadyToPubish     = MutableLiveData<Boolean>()
     //Listen change in editText
     private val mTitle = MutableLiveData<String>()
     private val mDescription = MutableLiveData<String>()
@@ -99,6 +100,9 @@ constructor() : ViewModel(),
     val tags: LiveData<ArrayList<String>>
         get() = mTags
 
+    val readytoPublish: LiveData<Boolean>
+        get() = isReadyToPubish
+
     public override fun onCleared() {
         super.onCleared()
         Timber.d("viewmodel cleared")
@@ -110,7 +114,6 @@ constructor() : ViewModel(),
      * PUBLIC METHODS CALLED IN VIEW
      *********************************************************************************************/
     fun init() {
-        initTasks()
         if (mTempDraft == null)
             mGetSourceTask.getOriginOfEditRequest()
     }
@@ -122,20 +125,29 @@ constructor() : ViewModel(),
             pickShotCommand.call()
     }
 
+    fun onAttachmentClicked() {
+        if (mTempDraft!!.typeOfDraft == Constants.EDIT_MODE_UPDATE_SHOT)
+            Timber.d("not allowed to change image already published")
+        else
+            pickShotCommand.call()
+    }
+
     fun onImagePicked() {
         cropImageCmd.call()
     }
 
-    fun onImageCropped(uri: Uri) {
+    fun onImageCropped(uri: Uri?) {
         croppedImageUri.value = uri
+        checkIfIsReadyToPublish(mTitle.value, croppedImageUri.value)
     }
 
-    fun onPickcropError(erroCode: Int) {
-        pickCropImgErrorCmd.value = erroCode
+    fun onPickCropError(errorCode: Int) {
+        pickCropImgErrorCmd.value = errorCode
     }
 
-    fun onTitleChanged(title: String) {
+    fun onTitleChanged(title: String?) {
         mTitle.value = title
+        checkIfIsReadyToPublish(mTitle.value, croppedImageUri.value)
     }
 
     fun onDescriptionChanged(desc: String) {
@@ -185,16 +197,6 @@ constructor() : ViewModel(),
     *********************************************************************************************
     * PRIVATE METHODS
     *********************************************************************************************/
-    private fun initTasks() {
-        if (mStoreDrafTask != null && mPublishTask != null && mGetSourceTask != null) {
-            Timber.d("tasks initialized")
-        } else {
-
-            Timber.d("tasks null")
-        }
-
-    }
-
     private fun registerOrUpdateDraft(context: Context?, isRegisteringImage: Boolean) {
         if (isRegisteringImage) {
             mStoreDrafTask.storeDraftImage(context!!,
@@ -224,11 +226,37 @@ constructor() : ViewModel(),
                 tags.value)
     }
 
+    /**
+     * The draft needs, at least, to have an image and a title to published and only a title
+     * to be updated
+     * Must be called in method which change title and image uri values changes
+     * @param title - title of the shot to be published/updated
+     * @param imageUri - link of the image to be published
+     */
+    private fun checkIfIsReadyToPublish(title:String?, imageUri:Uri?) :Boolean {
+        var isReady: Boolean?=false
+        if (title!=null  && title.isNotEmpty() && imageUri!=null && imageUri.toString().isNotEmpty()) {
+            isReady = true
+        }
+        onReadyToPublishOrNot(isReady)
+        Timber.tag("babar").d("Uri: "+imageUri)
+        Timber.tag("babar").d("title: "+title)
+        return isReady!!
+    }
+
+    /**
+     * Change value of "ready to publish"
+     * @param readyOrNot - by default is false
+     */
+    private fun onReadyToPublishOrNot(readyOrNot: Boolean?=false) {
+        isReadyToPubish.value=readyOrNot
+    }
+
     /*
     *********************************************************************************************
     * GETTER AND SETTER - CAN BE CALLED BY VIEW AND VIEWMODEL
     *********************************************************************************************/
-    fun getmTempDraft(): Draft? {
+    fun getTempDraft(): Draft? {
         return mTempDraft
     }
 
@@ -266,13 +294,9 @@ constructor() : ViewModel(),
         }
     }
 
-    override fun onStoreDraftSucceed() {
+    override fun onStoreDraftSucceed() {}
 
-    }
-
-    override fun onFailed() {
-
-    }
+    override fun onFailed() {}
 
     /*
      *********************************************************************************************

@@ -23,13 +23,10 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import butterknife.*
 
 import javax.inject.Inject
 
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnClick
-import butterknife.Unbinder
 import dagger.android.support.AndroidSupportInjection
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.Shot
@@ -85,13 +82,6 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
      ************************************************************************************
      *  Fragment lifecycle
      ************************************************************************************/
-    override fun onAttach(activity: Activity?) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            AndroidSupportInjection.inject(this)
-        }
-        super.onAttach(activity)
-    }
-
     override fun onAttach(context: Context?) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             AndroidSupportInjection.inject(this)
@@ -134,16 +124,13 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
                     }
                 }
             }
-
             mRvShots.layoutManager =  mGridLayoutManager
             mRvShots.adapter = shotListAdapter
-
 
         }
 
         shotsViewModel.shotList?.observe(this, Observer<PagedList<Shot>> {shotListAdapter.submitList(it)})
         shotsViewModel.networkState.observe(this, Observer<NetworkState> { shotListAdapter.setNetworkState(it!!) })
-
 
     }
 
@@ -204,6 +191,7 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
         usersSwipeRefreshLayout.isEnabled = networkState.status == Status.SUCCESS
     }
 
+    @Optional
     @OnClick(R.id.retryLoadingButton)
     internal fun retryInitialLoading() {
         shotsViewModel.retry()

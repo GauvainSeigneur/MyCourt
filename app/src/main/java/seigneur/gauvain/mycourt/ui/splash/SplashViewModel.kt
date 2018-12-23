@@ -1,5 +1,7 @@
 package seigneur.gauvain.mycourt.ui.splash
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 
 import com.google.gson.Gson
@@ -17,6 +19,7 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import seigneur.gauvain.mycourt.data.api.AuthUtils
+import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.data.model.Token
 import seigneur.gauvain.mycourt.data.model.User
 import seigneur.gauvain.mycourt.data.repository.TokenRepository
@@ -48,6 +51,7 @@ constructor() : ViewModel() {
 
     val signInCommand = SingleLiveEvent<Void>()
     val goToHomeCommand = SingleLiveEvent<Void>()
+    private val mConnected = MutableLiveData<Boolean>()
 
     public override fun onCleared() {
         super.onCleared()
@@ -68,6 +72,9 @@ constructor() : ViewModel() {
         signInCommand.call()
     }
 
+    val isConnected: LiveData<Boolean>
+        get() = mConnected //custom accessors,
+
     /**
      * User has been successfully saved in DB, go to home
      */
@@ -79,23 +86,23 @@ constructor() : ViewModel() {
      * Check if user is LoggedIn : check if a token is present in DB
      */
     private fun checkIfUserIsLoggedIn() {
-        compositeDisposable.add(mTokenRepository!!.accessTokenFromDB
+        compositeDisposable.add(mTokenRepository.accessTokenFromDB
                 .subscribe(
                         { (_, accessToken) ->
                             Timber.d("token found")
                             TokenRepository.accessToken = accessToken
+                            mConnected.value = true
                             goToHomeCommand.call()
-                            //mSplashView.goToHome(); //todo - replace by single  event
                         },
                         { t ->
-                            Timber.d(" error happened")
+                            Timber.d("error happened: "+t)
                             initAuthRetrofit()
+                            mConnected.value = false
                         },
                         {
                             Timber.d(" no token found")
                             initAuthRetrofit()
-                            //no token found
-
+                            mConnected.value =false
                         }
                 )
         )
@@ -185,7 +192,7 @@ constructor() : ViewModel() {
      * @param token - token fetch after successful auth
      */
     private fun insertToken(token: Token) {
-        compositeDisposable.add(mTokenRepository!!.insertToken(token)
+        compositeDisposable.add(mTokenRepository.insertToken(token)
                 .subscribe(
                         { Timber.d("insert completed") },
                         { t -> Timber.d(t) }

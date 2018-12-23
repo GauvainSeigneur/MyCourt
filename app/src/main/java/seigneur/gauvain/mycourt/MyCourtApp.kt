@@ -40,14 +40,18 @@ class MyCourtApp : Application(), HasActivityInjector {
 
     override fun onCreate() {
         super.onCreate()
+        inject() //get Application context
+        TimberLog.init() //Init timberLog
+        //setupLeakCanary()
+    }
+
+    private fun setupLeakCanary() {
         if (LeakCanary.isInAnalyzerProcess(this)) {
             // This process is dedicated to LeakCanary for heap analysis.
             // You should not init your app in this process.
             return
         }
         LeakCanary.install(this)
-        inject() //get Application context
-        TimberLog.init() //Init timberLog
     }
 
     private fun inject() {
