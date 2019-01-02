@@ -113,8 +113,8 @@ dependencies {
 
     //Canary leak
     def canaryVersion = '1.6.1'
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:$canaryVersion"
-    //releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$canaryVersion
+    //debugImplementation "com.squareup.leakcanary:leakcanary-android:$canaryVersion"
+    releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$canaryVersion"
     // Optional, if you use support library fragments:
     debugImplementation "com.squareup.leakcanary:leakcanary-support-fragment:$canaryVersion"
 

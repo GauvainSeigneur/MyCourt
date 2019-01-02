@@ -12,8 +12,6 @@ import java.util.ArrayList
 import java.util.Date
 
 import javax.inject.Inject
-
-import gnu.trove.TIntArrayList
 import io.reactivex.disposables.CompositeDisposable
 import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.data.model.Shot

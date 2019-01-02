@@ -2,9 +2,10 @@
 A mobile application which uses Dribbble API V2. It focuses on Prospect, Players and pros. 
 It is based on MVVM architecture & Android Architecture components. 
 
-<img src="art/home.png" width="30%"></img>
-<img src="art/draft.png" width="30%"></img>
-<img src="art/account.png" width="30%"></img>
+<img src="art/home.png" width="25%"></img>
+<img src="art/details.png" width="25%"></img>
+<img src="art/draft.png" width="25%"></img>
+<img src="art/draft2.png" width="25%"></img>
 
 ## Features
 * Fetch your shots in a endless recyclerView (paging library)
@@ -17,6 +18,7 @@ It is based on MVVM architecture & Android Architecture components.
 ## Technologies & pattern
 * Kotlin
 * MVVM and Observable/Observer pattern
+* AndroidX
 * Android Architecture Components - ViewModel, LiveData, Room, Paging
 * Retrofit - Http client
 * Gson - Serialization & deserialization
@@ -31,7 +33,7 @@ It is based on MVVM architecture & Android Architecture components.
 Not stable - architecture refactoring
 
 ## Todo
-* Manage pros, Manage attachments
+* Manage attachments
 * Manage mp4 
 
 ## Licence

@@ -41,7 +41,7 @@ class MyCourtApp : Application(), HasActivityInjector {
     override fun onCreate() {
         super.onCreate()
         inject() //get Application context
-        TimberLog.init() //Init timberLog
+       // TimberLog.init() //Init timberLog
         //setupLeakCanary()
     }
 

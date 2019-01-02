@@ -15,13 +15,10 @@ import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.View.*
 import android.widget.Toast
 import java.util.ArrayList
 import javax.inject.Inject
 import butterknife.BindView
-import com.squareup.haha.perflib.Main
-import dagger.android.support.AndroidSupportInjection
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.ui.base.BaseFragment
