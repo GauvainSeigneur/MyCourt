@@ -2,9 +2,9 @@
 A mobile application which uses Dribbble API V2. It focuses on Prospect, Players and pros. 
 It is based on MVVM architecture & Android Architecture components. 
 
-<img src="art/home.png" width="20%"></img>
+<img src="art/home_page.png" width="20%"></img>
 <img src="art/details.png" width="20%"></img>
-<img src="art/draft.png" width="20%"></img>
+<img src="art/draft_page.png" width="20%"></img>
 <img src="art/draft2.png" width="20%"></img>
 
 ## Features
