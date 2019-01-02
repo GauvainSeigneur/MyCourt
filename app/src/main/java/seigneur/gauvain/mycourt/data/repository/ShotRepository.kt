@@ -23,11 +23,6 @@ constructor() {
     lateinit var mDribbbleService: DribbbleService
 
     //get list of Shot from Dribbble
-    fun getShotsFromAPI(applyResponseCache: Int, page: Int, perPage: Int): Flowable<List<Shot>> {
-        return mDribbbleService.getShots(applyResponseCache, page, perPage)
-    }
-
-    //get list of Shot from Dribbble
     fun getShotsFromAPItest(applyResponseCache: Int, page: Long, perPage: Int): Flowable<List<Shot>> {
         return mDribbbleService.getShotAPI(applyResponseCache, page, perPage)
     }

@@ -3,6 +3,7 @@ package seigneur.gauvain.mycourt.ui.shotEdition.tasks
 import android.content.Context
 import android.net.Uri
 import io.reactivex.Observable
+import io.reactivex.Single.just
 
 import java.io.IOException
 import java.net.UnknownHostException
@@ -40,6 +41,10 @@ class PublishTask(
     *************************************************************************
     * NETWORK OPERATION - POST SHOT ON DRIBBBLE
     *************************************************************************/
+
+    //todo - if attachments, on success do it :
+    //1 - load the shot ! check that the name is the same as the one published, or get the id from the response!
+    //2 - with the id perform attachment operation
     fun postShot(draft: Draft,
                  context: Context,
                  fileUri: Uri,
@@ -97,18 +102,46 @@ class PublishTask(
 
     /*
     *************************************************************************
-    * NETWORK OPERATION - ADD ATTACHMENT TO A SHOT- TODO
+    * NETWORK OPERATION - ADD ATTACHMENT TO A SHOT
     *************************************************************************/
     /**
-     * Dribbbles API doesn't allow to publish a shot with attachments.
-     * We can only provide attachments to an existing shot
-     * Also, we can send only one attachment per POST.
-     * So for first publication with attachment, we must concat it in two request
+    * Dribbbles API doesn't allow to publish a shot with attachments.
+    * We can only provide attachments to an existing shot
+    * Also, we can send only one attachment per POST.
+    * So for first publication with attachment, we must concat it in two request
+    */
+
+    /**
+     * Post one or several attachments to an existing shot
      */
+    fun postAttachments(
+            id:String,
+            context: Context,
+            uris:List<Uri>,
+            imageFormat: String) {
+        mCompositeDisposable.add(
+                Observable.just(uris) //we create an Observable that emits a single array
+                        .flatMapIterable { it} //map the list to an Observable that emits every item as an observable
+                        .flatMap {it -> //perform following operation on every item
+                            // create RequestBody instance from file
+                            val body = HttpUtils.createFilePart(context, it, imageFormat, "file")
+                            mShotRepository.addAttachment(
+                                    id,
+                                    body)
+                                    .doOnNext{
+                                        response -> Timber.d(response.message())
+                                    }
+                        }
+                        .subscribe(
+                                { response -> Timber.d(response.message())},
+                                {t -> onPostFailed(t)},
+                                {Timber.d("complete")}
+                        )
+        )
+    }
 
     /**
      * Post an attachment to an existing shot
-     * TODO - to be tested
      */
     fun postAttachment(
             id :String,

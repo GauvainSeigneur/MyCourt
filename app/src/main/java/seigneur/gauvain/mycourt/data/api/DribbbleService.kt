@@ -37,13 +37,6 @@ interface DribbbleService {
     val user: Single<User>
 
     @GET("user/shots")
-    fun getShots(
-            @Header(RESPONSE_CACHE_DELAY) responseCacheDelay: Int,
-            @Query("page") page: Int,
-            @Query("per_page") pagePage: Int
-    ): Flowable<List<Shot>>
-
-    @GET("user/shots")
     fun getShotAPI(
             @Header(RESPONSE_CACHE_DELAY) responseCacheDelay: Int,
             @Query("page") page: Long,
