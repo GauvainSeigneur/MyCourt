@@ -1,14 +1,14 @@
 package seigneur.gauvain.mycourt.ui.main
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.bottomappbar.BottomAppBar
-import android.support.design.widget.BottomNavigationView
-import android.support.design.widget.FloatingActionButton
-import android.support.v4.app.Fragment
+import com.google.android.material.bottomappbar.BottomAppBar
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.fragment.app.Fragment
 import android.view.MenuItem
 import android.view.View
 import android.widget.FrameLayout
@@ -38,7 +38,7 @@ import timber.log.Timber
 class MainActivity : BaseActivity(), HasSupportFragmentInjector, CustomBottomActionMode.DraftListEditMode {
 
     @Inject
-    lateinit var fragmentDispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
+    lateinit var fragmentDispatchingAndroidInjector: DispatchingAndroidInjector<androidx.fragment.app.Fragment>
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -203,7 +203,7 @@ class MainActivity : BaseActivity(), HasSupportFragmentInjector, CustomBottomAct
 
     private fun initFragmentManager(savedInstanceState: Bundle?) {
         mFragmentStateManager = object : FragmentStateManager(mFragmentContainer, supportFragmentManager) {
-            override fun getItem(position: Int): Fragment {
+            override fun getItem(position: Int): androidx.fragment.app.Fragment {
                 when (position) {
                     0 -> return ShotsFragment()
                     1 -> return ShotDraftFragment()

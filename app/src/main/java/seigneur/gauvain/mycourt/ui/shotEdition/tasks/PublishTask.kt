@@ -52,9 +52,9 @@ class PublishTask(
                 mShotRepository.publishANewShot(
                         map,
                         body,
-                        draft.shot.title!!,
-                        draft.shot.description!!,
-                        draft.shot.tagList!!)
+                        draft.shot.title,
+                        draft.shot.description,
+                        draft.shot.tagList)
                         .doOnError { t ->
                             if (t is IOException) {
                                 Timber.tag("jul").d("UnknownHostException, dafuck")

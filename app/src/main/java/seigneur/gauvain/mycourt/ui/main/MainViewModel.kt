@@ -1,7 +1,7 @@
 package seigneur.gauvain.mycourt.ui.main
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import javax.inject.Inject
 import io.reactivex.disposables.CompositeDisposable
 import seigneur.gauvain.mycourt.data.model.Token

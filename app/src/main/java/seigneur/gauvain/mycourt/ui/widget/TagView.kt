@@ -3,7 +3,7 @@ package seigneur.gauvain.mycourt.ui.widget
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.PorterDuff
-import android.support.constraint.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View

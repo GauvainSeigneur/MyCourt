@@ -2,9 +2,9 @@ package seigneur.gauvain.mycourt.ui.shotDraft
 
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
-import android.support.v4.content.ContextCompat
-import android.support.v4.content.FileProvider
-import android.support.v7.widget.CardView
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.cardview.widget.CardView
 import android.view.View
 import android.widget.TextView
 
@@ -22,7 +22,7 @@ import java.io.File
 class ShotDraftViewHolder(itemView: View, private var mCallback: ShotDraftListCallback) : BaseViewHolder(itemView),
         View.OnLongClickListener, View.OnClickListener  {
     @BindView(R.id.shot_draft_layout)
-    lateinit var shotDraftLayout: CardView
+    lateinit var shotDraftLayout: androidx.cardview.widget.CardView
     @BindView(R.id.shot_draft_title)
     lateinit var shotDraftTitle: TextView
     @BindView(R.id.draft_type)

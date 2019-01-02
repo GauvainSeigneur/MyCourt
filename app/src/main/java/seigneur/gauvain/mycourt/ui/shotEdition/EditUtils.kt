@@ -2,7 +2,7 @@ package seigneur.gauvain.mycourt.ui.shotEdition
 
 import android.content.Context
 import android.net.Uri
-import android.support.v4.content.FileProvider
+import androidx.core.content.FileProvider
 import android.text.Html
 
 import java.io.File

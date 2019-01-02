@@ -3,23 +3,23 @@ package seigneur.gauvain.mycourt.ui.shotEdition
 import android.Manifest
 import android.app.Activity
 import android.app.Application
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
-import android.support.design.widget.CoordinatorLayout
-import android.support.design.widget.TextInputEditText
-import android.support.v4.app.ActivityCompat
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.textfield.TextInputEditText
+import androidx.core.app.ActivityCompat
 import android.os.Bundle
-import android.support.design.widget.BottomSheetBehavior
-import android.support.v4.content.ContextCompat
-import android.support.v4.content.FileProvider
-import android.support.v4.widget.NestedScrollView
-import android.support.v7.widget.Toolbar
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.core.widget.NestedScrollView
+import androidx.appcompat.widget.Toolbar
 import android.text.Editable
 import android.text.Html
 import android.text.TextWatcher
@@ -48,6 +48,7 @@ import javax.inject.Inject
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import butterknife.Optional
 import dagger.android.AndroidInjection
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.Draft
@@ -76,7 +77,7 @@ class EditShotActivity : BaseActivity() {
     lateinit var mToolbar: Toolbar
 
     @BindView(R.id.main)
-    lateinit var layoutMain: CoordinatorLayout
+    lateinit var layoutMain: androidx.coordinatorlayout.widget.CoordinatorLayout
 
     @BindView(R.id.shot_title_edt)
     lateinit var mShotTitleEditor: TextInputEditText
@@ -167,11 +168,13 @@ class EditShotActivity : BaseActivity() {
         mShotEditionViewModel.onStoreDraftClicked()
     }
 
+    @Optional
     @OnClick(R.id.btn_publish)
     fun publish() {
         mShotEditionViewModel.onPublishClicked()
     }
 
+    @Optional
     @OnClick(R.id.cropped_img_preview)
     fun shotPreviewClick() {
         mShotEditionViewModel.onImagePreviewClicked()

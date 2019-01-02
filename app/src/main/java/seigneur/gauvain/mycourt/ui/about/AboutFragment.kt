@@ -1,17 +1,18 @@
 package seigneur.gauvain.mycourt.ui.about
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.support.design.widget.AppBarLayout
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
+import com.google.android.material.appbar.AppBarLayout
+import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.widget.Toolbar
 import android.text.Html
 import android.util.DisplayMetrics
 import android.view.Display
@@ -60,13 +61,6 @@ class AboutFragment : BaseFragment() {
     ************************************************************************************
     *  Fragment lifecycle
     ************************************************************************************/
-    override fun onAttach(context: Context?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            AndroidSupportInjection.inject(this)
-        }
-        super.onAttach(context)
-    }
-
     override fun onCreateView(inRootView: View, inSavedInstanceState: Bundle?) {
         mAboutViewModel.init()
     }

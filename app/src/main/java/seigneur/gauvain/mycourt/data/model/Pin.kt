@@ -1,7 +1,7 @@
 package seigneur.gauvain.mycourt.data.model
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 //insert relation : https://stackoverflow.com/questions/44667160/android-room-insert-relation-entities-using-room
 @Entity

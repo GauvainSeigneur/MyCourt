@@ -1,44 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ImageView
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="96dp"
-        android:layout_gravity="center"
-        android:layout_margin="@dimen/padding_16"
-        android:contentDescription="@string/ct_logo"
-        android:src="@mipmap/ic_launcher"/>
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/padding_16"
+        android:paddingBottom="@dimen/padding_16"
+        app:layout_constraintBottom_toTopOf="@+id/layout_login"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/intro_layout">
+
+        <seigneur.gauvain.mycourt.ui.widget.ParallaxView
+            android:id="@+id/court"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/padding_16"
+            android:contentDescription="@string/ct_logo"
+            android:minHeight="200dp"
+            android:src="@drawable/basket_ball_court_logo" />
+
+        <seigneur.gauvain.mycourt.ui.widget.ParallaxView
+            android:id="@+id/ball"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/padding_24"
+            android:contentDescription="@string/ct_logo"
+            android:src="@drawable/ball_logo" />
+
+    </FrameLayout>
+
+    <seigneur.gauvain.mycourt.ui.widget.BaselineGridTextView
+        android:id="@+id/intro_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        android:padding="@dimen/padding_16"
+        android:text="Welcome to My Court, a dedicated app for Players and Pro"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:lineHeightHint="24dp" />
 
     <LinearLayout
-        android:visibility="gone"
         android:id="@+id/layout_login"
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:padding="@dimen/padding_16"
-        android:gravity="bottom">
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent">
 
         <seigneur.gauvain.mycourt.ui.widget.BaselineGridTextView
-            android:id="@+id/welcomeTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="@dimen/padding_16"
+            android:text="@string/please_connect"
             android:textAlignment="center"
-            app:lineHeightHint="24dp"
-            android:text="@string/please_connect"/>
+            app:lineHeightHint="24dp" />
 
         <Button
             android:id="@+id/activity_login_btn"
-            android:background="@drawable/round_accent_button"
-            android:layout_width="wrap_content"
-            android:minWidth="150dp"
-            android:layout_gravity="center"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="login"/>
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/padding_16"
+            android:background="@drawable/round_accent_button"
+            android:minWidth="150dp"
+            android:text="@string/connect" />
 
     </LinearLayout>
 
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

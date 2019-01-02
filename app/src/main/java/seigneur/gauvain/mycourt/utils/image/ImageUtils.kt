@@ -14,7 +14,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import android.support.v4.content.FileProvider
+import androidx.core.content.FileProvider
 import android.text.TextUtils
 import android.util.Log
 import android.util.Range
@@ -45,7 +45,7 @@ class ImageUtils {
          * set UriOgImageCropped
          * @param uriOfImageCroppedSaved
          */
-        var uriOfImageCroppedSaved: Uri?=null;
+        var uriOfImageCroppedSaved: Uri?=null
 
         /**
          * Go to cropping activity

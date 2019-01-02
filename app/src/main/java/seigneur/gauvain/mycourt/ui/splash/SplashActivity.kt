@@ -2,17 +2,16 @@ package seigneur.gauvain.mycourt.ui.splash
 
 import android.app.Activity
 import android.app.Application
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import android.content.Context
 import android.content.Intent
+import android.hardware.Sensor
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
-
 
 import javax.inject.Inject
 
@@ -26,7 +25,8 @@ import seigneur.gauvain.mycourt.ui.AuthActivity
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.ui.base.BaseActivity
 import seigneur.gauvain.mycourt.ui.main.MainActivity
-import timber.log.Timber
+import seigneur.gauvain.mycourt.ui.widget.ParallaxView
+
 
 class SplashActivity : BaseActivity() {
 
@@ -42,8 +42,11 @@ class SplashActivity : BaseActivity() {
     @BindView(R.id.activity_login_btn)
     lateinit var loginBtn: Button
 
-    @BindView(R.id.welcomeTextView)
-    lateinit var mWelcomeTextView: TextView
+    @BindView(R.id.ball)
+    lateinit var mball: ParallaxView
+
+    @BindView(R.id.court)
+    lateinit var mCourt: ParallaxView
 
     private val mSplashViewModel : SplashViewModel by lazy {
         ViewModelProviders.of(this, viewModelFactory).get(SplashViewModel::class.java)
@@ -52,12 +55,22 @@ class SplashActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AndroidInjection.inject(this)
+        setContentView(R.layout.activity_login)
         //init SplashViewModel
         mSplashViewModel.init()
-        setContentView(R.layout.activity_login)
         //Single are used to manage user click and single events messages
         subscribeToEvents(mSplashViewModel)
         ButterKnife.bind(this)
+
+
+        mCourt.init()
+        mCourt.setMinimumMovedPixelsToUpdate(mCourt.DEFAULT_MIN_MOVED_PIXELS * 3)
+        mCourt.setMovementMultiplier(mCourt.DEFAULT_MOVEMENT_MULTIPLIER * 2f)
+
+        mball.init()
+        mball.setMinimumMovedPixelsToUpdate(mball.DEFAULT_MIN_MOVED_PIXELS * 5)
+        mball.setMovementMultiplier(mball.DEFAULT_MOVEMENT_MULTIPLIER * 4f)
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -69,10 +82,24 @@ class SplashActivity : BaseActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        //stop listening accelerometer
+        mball.unregisterSensorListener()
+        mCourt.unregisterSensorListener()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        //start listening accelerometer
+        mball.registerSensorListener()
+        mCourt.registerSensorListener()
+    }
+
+
     @Optional
     @OnClick(R.id.activity_login_btn)
     fun signIn() {
-        Timber.d("signin clicked")
         mSplashViewModel.onSignInClicked()
     }
 
@@ -102,6 +129,8 @@ class SplashActivity : BaseActivity() {
         startActivity(intent)
         finish()
     }
+
+
 
 
 }

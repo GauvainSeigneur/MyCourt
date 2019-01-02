@@ -1,8 +1,8 @@
 package seigneur.gauvain.mycourt.ui.shots.list.adapter
 
-import android.arch.paging.PagedListAdapter
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
 
 
@@ -13,13 +13,13 @@ import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.ui.shots.list.data.NetworkState
 
 class ShotListAdapter(private val shotItemCallback: ShotItemCallback)
-    : PagedListAdapter<Shot, RecyclerView.ViewHolder>(UserDiffCallback) {
+    : PagedListAdapter<Shot, androidx.recyclerview.widget.RecyclerView.ViewHolder>(UserDiffCallback) {
 
     private var networkState: NetworkState? = null
 
     private val pos: Int = 0
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         when (viewType) {
             ITEM -> return ShotViewHolder.create(parent, shotItemCallback)
             LOADING -> return NetworkStateViewHolder.create(parent, shotItemCallback)
@@ -27,7 +27,7 @@ class ShotListAdapter(private val shotItemCallback: ShotItemCallback)
         }
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         when (getItemViewType(position)) {
             ITEM -> (holder as ShotViewHolder).bindTo(getItem(position)!!)
             LOADING -> (holder as NetworkStateViewHolder).bindTo(networkState!!)

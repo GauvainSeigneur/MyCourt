@@ -2,7 +2,7 @@ package seigneur.gauvain.mycourt.ui.user
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +19,7 @@ import seigneur.gauvain.mycourt.utils.Constants.MEDIUM
 import seigneur.gauvain.mycourt.utils.Constants.TWITTER
 
 class UserLinksAdapter(private val mContext: Context, internal var links: Map<String, String>)
-    : RecyclerView.Adapter<LinksViewHolder>() {
+    : androidx.recyclerview.widget.RecyclerView.Adapter<LinksViewHolder>() {
 
     override fun getItemCount(): Int {
         return links.size

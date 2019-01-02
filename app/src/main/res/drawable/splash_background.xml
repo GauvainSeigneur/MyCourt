@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
-        <color android:color="@color/colorPrimary"/>
+        <shape>
+            <gradient
+                android:startColor="@color/colorSplashGradientLight"
+                android:endColor="@color/colorSplashGradientDark"
+                android:angle="270"/>
+        </shape>
     </item>
-   <!-- <item>
-       <bitmap
-            android:src="@drawable/blue_image_test"
-            android:tileMode="disabled"
-            android:gravity="center"/>
-    </item>-->
 </layer-list>

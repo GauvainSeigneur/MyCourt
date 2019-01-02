@@ -1,16 +1,16 @@
 package seigneur.gauvain.mycourt.ui.shotDraft
 
 import android.app.Application
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.widget.Toolbar
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
@@ -50,7 +50,7 @@ class ShotDraftFragment : BaseFragment(), Toolbar.OnMenuItemClickListener {
     lateinit var toolbar: Toolbar
 
     @BindView(R.id.rv_shot_draft)
-    lateinit var shotDraftRV: RecyclerView
+    lateinit var shotDraftRV: androidx.recyclerview.widget.RecyclerView
 
     private var mShotDraftsListAdapter: ShotDraftsListAdapter?=null
     private var shotDraftsSaved: MutableList<Draft> = ArrayList()
@@ -62,13 +62,6 @@ class ShotDraftFragment : BaseFragment(), Toolbar.OnMenuItemClickListener {
     ************************************************************************************
     *  Fragment lifecycle
     ************************************************************************************/
-    override fun onAttach(context: Context?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            AndroidSupportInjection.inject(this)
-        }
-        super.onAttach(context)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
@@ -103,7 +96,7 @@ class ShotDraftFragment : BaseFragment(), Toolbar.OnMenuItemClickListener {
         Timber.d("onCreateView")
         toolbar.inflateMenu(R.menu.menu_shot_detail)
         toolbar.setOnMenuItemClickListener(this)
-        shotDraftRV.layoutManager = GridLayoutManager(context, 2)
+        shotDraftRV.layoutManager = androidx.recyclerview.widget.GridLayoutManager(context, 2)
         shotDraftRV.adapter = mShotDraftsListAdapter
     }
 

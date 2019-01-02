@@ -2,7 +2,7 @@ package seigneur.gauvain.mycourt.utils
 
 import android.content.Context
 import android.content.res.Resources
-import android.support.design.widget.AppBarLayout
+import com.google.android.material.appbar.AppBarLayout
 import android.util.DisplayMetrics
 import android.util.TypedValue
 import io.reactivex.internal.operators.flowable.FlowableTakeLastOne
@@ -43,7 +43,7 @@ object MathUtils {
     }
 
     @JvmStatic
-    fun vTotalScrollRange(appBarLayout:AppBarLayout) :Int{
+    fun vTotalScrollRange(appBarLayout: AppBarLayout) :Int{
         return appBarLayout.totalScrollRange
     }
 

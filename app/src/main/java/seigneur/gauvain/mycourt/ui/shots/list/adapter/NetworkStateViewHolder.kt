@@ -1,6 +1,6 @@
 package seigneur.gauvain.mycourt.ui.shots.list.adapter
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +18,7 @@ import seigneur.gauvain.mycourt.ui.shots.list.data.Status
 
 class NetworkStateViewHolder(
         itemView: View,
-        shotItemCallback: ShotItemCallback) : RecyclerView.ViewHolder(itemView) {
+        shotItemCallback: ShotItemCallback) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
 
     @BindView(R.id.errorMessageTextView)
     lateinit var errorMessageTextView: TextView

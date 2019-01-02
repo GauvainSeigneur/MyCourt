@@ -1,7 +1,7 @@
 package seigneur.gauvain.mycourt.data.model
 
-import android.arch.persistence.room.ColumnInfo
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.ColumnInfo
+import androidx.room.PrimaryKey
 
 import com.google.gson.annotations.SerializedName
 
@@ -13,7 +13,7 @@ data class Shot (
         @PrimaryKey
         @ColumnInfo(name = "id")
         var id: String?,
-        var title: String?,
+        var title: String?="",
         var description: String?,
         @SerializedName("tags")
         var tagList: ArrayList<String>?) {

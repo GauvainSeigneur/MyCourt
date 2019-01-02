@@ -1,7 +1,7 @@
 package seigneur.gauvain.mycourt.ui.user
 
 
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 
 import dagger.Binds
 import dagger.Module
@@ -21,7 +21,7 @@ abstract class UserFragmentModule {
      */
     @Binds
     @PerFragment
-    internal abstract fun fragment(userFragment: UserFragment): Fragment
+    internal abstract fun fragment(userFragment: UserFragment): androidx.fragment.app.Fragment
 
 
 }

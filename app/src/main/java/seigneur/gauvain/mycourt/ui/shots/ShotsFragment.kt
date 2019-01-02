@@ -2,19 +2,19 @@ package seigneur.gauvain.mycourt.ui.shots
 
 import android.app.Activity
 import android.app.ActivityOptions
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
-import android.arch.paging.PagedList
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.paging.PagedList
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,10 +45,10 @@ import timber.log.Timber
 class ShotsFragment : BaseFragment(), ShotItemCallback {
 
     @BindView(R.id.usersSwipeRefreshLayout)
-    lateinit var usersSwipeRefreshLayout: SwipeRefreshLayout
+    lateinit var usersSwipeRefreshLayout: androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
     @BindView(R.id.rvShots)
-    lateinit var mRvShots: RecyclerView
+    lateinit var mRvShots: androidx.recyclerview.widget.RecyclerView
 
     @BindView(R.id.globalNetworkState)
     lateinit var globalNetworkState: LinearLayout
@@ -73,22 +73,15 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
         ShotListAdapter(this)
     }
 
-    lateinit var mGridLayoutManager: GridLayoutManager
+    lateinit var mGridLayoutManager: androidx.recyclerview.widget.GridLayoutManager
 
     override val fragmentLayout: Int
         get() = R.layout.fragment_shots
 
     /*
-     ************************************************************************************
-     *  Fragment lifecycle
-     ************************************************************************************/
-    override fun onAttach(context: Context?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            AndroidSupportInjection.inject(this)
-        }
-        super.onAttach(context)
-    }
-
+    ************************************************************************************
+    *  Fragment lifecycle
+    ************************************************************************************/
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
@@ -114,8 +107,8 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
 
     private fun initAdapter() {
         if (mRvShots.layoutManager==null && mRvShots.adapter==null) {
-            mGridLayoutManager = GridLayoutManager(context, 2)
-            mGridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+            mGridLayoutManager = androidx.recyclerview.widget.GridLayoutManager(context, 2)
+            mGridLayoutManager.spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
                     when (shotListAdapter.getItemViewType(position)) {
                         ShotListAdapter.ITEM -> return if (position == 0) 2 else 1

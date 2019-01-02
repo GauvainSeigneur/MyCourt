@@ -100,7 +100,7 @@
 
     <style name="MyCourt.SplashTheme">
         <item name="android:windowBackground">@drawable/splash_background</item>
-        <item name="android:statusBarColor">@color/colorPrimary</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
     <!--Main title for shots and user name -->

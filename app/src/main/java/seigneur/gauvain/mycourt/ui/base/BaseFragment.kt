@@ -1,27 +1,27 @@
 package seigneur.gauvain.mycourt.ui.base
 
-import android.app.Activity
+
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
-import android.support.annotation.CallSuper
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 
 import butterknife.ButterKnife
 import butterknife.Unbinder
+import dagger.android.support.AndroidSupportInjection
 
 /**
  * Base fragment which allows to not duplicate some methods in child
  * Fragment - dedicated to UI not DI
  */
-abstract class BaseFragment : Fragment() {
+abstract class BaseFragment :Fragment() {
 
     lateinit var mRootview: View
 
-    val parentActivity: FragmentActivity? by lazy {
+    val parentActivity: androidx.fragment.app.FragmentActivity? by lazy {
         this.activity
     }
 
@@ -34,8 +34,13 @@ abstract class BaseFragment : Fragment() {
      */
     protected abstract val fragmentLayout: Int
 
-
-    override fun onAttach(context: Context?) {
+    /**
+     * Inject dependencies to child fragment
+     */
+    override fun onAttach(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            AndroidSupportInjection.inject(this)
+        }
         super.onAttach(context)
     }
 

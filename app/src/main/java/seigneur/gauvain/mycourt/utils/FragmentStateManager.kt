@@ -1,19 +1,19 @@
 package seigneur.gauvain.mycourt.utils
 
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentTransaction
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import android.view.ViewGroup
 
 import seigneur.gauvain.mycourt.R
 
 
-abstract class FragmentStateManager(internal var container: ViewGroup, private val mFragmentManager: FragmentManager) {
+abstract class FragmentStateManager(internal var container: ViewGroup, private val mFragmentManager: androidx.fragment.app.FragmentManager) {
 
     /**
      * Return the Fragment associated with a specified position.
      */
-    abstract fun getItem(position: Int): Fragment
+    abstract fun getItem(position: Int): androidx.fragment.app.Fragment
 
     /**
      * Shows fragment at position and detaches previous fragment if exists. If fragment is found in
@@ -22,7 +22,7 @@ abstract class FragmentStateManager(internal var container: ViewGroup, private v
      * @param position
      * @return fragment at position
      */
-    fun changeFragment(position: Int): Fragment {
+    fun changeFragment(position: Int): androidx.fragment.app.Fragment {
         val tag = makeFragmentName(container.id, getItemId(position))
         val fragmentTransaction = mFragmentManager
                 .beginTransaction()

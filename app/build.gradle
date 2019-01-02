@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 28
@@ -10,7 +11,7 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -30,77 +31,97 @@ kapt {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-    implementation 'com.google.android:flexbox:1.0.0'
+    implementation 'com.android.tools.build.jetifier:jetifier-core:1.0.0-beta02'
+
+    //Android UI elements
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.palette:palette:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
+    implementation 'com.google.android:flexbox:1.1.0'
+
+    //timber
     implementation 'com.jakewharton.timber:timber:4.6.1'
+
+    //Ucrop - to crop
     implementation 'com.github.yalantis:ucrop:2.2.2-native'
+
+    //Serialize/deserialize JSON with retrofit
     implementation 'com.google.code.gson:gson:2.8.2'
-    //doesn't use AndroidX yet. We mustuse this version for now
-    implementation 'com.alimuzaffar.lib:pinentryedittext:1.3.10'
+
+    //Pinentryedittext : used for password entries
+    implementation 'com.alimuzaffar.lib:pinentryedittext:2.0.6'
+
     //RxJava & RxAndroid
     def rxJavaVersion = '2.1.1'
     def rxAndroidVersion = '2.0.2'
     implementation "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
     implementation "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
-    def archVersion = '1.1.1'
-    implementation "android.arch.persistence.room:runtime:$archVersion"
-    kapt  "android.arch.persistence.room:compiler:$archVersion"
+
+    //Android Architecture Components
+    def archVersion = '2.0.0'
+    implementation "androidx.room:room-runtime:$archVersion"
+    kapt "androidx.room:room-compiler:$archVersion"
     // optional - RxJava support for Room
-    implementation "android.arch.persistence.room:rxjava2:$archVersion"
+    implementation "androidx.room:room-rxjava2:$archVersion"
     // ViewModel and LiveData
-    implementation "android.arch.lifecycle:extensions:$archVersion"
-    kapt "android.arch.lifecycle:compiler:$archVersion" // use kapt for Kotlin
-    // alternately - if using Java8, use the following instead of compiler
-    //implementation "android.arch.lifecycle:common-java8:$archVersion"
+    implementation "androidx.lifecycle:lifecycle-extensions:$archVersion"
+    kapt "androidx.lifecycle:lifecycle-compiler:$archVersion"
     // optional - ReactiveStreams support for LiveData
-    implementation "android.arch.lifecycle:reactivestreams:$archVersion"
+    implementation "androidx.lifecycle:lifecycle-reactivestreams:$archVersion"
     // optional - Test helpers for LiveData
-    testImplementation "android.arch.core:core-testing:$archVersion"
-    def paging_version = "1.0.1"
-    implementation "android.arch.paging:runtime:$paging_version"
+    testImplementation "androidx.arch.core:core-testing:$archVersion"
+    def paging_version = "2.1.0-rc01"
+    implementation "androidx.paging:paging-runtime:$paging_version"
     // alternatively - without Android dependencies for testing
-    testImplementation "android.arch.paging:common:$paging_version"
+    testImplementation "androidx.paging:paging-common:$paging_version"
     // optional - RxJava support, currently in release candidate
     implementation "android.arch.paging:rxjava2:1.0.1"
-    //if use this you must not used com.android.support lib but androidx
-    //see : https://material.io/develop/android/docs/getting-started/
-    //implementation 'com.google.android.material:material:1.0.0-beta01'
-    def androidSupportVersion = '28.0.0'//'27.1.1'
-    implementation "com.android.support:support-v4:$androidSupportVersion"
-    implementation "com.android.support:appcompat-v7:$androidSupportVersion"
-    implementation "com.android.support:design:$androidSupportVersion"
-    implementation "com.android.support:cardview-v7:$androidSupportVersion"
-    implementation "com.android.support:palette-v7:$androidSupportVersion"
+
+    //Glide
     def glideVersion = '4.7.1'
     implementation "com.github.bumptech.glide:glide:$glideVersion"
     annotationProcessor "com.github.bumptech.glide:compiler:$glideVersion"
+
+    //Okhttp
     def okHttpVersion = '3.10.0'
     implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
+
+    //Retrofit
     def retrofitVersion = '2.4.0'
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-scalars:$retrofitVersion"
     // optional - RxJava support for Retrofit
     implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
-    def butterKnifeVersion = '8.8.1'
+
+    //Butterknife
+    def butterKnifeVersion = '9.0.0-rc3'
     kapt "com.jakewharton:butterknife-compiler:$butterKnifeVersion"
     implementation "com.jakewharton:butterknife:$butterKnifeVersion"
+
+    //Dagger
     def daggerVersion = '2.16'
     kapt  "com.google.dagger:dagger-compiler:$daggerVersion"
     kapt  "com.google.dagger:dagger-android-processor:$daggerVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
     implementation "com.google.dagger:dagger-android:$daggerVersion"
     implementation "com.google.dagger:dagger-android-support:$daggerVersion"
+
     //Canary leak
     def canaryVersion = '1.6.1'
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$canaryVersion"
     //releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$canaryVersion
     // Optional, if you use support library fragments:
     debugImplementation "com.squareup.leakcanary:leakcanary-support-fragment:$canaryVersion"
+
+    //Tests
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 repositories {

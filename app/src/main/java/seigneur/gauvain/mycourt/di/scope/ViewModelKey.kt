@@ -1,6 +1,6 @@
 package seigneur.gauvain.mycourt.di.scope
 
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.ViewModel
 
 import dagger.MapKey
 import kotlin.reflect.KClass

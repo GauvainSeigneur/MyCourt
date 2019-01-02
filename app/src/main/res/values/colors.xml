@@ -21,26 +21,6 @@
     <color name="colorDraftHint">#66FFFFFF</color><!-- 40% opacity-->
     <color name="colorDraftContent">#E6FFFFFF</color><!-- 65% opacity-->
 
-    <!--Light theme -->
-    <!--<color name="colorPrimaryLight">#FFFFFF</color>
-    <color name="colorPrimary">#FFFFFF</color>
-    <color name="colorPrimaryDark">#e6e6e6</color>
-    <color name="colorStatusBar">#bfbfbf</color>
-    <color name="colorAccent">#348EF7</color>
-    <color name="colorBackground">#fcfcfc</color>
-    <color name="colorBackgroundEdit">#eaeaea</color>
-    <color name="colorError">#FF6859</color>
-    <color name="colorSurface">@color/colorPrimaryLight</color>
-    <color name="colorOnPrimary">#FF424242</color>
-    <color name= "colorSelectedForeground">#80E94877</color>
-
-    <color name="colorHeadline">#FF424242</color>
-    <color name="colorSubHead">#CC424242</color>
-    <color name="colorPrimaryTitle">#E6424242</color>
-    <color name="colorSecondaryTitle">#BF424242</color>
-    <color name="colorTextBody">#A6424242</color>
-    <color name="colorDraftHint">#A6424242</color>
-    <color name="colorDraftContent">#E6424242</color>-->
 
     <color name="delete_chip_icon_bg">#8C222222</color>
     <color name="color_title_primary">#F9F9F9</color>
@@ -49,7 +29,8 @@
     <color name="confirm_edition_background">#33000000</color>
     <color name="colorWhite">#ffffff</color>
 
-    <!--Common colors -->
+    <color name="colorSplashGradientLight">#49494d</color>
+    <color name="colorSplashGradientDark">#1e1e24</color>
 
     <!--social colors -->
     <color name="colorInstagramOne">#F6C584</color>

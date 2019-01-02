@@ -1,7 +1,7 @@
 package seigneur.gauvain.mycourt.ui.about
 
 
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 
 import dagger.Binds
 import dagger.Module
@@ -21,7 +21,7 @@ abstract class AboutFragmentModule {
      */
     @Binds
     @PerFragment
-    internal abstract fun fragment(aboutFragment: AboutFragment): Fragment
+    internal abstract fun fragment(aboutFragment: AboutFragment): androidx.fragment.app.Fragment
 
 
 }

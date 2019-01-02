@@ -2,20 +2,20 @@ package seigneur.gauvain.mycourt.ui.shotDetail
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.support.design.widget.AppBarLayout
-import android.support.design.widget.FloatingActionButton
-import android.support.v7.graphics.Palette
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.palette.graphics.Palette
+import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.widget.Toolbar
 import android.text.Html
 import android.util.DisplayMetrics
 import android.util.TypedValue
@@ -42,6 +42,7 @@ import javax.inject.Inject
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import butterknife.Optional
 import dagger.android.AndroidInjection
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.Shot
@@ -109,7 +110,7 @@ class ShotDetailActivity : BaseActivity() {
     lateinit var fab: FloatingActionButton
 
     @BindView(R.id.shot_tags_list)
-    lateinit var shotTags: RecyclerView
+    lateinit var shotTags: androidx.recyclerview.widget.RecyclerView
 
     private var statusbarheight: Int = 0
     private var isLightStatusBar = false
@@ -186,6 +187,7 @@ class ShotDetailActivity : BaseActivity() {
         setUpShotInfo(shot)
     }
 
+    @Optional
     @OnClick(R.id.fab)
     fun goToEdition() {
         mShotDetailViewModel.onEditClicked()
@@ -235,7 +237,7 @@ class ShotDetailActivity : BaseActivity() {
         val twentyFourDip = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 24f, this.resources.displayMetrics).toInt()
         // Bitmap bitmap = BitmapFactory.decodeResource(drawable);
-        Palette.from(bitmap)
+        androidx.palette.graphics.Palette.from(bitmap)
                 .clearFilters()
                 .setRegion(0, 0, bitmap.width, twentyFourDip)
                 .generate { palette ->
@@ -268,7 +270,7 @@ class ShotDetailActivity : BaseActivity() {
     private fun recolorShadowColor(bitmap: Bitmap) {
         val twentyFourDip = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 24f, this.resources.displayMetrics).toInt()
-        Palette.from(bitmap)
+        androidx.palette.graphics.Palette.from(bitmap)
                 .clearFilters()
                 .setRegion(0, bitmap.height-twentyFourDip, bitmap.width, bitmap.height)
                 .generate { palette ->

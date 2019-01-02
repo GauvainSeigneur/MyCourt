@@ -1,8 +1,8 @@
 package seigneur.gauvain.mycourt.ui.shots.list.data.datasource
 
-import android.arch.lifecycle.MutableLiveData
-import android.arch.paging.ItemKeyedDataSource
-import android.arch.paging.PageKeyedDataSource
+import androidx.lifecycle.MutableLiveData
+import androidx.paging.ItemKeyedDataSource
+import androidx.paging.PageKeyedDataSource
 
 
 import io.reactivex.Completable

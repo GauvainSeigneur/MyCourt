@@ -1,6 +1,6 @@
 package seigneur.gauvain.mycourt.ui.shotDraft
 
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 
 import dagger.Binds
 import dagger.Module
@@ -17,7 +17,7 @@ abstract class ShotDraftFragmentModule {
      */
     @Binds
     @PerFragment
-    internal abstract fun fragment(postFragment: ShotDraftFragment): Fragment
+    internal abstract fun fragment(postFragment: ShotDraftFragment): androidx.fragment.app.Fragment
 
 
 }
