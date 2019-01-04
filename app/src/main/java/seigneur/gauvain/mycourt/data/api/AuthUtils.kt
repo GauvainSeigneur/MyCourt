@@ -30,8 +30,8 @@ class AuthUtils {
         const val KEY_CLIENT_SECRET = "client_secret"
         const val KEY_REDIRECT_URI = "redirect_uri"
 
-        const val CLIENT_ID = DribbbleClient.CLIENT_ID
-        const val CLIENT_SECRET = DribbbleClient.CLIENT_SECRET
+        const val CLIENT_ID = "todo" //todo - reactivate
+        const val CLIENT_SECRET ="todo" //todo - reactivate
         const val REDIRECT_URI = "https://mycourt.com/path" //todo change it
         const val URI_TOKEN_RETROFIT = "https://dribbble.com/oauth/token/"
         const val REQ_CODE = 100

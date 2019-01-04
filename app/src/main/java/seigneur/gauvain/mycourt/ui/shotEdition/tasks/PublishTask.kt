@@ -19,6 +19,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.HttpException
 import retrofit2.Response
+import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository
@@ -41,14 +42,15 @@ class PublishTask(
     *************************************************************************
     * NETWORK OPERATION - POST SHOT ON DRIBBBLE
     *************************************************************************/
-
     //todo - if attachments, on success do it :
     //1 - load the shot ! check that the name is the same as the one published, or get the id from the response!
     //2 - with the id perform attachment operation
     fun postShot(draft: Draft,
                  context: Context,
                  fileUri: Uri,
-                 imageFormat: String) {
+                 imageFormat: String,
+                 hasAttachements: Boolean?=false,
+                 attachments:List<Attachment>?) {
         val body = HttpUtils.createFilePart(context, fileUri, imageFormat, "image")
         //add to HashMap key and RequestBody
         val map = HashMap<String, RequestBody>()
@@ -62,12 +64,12 @@ class PublishTask(
                         draft.shot.tagList)
                         .doOnError { t ->
                             if (t is IOException) {
-                                Timber.tag("jul").d("UnknownHostException, dafuck")
+                                Timber.tag("jul").d("UnknownHostException, dafuck what happened???")
                             }
                             handleNetworkOperationError(t, 100)
                         }
                         .subscribe(
-                                { response -> onPostSucceed(response, draft) },
+                                { response -> onPostSucceed(response, draft, hasAttachements,context,attachments) },
                                 {t -> onPostFailed(t)}
                         )
         )
@@ -78,7 +80,11 @@ class PublishTask(
      * response must be 202 to be publish on Dribbble
      * @param response - body response from Dribbble
      */
-    private fun onPostSucceed(response: Response<Void>, draft: Draft) {
+    private fun onPostSucceed(response: Response<Void>,
+                              draft: Draft,
+                              hasAttachements: Boolean?,
+                              context: Context,
+                              attachments: List<Attachment>?) {
         when (response.code()) {
             Constants.ACCEPTED -> {
                 val headers = response.headers()
@@ -86,7 +92,14 @@ class PublishTask(
                 val location = headers.get("location")
                 if (location != null)
                     Timber.d("post succeed. location: $location")
-                onPublishOrUpdateSucceed(draft)
+                if (hasAttachements==true) {
+                    //todo - use hasAttachments to perform attachment post on Dribbble !
+                    //postAttachments("idTOFIND",context, attachments!!)
+                } else {
+                    //stop process and confirm to user that the post has been successfully published
+                    onPublishOrUpdateSucceed(draft)
+                }
+
             }
             else -> Timber.d("post not succeed: " + response.code())
         }
@@ -99,7 +112,6 @@ class PublishTask(
     private fun onPostFailed(t: Throwable) {
         Timber.d("post failed: $t")
     }
-
     /*
     *************************************************************************
     * NETWORK OPERATION - ADD ATTACHMENT TO A SHOT
@@ -117,14 +129,13 @@ class PublishTask(
     fun postAttachments(
             id:String,
             context: Context,
-            uris:List<Uri>,
-            imageFormat: String) {
+            uris:List<Attachment>) {
         mCompositeDisposable.add(
                 Observable.just(uris) //we create an Observable that emits a single array
-                        .flatMapIterable { it} //map the list to an Observable that emits every item as an observable
+                        .flatMapIterable {it} //map the list to an Observable that emits every item as an observable
                         .flatMap {it -> //perform following operation on every item
                             // create RequestBody instance from file
-                            val body = HttpUtils.createFilePart(context, it, imageFormat, "file")
+                            val body = HttpUtils.createFilePart(context, it.uri, it.imageFormat, "file")
                             mShotRepository.addAttachment(
                                     id,
                                     body)
@@ -139,32 +150,6 @@ class PublishTask(
                         )
         )
     }
-
-    /**
-     * Post an attachment to an existing shot
-     */
-    fun postAttachment(
-            id :String,
-            context: Context,
-            fileUri: Uri,
-            imageFormat: String) {
-        // create RequestBody instance from file
-        val body = HttpUtils.createFilePart(context, fileUri, imageFormat, "file")
-        // executes the request
-        mCompositeDisposable.add(
-                mShotRepository.addAttachment(
-                        id,
-                        body)
-                        .doOnError { t ->
-                            Timber.tag("postAttachment").d("error: "+t)
-                        }
-                        .subscribe(
-                                { response -> Timber.d(response.message())},
-                                {t -> onPostFailed(t)}
-                        )
-        )
-    }
-
     /*
     *************************************************************************
     * NETWORK OPERATION - UPDATE SHOT ON DRIBBBLE
