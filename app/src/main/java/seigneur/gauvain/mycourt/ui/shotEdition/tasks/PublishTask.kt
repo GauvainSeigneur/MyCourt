@@ -135,7 +135,7 @@ class PublishTask(
                         .flatMapIterable {it} //map the list to an Observable that emits every item as an observable
                         .flatMap {it -> //perform following operation on every item
                             // create RequestBody instance from file
-                            val body = HttpUtils.createFilePart(context, it.uri, it.imageFormat, "file")
+                            val body = HttpUtils.createFilePart(context, Uri.parse(it.uri), it.imageFormat, "file")
                             mShotRepository.addAttachment(
                                     id,
                                     body)

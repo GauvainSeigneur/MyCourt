@@ -5,11 +5,32 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
-        android:id="@+id/attachment_image"
-        android:elevation="8dp"
-        android:foreground="@drawable/rect_ripple"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="0dp"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/padding_8"
+        android:layout_marginStart="@dimen/padding_4"
+        android:layout_marginEnd="@dimen/padding_4"
+        android:layout_marginBottom="@dimen/padding_8">
+
+        <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
+            android:id="@+id/attachment_image"
+            android:foreground="@drawable/rect_ripple"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <seigneur.gauvain.mycourt.ui.widget.CircularImageView
+        android:id="@+id/btn_delete_attachment"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_margin="2dp"
+        android:layout_gravity="end"
+        android:scaleType="fitCenter"
+        android:elevation="8dp"
+        android:src="@drawable/ic_close_black_24dp"
+        android:tint="@color/colorWhite"
+        android:background="@color/colorAccent"/>
 
 </FrameLayout>

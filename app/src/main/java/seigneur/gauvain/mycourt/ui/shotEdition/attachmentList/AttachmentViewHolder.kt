@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide
 
 import butterknife.BindView
 import seigneur.gauvain.mycourt.R
+import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.ui.base.BaseViewHolder
 
 class AttachmentViewHolder private constructor(itemView: View,
@@ -18,19 +19,24 @@ class AttachmentViewHolder private constructor(itemView: View,
     @BindView(R.id.attachment_image)
     lateinit var mAttachmentPreview: ImageView
 
+    @BindView(R.id.btn_delete_attachment)
+    lateinit var mRemoveAttachment: ImageView
+
     init {
         mAttachmentPreview.setOnClickListener(this)
+        mRemoveAttachment.setOnClickListener(this)
     }
 
-    fun bindTo(uri: String) {
+    fun bindTo(attachement: Attachment) {
         Glide.with(itemView.context)
-                .load(uri)
+                .load(Uri.parse(attachement.uri))
                 .into(mAttachmentPreview)
     }
 
     override fun onClick(view: View) {
         when (view.id) {
             R.id.attachment_image -> attachmentItemCallback.onAttachmentClicked(adapterPosition)
+            R.id.btn_delete_attachment -> attachmentItemCallback.onAttachmentDeleted(adapterPosition)
         }
     }
 

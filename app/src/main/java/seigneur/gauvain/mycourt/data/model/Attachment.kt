@@ -6,5 +6,5 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Attachment(
-        var uri: Uri,
+        var uri: String,
         var imageFormat: String)

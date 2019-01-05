@@ -49,6 +49,7 @@ import butterknife.OnClick
 import butterknife.Optional
 import dagger.android.AndroidInjection
 import seigneur.gauvain.mycourt.R
+import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.ui.base.BaseActivity
 import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.AttachmentItemCallback
@@ -108,8 +109,9 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     @BindView(R.id.rv_attachment)
     lateinit var mRvAttachments: RecyclerView
     lateinit var mGridLayoutManager: GridLayoutManager
+    var attachments=ArrayList<Attachment>()
     private val mAttachmentsAdapter: AttachmentsAdapter by lazy {
-        AttachmentsAdapter(this)
+        AttachmentsAdapter(attachments, this)
     }
 
     /*
@@ -138,18 +140,9 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     private fun testRvAttachment() {
         if (mRvAttachments.layoutManager==null && mRvAttachments.adapter==null) {
             mGridLayoutManager = GridLayoutManager(this, 5)
-            /*mGridLayoutManager.spanSizeLookup = object :GridLayoutManager.SpanSizeLookup() {
-                override fun getSpanSize(position: Int): Int {
-                    when (shotListAdapter.getItemViewType(position)) {
-                        ShotListAdapter.ITEM -> return if (position == 0) 2 else 1
-                        ShotListAdapter.LOADING -> return 2
-                        else -> return 1
-                    }
-                }*/
             mRvAttachments.layoutManager =  mGridLayoutManager
             mRvAttachments.adapter = mAttachmentsAdapter
         }
-        var attachments:ArrayList<String>
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -191,7 +184,9 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
     @OnClick(R.id.btn_store)
     fun store() {
-        mShotEditionViewModel.onStoreDraftClicked()
+
+
+        //mShotEditionViewModel.onStoreDraftClicked()
     }
 
     @Optional
@@ -303,7 +298,10 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     * AttachmentItemCallback
     *********************************************************************************************/
     override fun onAddClicked() {
-
+        val imageUri="https://cdn.dribbble.com/users/1673520/screenshots/5786159/2019-01-04_4x.jpg"
+        var attachment =Attachment(imageUri,"png")
+        attachments.add(attachment)
+        mAttachmentsAdapter.notifyDataSetChanged()
     }
 
     override fun onAttachmentClicked(position: Int) {
@@ -311,7 +309,8 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     }
 
     override fun onAttachmentDeleted(position: Int) {
-
+        attachments.remove(attachments[position])
+        mAttachmentsAdapter.notifyDataSetChanged()
     }
 
     /*

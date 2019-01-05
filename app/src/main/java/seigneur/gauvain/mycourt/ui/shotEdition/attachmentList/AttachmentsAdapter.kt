@@ -4,13 +4,17 @@ import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import seigneur.gauvain.mycourt.data.model.Attachment
+import seigneur.gauvain.mycourt.data.model.Draft
 
 
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.ui.shots.list.data.NetworkState
 
-class AttachmentsAdapter(private val attachmentItemCallback: AttachmentItemCallback)
-    : PagedListAdapter<Shot, RecyclerView.ViewHolder>(UserDiffCallback) {
+class AttachmentsAdapter(
+        private val data: MutableList<Attachment>,
+        private val attachmentItemCallback: AttachmentItemCallback) :
+        RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var networkState: NetworkState? = null
 
@@ -26,7 +30,7 @@ class AttachmentsAdapter(private val attachmentItemCallback: AttachmentItemCallb
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (getItemViewType(position)) {
-            ITEM -> (holder as AttachmentViewHolder).bindTo("todo")
+            ITEM -> (holder as AttachmentViewHolder).bindTo(data[position])
             ADD -> (holder as AddAttachmentViewHolder).bindTo(hasExtraRow())
         }
     }
@@ -42,13 +46,8 @@ class AttachmentsAdapter(private val attachmentItemCallback: AttachmentItemCallb
             ITEM
         }
     }
-
     override fun getItemCount(): Int {
-        return super.getItemCount() + if (hasExtraRow()) 1 else 0
-    }
-
-    fun getShotClicked(pos: Int): Shot? {
-        return getItem(pos)
+        return data.size  + if (hasExtraRow()) 1 else 0
     }
 
     /**
@@ -60,7 +59,7 @@ class AttachmentsAdapter(private val attachmentItemCallback: AttachmentItemCallb
      * @param newNetworkState the new network state
      */
     fun setNetworkState(newNetworkState: NetworkState) {
-        if (currentList != null) {
+        /*if (currentList != null) {
             if (currentList!!.size != 0) {
                 val previousState = this.networkState
                 val hadExtraRow = hasExtraRow()
@@ -76,7 +75,7 @@ class AttachmentsAdapter(private val attachmentItemCallback: AttachmentItemCallb
                     notifyItemChanged(itemCount - 1)
                 }
             }
-        }
+        }*/
     }
 
     companion object {

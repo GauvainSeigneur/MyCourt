@@ -21,7 +21,7 @@ class ShotDraftsListAdapter(private val context: Context,
                             private val data: MutableList<Draft>,
                             private var mCallback: ShotDraftListCallback,
                             private var mDraftListEditMode: CustomBottomActionMode.DraftListEditMode)
-    : androidx.recyclerview.widget.RecyclerView.Adapter<ShotDraftViewHolder>() {
+    : RecyclerView.Adapter<ShotDraftViewHolder>() {
 
     val selectedIds: MutableList<Long> = ArrayList<Long>()
 
