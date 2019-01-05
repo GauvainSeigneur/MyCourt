@@ -11,7 +11,6 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.textfield.TextInputEditText
 import androidx.core.app.ActivityCompat
 import android.os.Bundle
@@ -28,10 +27,11 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
@@ -40,8 +40,6 @@ import com.yalantis.ucrop.UCrop
 
 import java.io.File
 import java.util.ArrayList
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 import javax.inject.Inject
 
@@ -52,8 +50,9 @@ import butterknife.Optional
 import dagger.android.AndroidInjection
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.Draft
-import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.ui.base.BaseActivity
+import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.AttachmentItemCallback
+import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.AttachmentsAdapter
 import seigneur.gauvain.mycourt.utils.Constants
 import seigneur.gauvain.mycourt.utils.image.ImagePicker
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
@@ -61,7 +60,7 @@ import seigneur.gauvain.mycourt.utils.image.ImageUtils
 import seigneur.gauvain.mycourt.utils.MyTextUtils
 import timber.log.Timber
 
-class EditShotActivity : BaseActivity() {
+class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -105,6 +104,14 @@ class EditShotActivity : BaseActivity() {
 
     private lateinit var mBottomSheetBehaviour : BottomSheetBehavior<View>
 
+    //Attachments
+    @BindView(R.id.rv_attachment)
+    lateinit var mRvAttachments: RecyclerView
+    lateinit var mGridLayoutManager: GridLayoutManager
+    private val mAttachmentsAdapter: AttachmentsAdapter by lazy {
+        AttachmentsAdapter(this)
+    }
+
     /*
     *********************************************************************************************
     * LIFECYCLE
@@ -124,6 +131,25 @@ class EditShotActivity : BaseActivity() {
         //Subscribe to ViewModel data and event
         subscribeToLiveData(mShotEditionViewModel)
         subscribeToSingleEvent(mShotEditionViewModel)
+
+        testRvAttachment()
+    }
+
+    private fun testRvAttachment() {
+        if (mRvAttachments.layoutManager==null && mRvAttachments.adapter==null) {
+            mGridLayoutManager = GridLayoutManager(this, 5)
+            /*mGridLayoutManager.spanSizeLookup = object :GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    when (shotListAdapter.getItemViewType(position)) {
+                        ShotListAdapter.ITEM -> return if (position == 0) 2 else 1
+                        ShotListAdapter.LOADING -> return 2
+                        else -> return 1
+                    }
+                }*/
+            mRvAttachments.layoutManager =  mGridLayoutManager
+            mRvAttachments.adapter = mAttachmentsAdapter
+        }
+        var attachments:ArrayList<String>
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -270,6 +296,22 @@ class EditShotActivity : BaseActivity() {
                     Toast.makeText(mApplication, "Publis suceed", Toast.LENGTH_SHORT)
                     finishAfterTransition()
                 })
+    }
+
+    /*
+    *********************************************************************************************
+    * AttachmentItemCallback
+    *********************************************************************************************/
+    override fun onAddClicked() {
+
+    }
+
+    override fun onAttachmentClicked(position: Int) {
+
+    }
+
+    override fun onAttachmentDeleted(position: Int) {
+
     }
 
     /*
@@ -423,7 +465,4 @@ class EditShotActivity : BaseActivity() {
            //mBSPublish.foreground = ColorDrawable(ContextCompat.getColor(this, R.color.colorError))
         }
     }
-
-
-
 }

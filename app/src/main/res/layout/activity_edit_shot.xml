@@ -44,6 +44,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_attachment"
+                android:layout_width="match_parent"
+                android:background="@color/colorAccent"
+                android:layout_height="56dp"/>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/shot_title_input"
                 style="@style/Widget.MyCourt.TextInputLayoutStyle"

@@ -188,7 +188,7 @@ constructor() : ViewModel(),
                     mTempDraft!!,
                     mApplication,
                     getCroppedImageUri().value!!, //when image is changed
-                    imagePickedFormat!!)
+                    imagePickedFormat!!,null,null)//todo- define value
     }
 
     /*

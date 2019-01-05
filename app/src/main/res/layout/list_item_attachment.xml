@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
+        android:id="@+id/attachment_image"
+        android:elevation="8dp"
+        android:foreground="@drawable/rect_ripple"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"/>
+
+</FrameLayout>

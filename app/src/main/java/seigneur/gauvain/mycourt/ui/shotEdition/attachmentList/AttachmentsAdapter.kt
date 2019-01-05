@@ -1,18 +1,15 @@
-package seigneur.gauvain.mycourt.ui.shots.list.adapter
+package seigneur.gauvain.mycourt.ui.shotEdition.attachmentList
 
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 
 
-import java.util.Objects
-
-import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.ui.shots.list.data.NetworkState
 
-class ShotListAdapter(private val shotItemCallback: ShotItemCallback)
+class AttachmentsAdapter(private val attachmentItemCallback: AttachmentItemCallback)
     : PagedListAdapter<Shot, RecyclerView.ViewHolder>(UserDiffCallback) {
 
     private var networkState: NetworkState? = null
@@ -21,26 +18,26 @@ class ShotListAdapter(private val shotItemCallback: ShotItemCallback)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         when (viewType) {
-            ITEM -> return ShotViewHolder.create(parent, shotItemCallback)
-            LOADING -> return NetworkStateViewHolder.create(parent, shotItemCallback)
+            ITEM -> return AttachmentViewHolder.create(parent, attachmentItemCallback)
+            ADD -> return AddAttachmentViewHolder.create(parent, attachmentItemCallback)
             else -> throw IllegalArgumentException("unknown view type")
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (getItemViewType(position)) {
-            ITEM -> (holder as ShotViewHolder).bindTo(getItem(position)!!)
-            LOADING -> (holder as NetworkStateViewHolder).bindTo(networkState!!)
+            ITEM -> (holder as AttachmentViewHolder).bindTo("todo")
+            ADD -> (holder as AddAttachmentViewHolder).bindTo(hasExtraRow())
         }
     }
 
     private fun hasExtraRow(): Boolean {
-        return networkState != null && networkState != NetworkState.LOADED
+        return true //todo - define rule here
     }
 
     override fun getItemViewType(position: Int): Int {
         return if (hasExtraRow() && position == itemCount - 1) {
-            LOADING
+            ADD
         } else {
             ITEM
         }
@@ -85,7 +82,7 @@ class ShotListAdapter(private val shotItemCallback: ShotItemCallback)
     companion object {
 
         val ITEM = 0
-        val LOADING = 1
+        val ADD = 1
 
         private val UserDiffCallback = object : DiffUtil.ItemCallback<Shot>() {
             override fun areItemsTheSame(oldItem: Shot, newItem: Shot): Boolean {

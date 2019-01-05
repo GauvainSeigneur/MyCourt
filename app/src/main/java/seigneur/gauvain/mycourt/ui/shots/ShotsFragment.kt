@@ -45,10 +45,10 @@ import timber.log.Timber
 class ShotsFragment : BaseFragment(), ShotItemCallback {
 
     @BindView(R.id.usersSwipeRefreshLayout)
-    lateinit var usersSwipeRefreshLayout: androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    lateinit var usersSwipeRefreshLayout:SwipeRefreshLayout
 
     @BindView(R.id.rvShots)
-    lateinit var mRvShots: androidx.recyclerview.widget.RecyclerView
+    lateinit var mRvShots: RecyclerView
 
     @BindView(R.id.globalNetworkState)
     lateinit var globalNetworkState: LinearLayout
@@ -73,7 +73,7 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
         ShotListAdapter(this)
     }
 
-    lateinit var mGridLayoutManager: androidx.recyclerview.widget.GridLayoutManager
+    lateinit var mGridLayoutManager: GridLayoutManager
 
     override val fragmentLayout: Int
         get() = R.layout.fragment_shots
@@ -107,8 +107,8 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
 
     private fun initAdapter() {
         if (mRvShots.layoutManager==null && mRvShots.adapter==null) {
-            mGridLayoutManager = androidx.recyclerview.widget.GridLayoutManager(context, 2)
-            mGridLayoutManager.spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
+            mGridLayoutManager = GridLayoutManager(context, 2)
+            mGridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
                     when (shotListAdapter.getItemViewType(position)) {
                         ShotListAdapter.ITEM -> return if (position == 0) 2 else 1
