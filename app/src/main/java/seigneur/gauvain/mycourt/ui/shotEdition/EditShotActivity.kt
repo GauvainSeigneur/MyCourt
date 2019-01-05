@@ -27,6 +27,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.view.ViewCompat.canScrollVertically
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -54,6 +55,7 @@ import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.ui.base.BaseActivity
 import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.AttachmentItemCallback
 import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.AttachmentsAdapter
+import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.UnScrollableLayoutManager
 import seigneur.gauvain.mycourt.utils.Constants
 import seigneur.gauvain.mycourt.utils.image.ImagePicker
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
@@ -139,10 +141,15 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
     private fun testRvAttachment() {
         if (mRvAttachments.layoutManager==null && mRvAttachments.adapter==null) {
-            mGridLayoutManager = GridLayoutManager(this, 5)
+            mGridLayoutManager = UnScrollableLayoutManager(this, 5)
+
             mRvAttachments.layoutManager =  mGridLayoutManager
             mRvAttachments.adapter = mAttachmentsAdapter
+            (mRvAttachments.layoutManager as UnScrollableLayoutManager).disableScrolling()
         }
+        //disable scroll
+      //  mRvAttachments.isLayoutFrozen= true
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -309,6 +316,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     }
 
     override fun onAttachmentDeleted(position: Int) {
+        //mAttachmentsAdapter.showAddBtn(false)
         attachments.remove(attachments[position])
         mAttachmentsAdapter.notifyDataSetChanged()
     }

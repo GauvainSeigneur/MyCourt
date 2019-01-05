@@ -26,6 +26,13 @@ class AddAttachmentViewHolder private constructor(itemView: View,
         //todo
     }
 
+    fun seVisible(isVisible:Boolean) {
+        if(isVisible)
+            itemView.visibility=View.VISIBLE
+        else
+            itemView.visibility=View.GONE
+    }
+
     override fun onClick(view: View) {
         when (view.id) {
             R.id.add -> attachmentItemCallback.onAddClicked()

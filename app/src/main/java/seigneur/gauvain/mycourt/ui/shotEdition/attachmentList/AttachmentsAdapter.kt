@@ -16,14 +16,16 @@ class AttachmentsAdapter(
         private val attachmentItemCallback: AttachmentItemCallback) :
         RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var networkState: NetworkState? = null
-
     private val pos: Int = 0
+    var mAddAttachmentVh:AddAttachmentViewHolder?=null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         when (viewType) {
             ITEM -> return AttachmentViewHolder.create(parent, attachmentItemCallback)
-            ADD -> return AddAttachmentViewHolder.create(parent, attachmentItemCallback)
+            ADD -> {
+                 mAddAttachmentVh = AddAttachmentViewHolder.create(parent, attachmentItemCallback)
+                 return mAddAttachmentVh!!
+            }
             else -> throw IllegalArgumentException("unknown view type")
         }
     }
@@ -32,11 +34,16 @@ class AttachmentsAdapter(
         when (getItemViewType(position)) {
             ITEM -> (holder as AttachmentViewHolder).bindTo(data[position])
             ADD -> (holder as AddAttachmentViewHolder).bindTo(hasExtraRow())
+
         }
     }
 
     private fun hasExtraRow(): Boolean {
         return true //todo - define rule here
+    }
+
+    fun showAddBtn(isVisible:Boolean){
+        mAddAttachmentVh?.seVisible(isVisible)
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -46,36 +53,9 @@ class AttachmentsAdapter(
             ITEM
         }
     }
+
     override fun getItemCount(): Int {
         return data.size  + if (hasExtraRow()) 1 else 0
-    }
-
-    /**
-     * Set the current network state to the adapter
-     * but this work only after the initial load
-     * and the adapter already have list to add new loading raw to it
-     * so the initial loading state the activity responsible for handle it
-     *
-     * @param newNetworkState the new network state
-     */
-    fun setNetworkState(newNetworkState: NetworkState) {
-        /*if (currentList != null) {
-            if (currentList!!.size != 0) {
-                val previousState = this.networkState
-                val hadExtraRow = hasExtraRow()
-                this.networkState = newNetworkState
-                val hasExtraRow = hasExtraRow()
-                if (hadExtraRow != hasExtraRow) {
-                    if (hadExtraRow) {
-                        notifyItemRemoved(super.getItemCount())
-                    } else {
-                        notifyItemInserted(super.getItemCount())
-                    }
-                } else if (hasExtraRow && previousState != newNetworkState) {
-                    notifyItemChanged(itemCount - 1)
-                }
-            }
-        }*/
     }
 
     companion object {
