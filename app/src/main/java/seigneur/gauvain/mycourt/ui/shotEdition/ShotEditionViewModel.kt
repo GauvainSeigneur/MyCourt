@@ -13,6 +13,7 @@ import java.util.Date
 
 import javax.inject.Inject
 import io.reactivex.disposables.CompositeDisposable
+import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository
@@ -73,6 +74,7 @@ constructor() : ViewModel(),
     * EVENT WHICH VIEW WILL SUBSCRIBE
     *********************************************************************************************/
     val pickShotCommand = SingleLiveEvent<Void>()
+    val pickAttachmentCommand = SingleLiveEvent<Void>()
     val cropImageCmd = SingleLiveEvent<Void>()
     val requestPermCmd = SingleLiveEvent<Void>()
     val checkPerm = SingleLiveEvent<Void>()
@@ -88,6 +90,11 @@ constructor() : ViewModel(),
     private val mTitle = MutableLiveData<String>()
     private val mDescription = MutableLiveData<String>()
     private val mTags = MutableLiveData<ArrayList<String>>()
+    //List of attachment
+    private val mTempAttachmentList = ArrayList<Attachment>() //UI list
+    private val mAttachmentsTobeUploaded= MutableLiveData<ArrayList<Attachment>>()
+
+    private val mTempAttachmentsToDelete = ArrayList<Attachment>()//Non UI list to keep reference of attachment that they needs to be deleted
 
     val title: LiveData<String>
         get() = mTitle
@@ -100,6 +107,9 @@ constructor() : ViewModel(),
 
     val readytoPublish: LiveData<Boolean>
         get() = isReadyToPubish
+
+    val attachmentsTobeUploaded : LiveData<ArrayList<Attachment>>
+        get() = mAttachmentsTobeUploaded
 
     public override fun onCleared() {
         super.onCleared()
@@ -123,11 +133,8 @@ constructor() : ViewModel(),
             pickShotCommand.call()
     }
 
-    fun onAttachmentClicked() {
-        if (mTempDraft!!.typeOfDraft == Constants.EDIT_MODE_UPDATE_SHOT)
-            Timber.d("not allowed to change image already published")
-        else
-            pickShotCommand.call()
+    fun onAddAttachmentClicked() {
+        pickAttachmentCommand.call()
     }
 
     fun onImagePicked() {
@@ -155,6 +162,23 @@ constructor() : ViewModel(),
     fun onTagChanged(tag: String) {
         mTags.value = EditUtils.tagListWithoutQuote(tag)
     }
+
+    fun onAttachmentAdded(attachment: Attachment) {
+        mTempAttachmentList.add(attachment)
+        mAttachmentsTobeUploaded.value = mTempAttachmentList
+    }
+
+    fun onRemoveAttachment(pos: Int) {
+        if (mTempAttachmentList[pos].id!=-1L && mTempAttachmentList[pos].shotId.isNotEmpty()) {
+            mTempAttachmentsToDelete.add(mTempAttachmentList[pos])
+            //todo schedule a delete post on Dribbble
+        }
+        //ui and list to be uploaded
+        mTempAttachmentList.removeAt(pos)
+        mAttachmentsTobeUploaded.value = mTempAttachmentList
+
+    }
+
 
     fun requestPerm() {
         requestPermCmd.call()

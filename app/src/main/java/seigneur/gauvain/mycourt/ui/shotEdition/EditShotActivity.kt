@@ -135,7 +135,6 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         //Subscribe to ViewModel data and event
         subscribeToLiveData(mShotEditionViewModel)
         subscribeToSingleEvent(mShotEditionViewModel)
-
         testRvAttachment()
     }
 
@@ -149,7 +148,6 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         }
         //disable scroll
       //  mRvAttachments.isLayoutFrozen= true
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -159,9 +157,20 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
                 mShotEditionViewModel.imagePickedFileName = ImagePicker.getPickedImageName(this, mShotEditionViewModel.imagePickedUriSource!!)
                 mShotEditionViewModel.imagePickedFormat = ImageUtils.getImageExtension(this, mShotEditionViewModel.imagePickedUriSource!!)
                 mShotEditionViewModel.imageSize = ImageUtils.imagePickedWidthHeight(this, mShotEditionViewModel.imagePickedUriSource!!, 0)
+                Timber.d("PICK_IMAGE_REQUEST called")
                 mShotEditionViewModel.onImagePicked()
-            } else if (requestCode == UCrop.REQUEST_CROP)
+            } else if (requestCode == UCrop.REQUEST_CROP) {
                 mShotEditionViewModel.onImageCropped(UCrop.getOutput(data!!)!!)
+            }
+            else if (requestCode == Constants.PICK_ATTACHMENT_REQUEST) {
+                Timber.d("PICK_ATTACHMENT_REQUEST called")
+                val attachmentUri = ImagePicker.getImageUriFromResult(this, resultCode, data)
+                val attachmentFormat = ImageUtils.getImageExtension(this, attachmentUri!!)
+                mShotEditionViewModel.imageSize = ImageUtils.imagePickedWidthHeight(this, attachmentUri, 0)
+                //id to be -1 for new attachment
+                val attachment=Attachment(-1L,"", attachmentUri.toString(), attachmentFormat!!)
+                mShotEditionViewModel.onAttachmentAdded(attachment)
+            }
         } else {
             if (resultCode == UCrop.RESULT_ERROR)
                 mShotEditionViewModel.onPickCropError(resultCode)
@@ -191,9 +200,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
     @OnClick(R.id.btn_store)
     fun store() {
-
-
-        //mShotEditionViewModel.onStoreDraftClicked()
+        mShotEditionViewModel.onStoreDraftClicked()
     }
 
     @Optional
@@ -261,6 +268,15 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
         viewModel.tags.observe(this,  Observer<ArrayList<String>> { Timber.d("tags change:$it") })
 
+        viewModel.attachmentsTobeUploaded.observe(this,  Observer<ArrayList<Attachment>> {
+             attachments.clear() //clear list
+            for (i in it.indices) {
+                //repopulate list
+                attachments.add(it[i])
+            }
+            mAttachmentsAdapter.updateRv()
+        })
+
         viewModel.isReadyToPubish.observe(this,  Observer<Boolean?> {
             Timber.d("is ready to publish: $it")
             activePublishBottomSheet(it)
@@ -274,6 +290,8 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         )
 
         viewModel.pickShotCommand.observe(this, Observer { openImagePicker() })
+
+        viewModel.pickAttachmentCommand.observe(this, Observer { openAttachmentPicker() })
 
         viewModel.cropImageCmd.observe(this,
                  Observer {
@@ -305,20 +323,14 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     * AttachmentItemCallback
     *********************************************************************************************/
     override fun onAddClicked() {
-        val imageUri="https://cdn.dribbble.com/users/1673520/screenshots/5786159/2019-01-04_4x.jpg"
-        var attachment =Attachment(imageUri,"png")
-        attachments.add(attachment)
-        mAttachmentsAdapter.notifyDataSetChanged()
-    }
+        mShotEditionViewModel.onAddAttachmentClicked()
+}
 
     override fun onAttachmentClicked(position: Int) {
-
     }
 
     override fun onAttachmentDeleted(position: Int) {
-        //mAttachmentsAdapter.showAddBtn(false)
-        attachments.remove(attachments[position])
-        mAttachmentsAdapter.notifyDataSetChanged()
+        mShotEditionViewModel.onRemoveAttachment(position)
     }
 
     /*
@@ -348,6 +360,10 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
     private fun openImagePicker() {
         ImagePicker.pickImage(this, Constants.PICK_IMAGE_REQUEST)
+    }
+
+    private fun openAttachmentPicker() {
+        ImagePicker.pickImage(this, Constants.PICK_ATTACHMENT_REQUEST)
     }
 
     private fun goToUCropActivity(imagePickedformat: String?,

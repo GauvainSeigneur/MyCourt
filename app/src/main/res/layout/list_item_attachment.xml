@@ -2,22 +2,19 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/padding_8"
-        android:layout_marginStart="@dimen/padding_4"
-        android:layout_marginEnd="@dimen/padding_4"
-        android:layout_marginBottom="@dimen/padding_8">
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/padding_4">
 
-        <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
+        <ImageView
             android:id="@+id/attachment_image"
             android:foreground="@drawable/rect_ripple"
             android:layout_width="match_parent"
-            android:layout_height="0dp"/>
+            android:layout_height="match_parent"/>
 
     </androidx.cardview.widget.CardView>
 
@@ -29,6 +26,7 @@
         android:layout_gravity="end"
         android:scaleType="fitCenter"
         android:elevation="8dp"
+        android:outlineProvider="none"
         android:src="@drawable/ic_close_black_24dp"
         android:tint="@color/colorWhite"
         android:background="@color/colorAccent"/>

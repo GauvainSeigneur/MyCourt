@@ -11,6 +11,10 @@ import butterknife.BindView
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.ui.base.BaseViewHolder
+import com.bumptech.glide.load.resource.bitmap.TransformationUtils.centerCrop
+import com.bumptech.glide.request.RequestOptions
+
+
 
 class AttachmentViewHolder private constructor(itemView: View,
                                                private val attachmentItemCallback: AttachmentItemCallback) :
@@ -22,15 +26,20 @@ class AttachmentViewHolder private constructor(itemView: View,
     @BindView(R.id.btn_delete_attachment)
     lateinit var mRemoveAttachment: ImageView
 
+    private val glideOptions = RequestOptions()
+
     init {
         mAttachmentPreview.setOnClickListener(this)
         mRemoveAttachment.setOnClickListener(this)
+        glideOptions.centerCrop()
     }
 
     fun bindTo(attachement: Attachment) {
         Glide.with(itemView.context)
                 .load(Uri.parse(attachement.uri))
+                .apply (glideOptions)
                 .into(mAttachmentPreview)
+
     }
 
     override fun onClick(view: View) {

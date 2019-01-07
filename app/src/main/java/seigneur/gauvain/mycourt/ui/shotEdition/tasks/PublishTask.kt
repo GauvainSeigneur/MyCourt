@@ -131,9 +131,9 @@ class PublishTask(
             context: Context,
             uris:List<Attachment>) {
         mCompositeDisposable.add(
-                Observable.just(uris) //we create an Observable that emits a single array
-                        .flatMapIterable {it} //map the list to an Observable that emits every item as an observable
-                        .flatMap {it -> //perform following operation on every item
+                Observable.fromIterable(uris) //map the list to an Observable that emits every item as an observable
+                        .filter {it -> it.id!=-1L } //send only item in the list which ids is -1L
+                        .flatMap {it -> //perform following operation on every filtered item
                             // create RequestBody instance from file
                             val body = HttpUtils.createFilePart(context, Uri.parse(it.uri), it.imageFormat, "file")
                             mShotRepository.addAttachment(
