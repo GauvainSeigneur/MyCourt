@@ -91,25 +91,10 @@ constructor() : ViewModel(),
     private val mDescription = MutableLiveData<String>()
     private val mTags = MutableLiveData<ArrayList<String>>()
     //List of attachment
-    private val mTempAttachmentList = ArrayList<Attachment>() //UI list
-    private val mAttachmentsTobeUploaded= MutableLiveData<ArrayList<Attachment>>()
-
+    private val mTempAttachmentList = ArrayList<Attachment>() //Non UI list
+    private val mAttachmentsTobeUploaded= MutableLiveData<ArrayList<Attachment>>() //UI list
     private val mTempAttachmentsToDelete = ArrayList<Attachment>()//Non UI list to keep reference of attachment that they needs to be deleted
-
-    val title: LiveData<String>
-        get() = mTitle
-
-    val description: LiveData<String>
-        get() = mDescription
-
-    val tags: LiveData<ArrayList<String>>
-        get() = mTags
-
-    val readytoPublish: LiveData<Boolean>
-        get() = isReadyToPubish
-
-    val attachmentsTobeUploaded : LiveData<ArrayList<Attachment>>
-        get() = mAttachmentsTobeUploaded
+    private var hasAttachment =false
 
     public override fun onCleared() {
         super.onCleared()
@@ -118,9 +103,9 @@ constructor() : ViewModel(),
     }
 
     /*
-     *********************************************************************************************
-     * PUBLIC METHODS CALLED IN VIEW
-     *********************************************************************************************/
+    *********************************************************************************************
+    * PUBLIC METHODS CALLED IN VIEW
+    *********************************************************************************************/
     fun init() {
         if (mTempDraft == null)
             mGetSourceTask.getOriginOfEditRequest()
@@ -166,16 +151,22 @@ constructor() : ViewModel(),
     fun onAttachmentAdded(attachment: Attachment) {
         mTempAttachmentList.add(attachment)
         mAttachmentsTobeUploaded.value = mTempAttachmentList
+        //check after if the list include new shot
+        hasAttachment = mTempAttachmentList.any { it -> it.id == -1L }
+        Timber.d("has attachment: "+ hasAttachment)
     }
 
     fun onRemoveAttachment(pos: Int) {
-        if (mTempAttachmentList[pos].id!=-1L && mTempAttachmentList[pos].shotId.isNotEmpty()) {
+        if (mTempAttachmentList[pos].id != -1L && mTempAttachmentList[pos].shotId.isNotEmpty()) {
             mTempAttachmentsToDelete.add(mTempAttachmentList[pos])
-            //todo schedule a delete post on Dribbble
+            //todo schedule a delete post on Dribbble for mTempAttachmentsToDelete
         }
         //ui and list to be uploaded
         mTempAttachmentList.removeAt(pos)
         mAttachmentsTobeUploaded.value = mTempAttachmentList
+        //check if the list include new shots
+        hasAttachment = mTempAttachmentList.any { it -> it.id == -1L }
+        Timber.d("has attachment: "+ hasAttachment)
 
     }
 
@@ -212,7 +203,7 @@ constructor() : ViewModel(),
                     mTempDraft!!,
                     mApplication,
                     getCroppedImageUri().value!!, //when image is changed
-                    imagePickedFormat!!,null,null)//todo- define value
+                    imagePickedFormat!!,hasAttachment,mTempAttachmentList)//todo- define value
     }
 
     /*
@@ -233,10 +224,6 @@ constructor() : ViewModel(),
                 mStoreDrafTask.update(mTempDraft!!)
             }
         }
-    }
-
-    fun getCroppedImageUri(): LiveData<Uri> {
-        return croppedImageUri
     }
 
     private fun changeTempDraftInfo() {
@@ -282,6 +269,25 @@ constructor() : ViewModel(),
         return mTempDraft
     }
 
+    val title: LiveData<String>
+        get() = mTitle
+
+    val description: LiveData<String>
+        get() = mDescription
+
+    val tags: LiveData<ArrayList<String>>
+        get() = mTags
+
+    val readytoPublish: LiveData<Boolean>
+        get() = isReadyToPubish
+
+    val attachmentsTobeUploaded : LiveData<ArrayList<Attachment>>
+        get() = mAttachmentsTobeUploaded
+
+    fun getCroppedImageUri(): LiveData<Uri> {
+        return croppedImageUri
+    }
+
     /*
     *********************************************************************************************
     * GetSourceTaskCallback
@@ -321,9 +327,9 @@ constructor() : ViewModel(),
     override fun onFailed() {}
 
     /*
-     *********************************************************************************************
-     * PublishTaskCallBack
-     *********************************************************************************************/
+    *********************************************************************************************
+    * PublishTaskCallBack
+    *********************************************************************************************/
     override fun onPublishSuccess() {
         onPublishSucceed.call()
     }

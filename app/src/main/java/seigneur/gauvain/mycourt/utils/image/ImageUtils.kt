@@ -222,6 +222,7 @@ class ImageUtils {
 
         }
 
+
         fun decodeBitmap(context: Context, uri: Uri, sampleSize: Int): Bitmap? {
             val options = BitmapFactory.Options()
             var fileDescriptor: AssetFileDescriptor? = null

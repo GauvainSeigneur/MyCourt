@@ -25,7 +25,7 @@ object Constants {
         const val REQUEST_STORAGE_READ_ACCESS_PERMISSION = 1001
         const val REQUEST_STORAGE_WRITE_ACCESS_PERMISSION = 1002
         const val PICK_IMAGE_REQUEST = 1003
-
+        const val PICK_ATTACHMENT_REQUEST = 1004
 
         const val SECRET_PWD_ALIAS = "SecretPwdAlias"
 
