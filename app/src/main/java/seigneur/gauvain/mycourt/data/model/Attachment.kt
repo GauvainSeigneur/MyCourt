@@ -1,12 +1,16 @@
 package seigneur.gauvain.mycourt.data.model
 
-import android.net.Uri
 import androidx.room.Entity
-import androidx.room.PrimaryKey
+import com.google.gson.annotations.SerializedName
 
 @Entity
 data class Attachment(
+        @SerializedName("id")
         var id:Long,
-        var shotId:String,
+        var shotId:String?="",
+        @SerializedName("url")
         var uri: String,
-        var imageFormat: String)
+        var imageFormat: String?="") {
+
+
+}

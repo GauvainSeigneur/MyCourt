@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import seigneur.gauvain.mycourt.data.model.Attachment
 
 import java.lang.reflect.Type
 import java.util.ArrayList
@@ -70,6 +71,20 @@ object RoomConverter {
     fun mapStringToString(mapString: Map<String, String>?): String? {
         val gson = Gson()
         return if (mapString == null) null else gson.toJson(mapString)
+    }
+
+    @TypeConverter
+    @JvmStatic
+    fun attachmentListToJson(value: List<Attachment>?): String {
+        return Gson().toJson(value)
+    }
+
+    @TypeConverter
+    @JvmStatic
+    fun attachmentjsonToList(value: String): List<Attachment>? {
+        val objects = Gson().fromJson(value, Array<Attachment>::class.java) as Array<Attachment>
+        val list = objects.toList()
+        return list
     }
 
 

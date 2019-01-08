@@ -157,19 +157,24 @@ constructor() : ViewModel(),
     }
 
     fun onRemoveAttachment(pos: Int) {
-        if (mTempAttachmentList[pos].id != -1L && mTempAttachmentList[pos].shotId.isNotEmpty()) {
-            mTempAttachmentsToDelete.add(mTempAttachmentList[pos])
-            //todo schedule a delete post on Dribbble for mTempAttachmentsToDelete
+        if (mTempAttachmentList[pos].id != -1L) {
+            //create temporary attachment object
+            val tempAttachmentTodelete = mTempAttachmentList[pos]
+            //inject tio it the current shot id to perform Delete POST on Dribbble
+            mTempDraft?.shot?.id?.let {
+                tempAttachmentTodelete.shotId = mTempDraft!!.shot.id
+            }
+            //finnaly add to delete list
+            mTempAttachmentsToDelete.add(tempAttachmentTodelete)
         }
         //ui and list to be uploaded
         mTempAttachmentList.removeAt(pos)
+        //notify UI
         mAttachmentsTobeUploaded.value = mTempAttachmentList
-        //check if the list include new shots
+        //check if the list include new shots to program or not Pubish Attachment POST on DRIBBBLE
         hasAttachment = mTempAttachmentList.any { it -> it.id == -1L }
         Timber.d("has attachment: "+ hasAttachment)
-
     }
-
 
     fun requestPerm() {
         requestPermCmd.call()
@@ -298,7 +303,7 @@ constructor() : ViewModel(),
 
     override fun setUpTempDraft(draft: Draft) {
         mTempDraft = draft
-        Timber.d("tempDraft created : " + mTempDraft!!.draftID)
+        Timber.d("tempDraft created : " + mTempDraft!!.attachments)
     }
 
     /*

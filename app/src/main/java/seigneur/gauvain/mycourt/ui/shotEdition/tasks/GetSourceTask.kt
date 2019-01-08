@@ -41,10 +41,15 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
             Constants.SOURCE_SHOT -> getShot()
             //User wishes to create a shot
             Constants.SOURCE_FAB -> {
-                val shot = Shot("","","",null) //create an empty shot
+                val shot = Shot("","","",null, null) //create an empty shot
                 val draft = Draft(
-                        0, Constants.EDIT_MODE_NEW_SHOT,
-                        null, null, null, shot)
+                        0,
+                        Constants.EDIT_MODE_NEW_SHOT,
+                        null,
+                        null,
+                        null,
+                        shot,
+                        shot.attachment)
                 mSourceCallback.setUpTempDraft(draft)
                 mSourceCallback.dataForUIReady()
             }
@@ -76,7 +81,7 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
                 0,
                 Constants.EDIT_MODE_UPDATE_SHOT,
                 shot.imageHidpi, null, null,
-                shot)
+                shot, shot.attachment)
         mSourceCallback.setUpTempDraft(draft)
         mSourceCallback.dataForUIReady()
     }

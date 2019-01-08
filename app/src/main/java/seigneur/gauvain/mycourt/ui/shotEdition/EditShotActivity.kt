@@ -217,40 +217,6 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
     /*
     *********************************************************************************************
-    * TEXTWATCHER
-    *********************************************************************************************/
-    private val titleWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) { mShotEditionViewModel.onTitleChanged(s.toString()) }
-        override fun afterTextChanged(s: Editable) {}
-    }
-
-    private val descWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) { mShotEditionViewModel.onDescriptionChanged(s.toString()) }
-        override fun afterTextChanged(s: Editable) {}
-    }
-
-    private val tagWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {  manageTagEdition(s)}
-        override fun afterTextChanged(s: Editable) {}
-    }
-
-
-    private fun manageTagEdition(s: CharSequence) {
-        val tagString = s.toString()
-        val commas = s.toString().replace("[^,]".toRegex(), "").length
-        Timber.d(commas.toString() + "")
-        if (commas < 12) {
-            mShotEditionViewModel.onTagChanged(tagString)
-        } else {
-
-        }
-    }
-
-    /*
-    *********************************************************************************************
     * EVENT WHICH VIEW WILL SUBSCRIBE
     *********************************************************************************************/
     private fun subscribeToLiveData(viewModel: ShotEditionViewModel) {
@@ -269,12 +235,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         viewModel.tags.observe(this,  Observer<ArrayList<String>> { Timber.d("tags change:$it") })
 
         viewModel.attachmentsTobeUploaded.observe(this,  Observer<ArrayList<Attachment>> {
-             attachments.clear() //clear list
-            for (i in it.indices) {
-                //repopulate list
-                attachments.add(it[i])
-            }
-            mAttachmentsAdapter.updateRv()
+            updateAttachmentList(it)
         })
 
         viewModel.isReadyToPubish.observe(this,  Observer<Boolean?> {
@@ -387,22 +348,38 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     }
 
     private fun setUpEditionUI(draft: Draft) {
+        //set toolbar title
         if (draft.typeOfDraft == Constants.EDIT_MODE_NEW_SHOT) {
             mToolbar.title = "Create a shot"
         } else {
             mToolbar.title = "Edit a shot"
         }
+
+        //get image from draft object
         if (draft.imageUri == null)
             croppedImagePreview.setImageResource(R.drawable.add_image_illustration)
         val imageCroppedUri :Uri? = EditUtils.getImageUrl(this, draft)
         if (imageCroppedUri!=null)
             mShotEditionViewModel.onImageCropped(imageCroppedUri)
+
+        //get title from draft object
         mShotTitleEditor.setText(draft.shot.title)
-        //todo - from html only if source is from shot... --> mange it in task!!!
+
+        //get description from draft objects
         val description = EditUtils.getDescription(draft)
         if (description != null && !description.isEmpty())
             mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description))
+
+        //get tags from draft objects
         mTagEditor.setText(EditUtils.getTagList(draft))
+
+        //get attachments from Draft object and send data to ViewModel to update UI
+        draft.attachments?.let {
+            updateAttachmentList(ArrayList(draft.attachments))
+            for (i in ArrayList(draft.attachments)) {
+                mShotEditionViewModel.onAttachmentAdded(i)
+            }
+        }
 
     }
 
@@ -453,6 +430,15 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         })
     }
 
+    private fun updateAttachmentList(atatchments: ArrayList<Attachment>) {
+        attachments.clear() //clear list
+        for (i in atatchments.indices) {
+            //repopulate list
+            attachments.add(atatchments[i])
+        }
+        mAttachmentsAdapter.updateRv()
+    }
+
     private fun setUpScrollListener() {
         mNestedScrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener {
             v, scrollX, scrollY, oldScrollX, oldScrollY ->
@@ -486,6 +472,40 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
             publishBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimaryLight))
             storeBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimaryLight))
            //mBSPublish.foreground = ColorDrawable(ContextCompat.getColor(this, R.color.colorError))
+        }
+    }
+
+    /*
+    *********************************************************************************************
+    * TEXTWATCHER
+    *********************************************************************************************/
+    private val titleWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) { mShotEditionViewModel.onTitleChanged(s.toString()) }
+        override fun afterTextChanged(s: Editable) {}
+    }
+
+    private val descWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) { mShotEditionViewModel.onDescriptionChanged(s.toString()) }
+        override fun afterTextChanged(s: Editable) {}
+    }
+
+    private val tagWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {  manageTagEdition(s)}
+        override fun afterTextChanged(s: Editable) {}
+    }
+
+
+    private fun manageTagEdition(s: CharSequence) {
+        val tagString = s.toString()
+        val commas = s.toString().replace("[^,]".toRegex(), "").length
+        Timber.d(commas.toString() + "")
+        if (commas < 12) {
+            mShotEditionViewModel.onTagChanged(tagString)
+        } else {
+
         }
     }
 }

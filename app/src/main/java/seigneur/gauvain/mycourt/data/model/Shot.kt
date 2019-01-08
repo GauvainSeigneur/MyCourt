@@ -16,7 +16,9 @@ data class Shot (
         var title: String?="",
         var description: String?,
         @SerializedName("tags")
-        var tagList: ArrayList<String>?) {
+        var tagList: ArrayList<String>?,
+        @SerializedName("attachments")
+        var attachment: List<Attachment>?) {
 
     //exclude properties from the generated implementations, declare it inside the class body:
     var html_url: String? =""
