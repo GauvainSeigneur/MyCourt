@@ -72,6 +72,7 @@ constructor() : ViewModel() {
      * fetch draft list from DB
      */
     fun fetchShotDrafts() {
+        Timber.d("fetchShotDrafts called")
         isRefreshing = false
         mCompositeDisposable.add(fetchDrafts()
                 .subscribe(
@@ -135,7 +136,6 @@ constructor() : ViewModel() {
         if (isRefreshing) {
             mStopRefreshEvent.call()
         }
-
     }
 
     /**
@@ -144,7 +144,7 @@ constructor() : ViewModel() {
      */
     private fun doOnError(throwable: Throwable) {
         Timber.e(throwable)
-        //TODO -SINGLE EVENT?
+        Timber.d("shotDrafts error: "+ throwable)
     }
 
     private fun onDeleteSucceed() {

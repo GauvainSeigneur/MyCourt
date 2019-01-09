@@ -19,19 +19,22 @@ data class Draft(
     var schedulingDate: Date?=null,//ONLY FOR UPDATE OF AN ALREADY PUBLISHED SHOT
     //Embed shot object
     @Embedded
-    var shot: Shot,
-    var attachments:List<Attachment>?) {
+    var shot: Shot
+    /*var attachments:List<Attachment>?*/) {
 
     fun changeInfoFromEdit(
             inImageUri: String?,
             inImageFormat: String?,
             title: String?,
             desc: String?,
-            tags: ArrayList<String>?) {
+            tags: ArrayList<String>?,
+            newAttachments: List<Attachment>?) {
         imageUri = inImageUri
         imageFormat = inImageFormat
         shot.title = title
         shot.description = desc
         shot.tagList = tags
+        shot.attachment = newAttachments
+        //attachments =newAttachments
     }
 }

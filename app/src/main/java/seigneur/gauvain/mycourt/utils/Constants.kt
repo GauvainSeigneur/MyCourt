@@ -27,6 +27,9 @@ object Constants {
         const val PICK_IMAGE_REQUEST = 1003
         const val PICK_ATTACHMENT_REQUEST = 1004
 
+        const val ADD_ATTACHMENT_OPE = 21
+        const val REMOVE_ATTACHMENT_OPE = 22
+
         const val SECRET_PWD_ALIAS = "SecretPwdAlias"
 
         /**

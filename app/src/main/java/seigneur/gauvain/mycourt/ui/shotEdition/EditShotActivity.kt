@@ -48,6 +48,7 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.Optional
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import dagger.android.AndroidInjection
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.Attachment
@@ -158,17 +159,18 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
                 mShotEditionViewModel.imagePickedFormat = ImageUtils.getImageExtension(this, mShotEditionViewModel.imagePickedUriSource!!)
                 mShotEditionViewModel.imageSize = ImageUtils.imagePickedWidthHeight(this, mShotEditionViewModel.imagePickedUriSource!!, 0)
                 Timber.d("PICK_IMAGE_REQUEST called")
+                Timber.d("imagePicked: "+mShotEditionViewModel.imagePickedUriSource)
                 mShotEditionViewModel.onImagePicked()
             } else if (requestCode == UCrop.REQUEST_CROP) {
                 mShotEditionViewModel.onImageCropped(UCrop.getOutput(data!!)!!)
             }
             else if (requestCode == Constants.PICK_ATTACHMENT_REQUEST) {
                 Timber.d("PICK_ATTACHMENT_REQUEST called")
-                val attachmentUri = ImagePicker.getImageUriFromResult(this, resultCode, data)
-                val attachmentFormat = ImageUtils.getImageExtension(this, attachmentUri!!)
-                mShotEditionViewModel.imageSize = ImageUtils.imagePickedWidthHeight(this, attachmentUri, 0)
+                val contentImageUri = ImagePicker.getImageUriFromResult(this, resultCode, data)
+                val attachmentFormat = ImageUtils.getImageExtension(this, contentImageUri!!)
+                mShotEditionViewModel.imageSize = ImageUtils.imagePickedWidthHeight(this, contentImageUri, 0)
                 //id to be -1 for new attachment
-                val attachment=Attachment(-1L,"", attachmentUri.toString(), attachmentFormat!!)
+                val attachment=Attachment(-1L,"",contentImageUri.toString(), attachmentFormat!!)
                 mShotEditionViewModel.onAttachmentAdded(attachment)
             }
         } else {
@@ -176,6 +178,8 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
                 mShotEditionViewModel.onPickCropError(resultCode)
         }
     }
+
+
 
     public override fun onDestroy() {
         super.onDestroy()
@@ -374,9 +378,9 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         mTagEditor.setText(EditUtils.getTagList(draft))
 
         //get attachments from Draft object and send data to ViewModel to update UI
-        draft.attachments?.let {
-            updateAttachmentList(ArrayList(draft.attachments))
-            for (i in ArrayList(draft.attachments)) {
+        draft.shot.attachment?.let {
+            updateAttachmentList(ArrayList(draft.shot.attachment))
+            for (i in ArrayList(draft.shot.attachment)) {
                 mShotEditionViewModel.onAttachmentAdded(i)
             }
         }
@@ -389,6 +393,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
                     .asBitmap()
                     .load(uriImageCropped)
                     .apply(RequestOptions()
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .error(R.drawable.ic_my_shot_black_24dp)
                             // .diskCacheStrategy(DiskCacheStrategy.ALL)
                     )

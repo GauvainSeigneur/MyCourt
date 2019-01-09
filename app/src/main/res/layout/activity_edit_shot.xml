@@ -47,10 +47,9 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_attachment"
                 android:layout_width="match_parent"
-                android:background="@color/colorWhite"
-                android:paddingStart="@dimen/padding_4"
-                android:paddingEnd="@dimen/padding_4"
-                android:layout_height="64dp"/>
+                android:paddingStart="@dimen/padding_12"
+                android:paddingEnd="@dimen/padding_12"
+                android:layout_height="56dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/shot_title_input"

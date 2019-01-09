@@ -25,6 +25,8 @@ constructor() {
     //get list of Shot from Dribbble
     fun getShotsFromAPItest(applyResponseCache: Int, page: Long, perPage: Int): Flowable<List<Shot>> {
         return mDribbbleService.getShotAPI(applyResponseCache, page, perPage)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
     }
 
     //send an update to Dribbble

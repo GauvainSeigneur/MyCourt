@@ -76,7 +76,7 @@ object ImagePicker {
                 selectedImage = imageReturnedIntent!!.data
             }
         }
-        getImageSize(context,selectedImage!!)
+        //getImageSize(context,selectedImage!!)
         return selectedImage
     }
 

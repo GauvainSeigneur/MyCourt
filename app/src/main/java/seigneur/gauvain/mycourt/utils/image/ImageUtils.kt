@@ -32,6 +32,8 @@ import java.nio.channels.FileChannel
 import java.util.Calendar
 
 import seigneur.gauvain.mycourt.R
+import seigneur.gauvain.mycourt.data.model.Draft
+import seigneur.gauvain.mycourt.utils.Constants
 import timber.log.Timber
 
 class ImageUtils {
@@ -222,7 +224,6 @@ class ImageUtils {
 
         }
 
-
         fun decodeBitmap(context: Context, uri: Uri, sampleSize: Int): Bitmap? {
             val options = BitmapFactory.Options()
             var fileDescriptor: AssetFileDescriptor? = null
@@ -237,158 +238,33 @@ class ImageUtils {
 
             return actuallyUsableBitmap
         }
-    }
 
-}
-
-/*
-
-public class ImageUtils {
-
-    public static Uri mUriOfImageCroppedSaved;
-
-    public ImageUtils(){}
-
-
-public static void goToUCropActivity(String ImageCroppedFormat,
-                                     Uri source,
-                                     Uri destination,
-                                     Activity activity,
-                                     int[] imageSize) {
-    UCrop.Options options = new UCrop.Options();
-    options.setStatusBarColor(activity.getResources().getColor(R.color.colorPrimaryDark));
-    options.setToolbarColor(activity.getResources().getColor(R.color.colorPrimary));
-    options.setActiveWidgetColor(activity.getResources().getColor(R.color.colorAccent));
-    //if image is Gif, it can't be cropped. so check if the px size is in accordance to
-    //Must be a 4:3 ratio between 400×300 and 1600×1200
-    if (ImageCroppedFormat!=null && ImageCroppedFormat.equals("gif")) {
-        //check if image aspect ratio is 4/3
-        double gifRatio=(double)imageSize[1]/(double)imageSize[0];
-        Timber.d("4/3 :"+gifRatio);
-        if (gifRatio==0.75 && imageSize[0]<=1600 && imageSize[1]<=1200 && imageSize[0]>400 && imageSize[1]>=300) {
-            options.setHideBottomControls(true);
-            options.setAllowedGestures(0,0,0);
-            UCrop.of(source, destination)
-                    .useSourceImageAspectRatio() //use source aspect ratio
-                    .withOptions(options)
-                    .start(activity);
-            Toast.makeText(activity, "gif can't be cropped", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(activity, "gif can't be cropped and the format needs to be 4/3 (eg. 400px*300px)", Toast.LENGTH_SHORT).show();
-        }
-    } else {
-        UCrop.of(source, destination)
-                .withAspectRatio(4, 3)
-                .withOptions(options)
-                .withMaxResultSize(1600, 1200)
-                .start(activity);
-    }
-}
-
-
-    public static String saveImageAndGetItsFinalUri(String ImageCroppedFormat, Uri croppedFileUri, Context context) throws Exception {
-        Timber.d(croppedFileUri.getLastPathSegment());
-        //1: define path and create folder "MyCourt" inside Gallery
-        String appDirectoryName = "MyCourt";
-        File myCourtDraftFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath(), appDirectoryName);
-        myCourtDraftFolder.mkdirs();
-        //2: give to image a name
-        //String filename = String.format("%d_%s", Calendar.getInstance().getTimeInMillis(), croppedFileUri.getLastPathSegment())+"."+ImageCroppedFormat;
-        String filename = croppedFileUri.getLastPathSegment()+"."+ImageCroppedFormat;
-        //3: create a file with the path of myCourtDraftFolder and the given name
-        File saveFile = new File(myCourtDraftFolder.getAbsolutePath(), filename);
-        //4: Copy file and close process
-        FileInputStream inStream = new FileInputStream(new File(croppedFileUri.getPath()));
-        FileOutputStream outStream = new FileOutputStream(saveFile);
-        FileChannel inChannel = inStream.getChannel();
-        FileChannel outChannel = outStream.getChannel();
-        inChannel.transferTo(0, inChannel.size(), outChannel);
-        inStream.close();
-        outStream.close();
-        //5 : show to user some information
-        Toast.makeText(context, R.string.notification_image_saved, Toast.LENGTH_SHORT).show();
-        //showNotification(saveFile);
-        //6: get the new URI of the file after it has been copied to save it in Room
-        //Uri fileUri = FileProvider.getUriForFile(context, context.getString(R.string.file_provider_authorities), saveFile);
-        return saveFile.getAbsolutePath();//fileUri;
-    }
-
-
-    public static String getImageExtension(Context context, Uri uri) {
-        ContentResolver contentResolver=context.getContentResolver();
-        MimeTypeMap mimeTypeMap=MimeTypeMap.getSingleton();
-        // Return file Extension
-        return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
-    }
-
-
-    public static String getRealPathFromImage(Context context, Uri selectedImageUri) {
-        String selectedImagePath = null;
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = context.getContentResolver().query(selectedImageUri,
-                projection, null, null, null);
-        if (cursor == null) {
-            selectedImagePath = selectedImageUri.getPath();
-        } else {
-            if (!cursor.moveToFirst()) {
-                cursor.moveToFirst();
-                int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-                selectedImagePath = cursor.getString(idx);
+        fun getRealPathFromUri(context: Context, contentUri: Uri): String {
+            var cursor: Cursor? = null
+            try {
+                val proj = arrayOf(MediaStore.Images.Media.DATA)
+                cursor = context.contentResolver.query(contentUri, proj, null, null, null)
+                val column_index = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                cursor.moveToFirst()
+                return cursor.getString(column_index)
+            } finally {
+                cursor?.close()
             }
         }
-        return selectedImagePath;
-    }
 
+        fun getAttachmentFileUrl(context: Context, contentUri: String?): Uri? {
+            return if (contentUri!= null) {
+                FileProvider.getUriForFile(
+                        context,
+                        context.getString(R.string.file_provider_authorities),
+                        File(contentUri))
+            } else {
+                null
+            }
 
-
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
         }
 
-        // We ask for the bounds if they have been set as they would be most
-        // correct, then we check we are  > 0
-        final int width = !drawable.getBounds().isEmpty() ?
-                drawable.getBounds().width() : drawable.getIntrinsicWidth();
-
-        final int height = !drawable.getBounds().isEmpty() ?
-                drawable.getBounds().height() : drawable.getIntrinsicHeight();
-
-        // Now we check we are > 0
-        final Bitmap bitmap = Bitmap.createBitmap(width <= 0 ? 1 : width, height <= 0 ? 1 : height,
-                Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-
-        return bitmap;
-    }
-
-
-    public static int[] imagePickedWidthHeight(Context context, Uri uri, int sampleSize) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        AssetFileDescriptor fileDescriptor = null;
-        Bitmap bitmap =null;
-        try {
-            fileDescriptor = context.getContentResolver().openAssetFileDescriptor(uri, "r");
-            bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor.getFileDescriptor(), null, options);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        if (bitmap!=null) {
-            Timber.d("image sized - width: "+ bitmap.getWidth() +" height: "+bitmap.getHeight());
-            return new int[] {bitmap.getWidth(),bitmap.getHeight()};
-        }
-        else
-            return new int[] {0,0};
 
     }
-
-    public static Uri getUriOfImageCroppedSaved(){
-        return mUriOfImageCroppedSaved;
-    }
-
 
 }
-*/
-

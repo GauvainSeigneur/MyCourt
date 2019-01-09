@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import io.reactivex.Observable
 import io.reactivex.Single.just
+import io.reactivex.android.schedulers.AndroidSchedulers
 
 import java.io.IOException
 import java.net.UnknownHostException
@@ -14,6 +15,7 @@ import javax.inject.Inject
 
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Consumer
+import io.reactivex.schedulers.Schedulers
 import okhttp3.Headers
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -29,6 +31,12 @@ import seigneur.gauvain.mycourt.utils.Constants
 import seigneur.gauvain.mycourt.utils.HttpUtils
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler
 import timber.log.Timber
+import java.io.File
+import java.util.concurrent.TimeUnit
+import android.provider.MediaStore
+import androidx.loader.content.CursorLoader
+import seigneur.gauvain.mycourt.utils.image.ImageUtils
+
 
 class PublishTask(
         private val mCompositeDisposable: CompositeDisposable,
@@ -90,15 +98,21 @@ class PublishTask(
                 val headers = response.headers()
                 //todo - use location get shot id and send attachment after with RX
                 val location = headers.get("location")
-                if (location != null)
-                    Timber.d("post succeed. location: $location")
+                location?.let { Timber.d("post succeed. location: $location") }
                 if (hasAttachements==true) {
-                    //todo - use hasAttachments to perform attachment post on Dribbble !
-                    //postAttachments("idTOFIND",context, attachments!!)
+                    val shotId:String //todo - this variable must be defined into Firebase for fast update
+                    //val location="https://api.dribbble.com/v2/shots/471756-ShotTitle"
+                    val locationTrunkAfter= location!!.substringAfterLast("/",location )
+                    shotId=locationTrunkAfter.substringBefore("-",locationTrunkAfter)
+                    Timber.d("testTrunk: $locationTrunkAfter")
+                    Timber.d("shotid: $shotId")
+                    postAttachments( "5381467", context, attachments!!)
+                    //getPublishedShotAndPublishAttachment()
                 } else {
                     //stop process and confirm to user that the post has been successfully published
                     onPublishOrUpdateSucceed(draft)
                 }
+
 
             }
             else -> Timber.d("post not succeed: " + response.code())
@@ -112,43 +126,66 @@ class PublishTask(
     private fun onPostFailed(t: Throwable) {
         Timber.d("post failed: $t")
     }
+
     /*
     *************************************************************************
-    * NETWORK OPERATION - ADD ATTACHMENT TO A SHOT
-    *************************************************************************/
-    /**
+    * NETWORK OPERATION - get a shot after a publishing
+    *
     * Dribbbles API doesn't allow to publish a shot with attachments.
     * We can only provide attachments to an existing shot
     * Also, we can send only one attachment per POST.
     * So for first publication with attachment, we must concat it in two request
-    */
+    *************************************************************************/
 
     /**
      * Post one or several attachments to an existing shot
      */
     fun postAttachments(
-            id:String,
+            shotId:String,
             context: Context,
             uris:List<Attachment>) {
-        mCompositeDisposable.add(
+
+        val body = HttpUtils.createFilePart(
+                context,
+                //Uri.parse(uris[0].uri),
+                ImageUtils.getAttachmentFileUrl(context,uris[0].imageFormat),
+                uris[0].imageFormat,
+                "file")
+        Timber.d("postAttachments called")
+        mCompositeDisposable.add(mShotRepository.addAttachment("5381467", body)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { response -> Timber.d(response.message())},
+                        {t -> onPostFailed(t)},
+                        {Timber.d("complete")}
+                )
+        )
+        /*mCompositeDisposable.add(
                 Observable.fromIterable(uris) //map the list to an Observable that emits every item as an observable
                         .filter {it -> it.id!=-1L } //send only item in the list which ids is -1L
                         .flatMap {it -> //perform following operation on every filtered item
                             // create RequestBody instance from file
-                            val body = HttpUtils.createFilePart(context, Uri.parse(it.uri), it.imageFormat, "file")
+                            val body = HttpUtils.createFilePart(
+                                    context,
+                                    Uri.parse(it.uri),
+                                    it.imageFormat,
+                                    "file")
                             mShotRepository.addAttachment(
-                                    id,
+                                    shotId,
                                     body)
                                     .doOnNext{
                                         response -> Timber.d(response.message())
                                     }
                         }
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
                                 { response -> Timber.d(response.message())},
                                 {t -> onPostFailed(t)},
                                 {Timber.d("complete")}
                         )
-        )
+        )*/
     }
     /*
     *************************************************************************

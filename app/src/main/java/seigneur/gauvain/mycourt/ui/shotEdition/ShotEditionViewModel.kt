@@ -22,10 +22,7 @@ import seigneur.gauvain.mycourt.data.repository.TempDataRepository
 import seigneur.gauvain.mycourt.ui.shotEdition.tasks.GetSourceTask
 import seigneur.gauvain.mycourt.ui.shotEdition.tasks.PublishTask
 import seigneur.gauvain.mycourt.ui.shotEdition.tasks.StoreDraftTask
-import seigneur.gauvain.mycourt.utils.ConnectivityReceiver
-import seigneur.gauvain.mycourt.utils.Constants
-import seigneur.gauvain.mycourt.utils.ListUtils
-import seigneur.gauvain.mycourt.utils.SingleLiveEvent
+import seigneur.gauvain.mycourt.utils.*
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler
 import timber.log.Timber
 
@@ -59,7 +56,7 @@ constructor() : ViewModel(),
     private var mTempDraft: Draft? = null
     val setUpUiCmd = SingleLiveEvent<Void>()
 
-    //task files
+    //Task class
     private val mStoreDrafTask: StoreDraftTask by lazy {
         StoreDraftTask(compositeDisposable, mShotDraftRepository, this) }
     private val mGetSourceTask: GetSourceTask by lazy {
@@ -81,7 +78,7 @@ constructor() : ViewModel(),
     val onPublishSucceed = SingleLiveEvent<Void>()
     var imagePickedUriSource: Uri? = null //NOT LIVEDATA - NOT RELATED TO UI
     var imagePickedFileName: String? = null //NOT LIVEDATA - NOT RELATED TO UI
-    var imagePickedFormat: String? = null //NOT LIVEDATA - NOT RELATED TO UI
+    var imagePickedFormat: String? = "png" //NOT LIVEDATA - NOT RELATED TO UI
     var imageSize: IntArray? = null //NOT LIVEDATA - NOT RELATED TO UI
     private val croppedImageUri = MutableLiveData<Uri>()
     val pickCropImgErrorCmd = SingleLiveEvent<Int>()
@@ -92,7 +89,7 @@ constructor() : ViewModel(),
     private val mTags = MutableLiveData<ArrayList<String>>()
     //List of attachment
     private val mTempAttachmentList = ArrayList<Attachment>() //Non UI list
-    private val mAttachmentsTobeUploaded= MutableLiveData<ArrayList<Attachment>>() //UI list
+    private val mAttachmentUIList= MutableLiveData<ArrayList<Attachment>>() //UI list
     private val mTempAttachmentsToDelete = ArrayList<Attachment>()//Non UI list to keep reference of attachment that they needs to be deleted
     private var hasAttachment =false
 
@@ -128,6 +125,7 @@ constructor() : ViewModel(),
 
     fun onImageCropped(uri: Uri?) {
         croppedImageUri.value = uri
+        Timber.d("imagecroppedUri: $uri")
         checkIfIsReadyToPublish(mTitle.value, croppedImageUri.value)
     }
 
@@ -149,31 +147,13 @@ constructor() : ViewModel(),
     }
 
     fun onAttachmentAdded(attachment: Attachment) {
-        mTempAttachmentList.add(attachment)
-        mAttachmentsTobeUploaded.value = mTempAttachmentList
-        //check after if the list include new shot
-        hasAttachment = mTempAttachmentList.any { it -> it.id == -1L }
-        Timber.d("has attachment: "+ hasAttachment)
+        //mPublishTask.postAttachments("5381467", mApplication, attachment!!)
+        updateAttachmentList(attachment, null, Constants.ADD_ATTACHMENT_OPE)
     }
 
     fun onRemoveAttachment(pos: Int) {
-        if (mTempAttachmentList[pos].id != -1L) {
-            //create temporary attachment object
-            val tempAttachmentTodelete = mTempAttachmentList[pos]
-            //inject tio it the current shot id to perform Delete POST on Dribbble
-            mTempDraft?.shot?.id?.let {
-                tempAttachmentTodelete.shotId = mTempDraft!!.shot.id
-            }
-            //finnaly add to delete list
-            mTempAttachmentsToDelete.add(tempAttachmentTodelete)
-        }
-        //ui and list to be uploaded
-        mTempAttachmentList.removeAt(pos)
-        //notify UI
-        mAttachmentsTobeUploaded.value = mTempAttachmentList
-        //check if the list include new shots to program or not Pubish Attachment POST on DRIBBBLE
-        hasAttachment = mTempAttachmentList.any { it -> it.id == -1L }
-        Timber.d("has attachment: "+ hasAttachment)
+        programDeletePOST(pos)
+        updateAttachmentList(null, pos, Constants.REMOVE_ATTACHMENT_OPE)
     }
 
     fun requestPerm() {
@@ -198,7 +178,10 @@ constructor() : ViewModel(),
     }
 
     fun onPublishClicked() {
-        changeTempDraftInfo() //first change info for temporary draft
+        changeDraftInfo()
+        //Timber.d("checkAttachment: "+mTempAttachmentList[0].uri)
+        //Timber.d("checkPostShot: "+ getCroppedImageUri().value!!)
+        //mPublishTask.postAttachments("5381467",mApplication , mTempAttachmentList)
         if (mTempDraft!!.typeOfDraft == Constants.EDIT_MODE_UPDATE_SHOT) {
             mPublishTask.updateShot(
                     mTempDraft!!,
@@ -208,67 +191,14 @@ constructor() : ViewModel(),
                     mTempDraft!!,
                     mApplication,
                     getCroppedImageUri().value!!, //when image is changed
-                    imagePickedFormat!!,hasAttachment,mTempAttachmentList)//todo- define value
+                    imagePickedFormat!!,
+                    hasAttachment,
+                    mTempAttachmentList)
     }
 
     /*
     *********************************************************************************************
-    * PRIVATE METHODS
-    *********************************************************************************************/
-    private fun registerOrUpdateDraft(context: Context?, isRegisteringImage: Boolean) {
-        if (isRegisteringImage) {
-            mStoreDrafTask.storeDraftImage(context!!,
-                    imagePickedFormat!!, getCroppedImageUri().value!!)
-        } else {
-            changeTempDraftInfo()
-            if (mTempDraft!!.draftID == 0L) {
-                //new draft, so save it in db
-                mStoreDrafTask.save(mTempDraft!!)
-            } else {
-                //it is draft fetch from db, update it
-                mStoreDrafTask.update(mTempDraft!!)
-            }
-        }
-    }
-
-    private fun changeTempDraftInfo() {
-        mTempDraft!!.changeInfoFromEdit(
-                mTempDraft!!.imageUri, //Image doesn't change
-                mTempDraft!!.imageFormat, //Image doesn't change
-                title.value,
-                description.value,
-                tags.value)
-    }
-
-    /**
-     * The draft needs, at least, to have an image and a title to published and only a title
-     * to be updated
-     * Must be called in method which change title and image uri values changes
-     * @param title - title of the shot to be published/updated
-     * @param imageUri - link of the image to be published
-     */
-    private fun checkIfIsReadyToPublish(title:String?, imageUri:Uri?) :Boolean {
-        var isReady: Boolean?=false
-        if (title!=null  && title.isNotEmpty() && imageUri!=null && imageUri.toString().isNotEmpty()) {
-            isReady = true
-        }
-        onReadyToPublishOrNot(isReady)
-        Timber.tag("babar").d("Uri: "+imageUri)
-        Timber.tag("babar").d("title: "+title)
-        return isReady!!
-    }
-
-    /**
-     * Change value of "ready to publish"
-     * @param readyOrNot - by default is false
-     */
-    private fun onReadyToPublishOrNot(readyOrNot: Boolean?=false) {
-        isReadyToPubish.value=readyOrNot
-    }
-
-    /*
-    *********************************************************************************************
-    * GETTER AND SETTER - CAN BE CALLED BY VIEW AND VIEWMODEL
+    * LIVEDATA GETTER CALLED BY UI
     *********************************************************************************************/
     fun getTempDraft(): Draft? {
         return mTempDraft
@@ -287,7 +217,7 @@ constructor() : ViewModel(),
         get() = isReadyToPubish
 
     val attachmentsTobeUploaded : LiveData<ArrayList<Attachment>>
-        get() = mAttachmentsTobeUploaded
+        get() = mAttachmentUIList
 
     fun getCroppedImageUri(): LiveData<Uri> {
         return croppedImageUri
@@ -303,7 +233,7 @@ constructor() : ViewModel(),
 
     override fun setUpTempDraft(draft: Draft) {
         mTempDraft = draft
-        Timber.d("tempDraft created : " + mTempDraft!!.attachments)
+        Timber.d("tempDraft created : " + mTempDraft!!.shot.attachment)
     }
 
     /*
@@ -311,23 +241,13 @@ constructor() : ViewModel(),
     * StoreTaskCallback
     *********************************************************************************************/
     override fun onSaveImageSuccess(uri: String) {
-        mTempDraft!!.changeInfoFromEdit(
-                uri,
-                imagePickedFormat,
-                title.value,
-                description.value,
-                tags.value)
-
-        if (mTempDraft!!.draftID == 0L) {
-            //new draft, so save it in db
-            mStoreDrafTask.save(mTempDraft!!)
-        } else {
-            //it is draft fetch from db, update it
-            mStoreDrafTask.update(mTempDraft!!)
-        }
+        changeDraftInfo(uri)
+        storeDraft()
     }
 
-    override fun onStoreDraftSucceed() {}
+    override fun onStoreDraftSucceed() {
+        Timber.d("store draft succeed")
+    }
 
     override fun onFailed() {}
 
@@ -338,5 +258,108 @@ constructor() : ViewModel(),
     override fun onPublishSuccess() {
         onPublishSucceed.call()
     }
+
+    /*
+    *********************************************************************************************
+    * PRIVATE METHODS
+    *********************************************************************************************/
+    /**
+     * The draft needs, at least, to have an image and a title to published and only a title
+     * to be updated
+     * Must be called in method which change title and image uri values changes
+     * @param title - title of the shot to be published/updated
+     * @param imageUri - link of the image to be published
+     */
+    private fun checkIfIsReadyToPublish(title:String?, imageUri:Uri?) :Boolean {
+        var isReady: Boolean?=false
+        if (title!=null  && title.isNotEmpty() && imageUri!=null && imageUri.toString().isNotEmpty()) {
+            isReady = true
+        }
+        onReadyToPublishOrNot(isReady)
+        return isReady!!
+    }
+
+    /**
+     * Change value of "ready to publish"
+     * @param readyOrNot - by default is false
+     */
+    private fun onReadyToPublishOrNot(readyOrNot: Boolean?=false) {
+        isReadyToPubish.value=readyOrNot
+    }
+
+    private fun programDeletePOST(position:Int) {
+        //if attachment id is different than -1L, is an published on, so we have to perform
+        //DELETE POST if user delete it from UI
+        if (mTempAttachmentList[position].id != -1L) {
+            //create temporary attachment object
+            val tempAttachmentToDelete = mTempAttachmentList[position]
+            //inject to it the current shot id to perform Delete POST on Dribbble
+            mTempDraft?.shot?.id?.let {
+                tempAttachmentToDelete.shotId = mTempDraft!!.shot.id
+            }
+            //finally add to delete list
+            mTempAttachmentsToDelete.add(tempAttachmentToDelete)
+        }
+    }
+
+    private fun updateAttachmentList(newAttachment:Attachment?, position:Int?, operationType: Int) {
+        //ui and list to be uploaded
+        when (operationType) {
+           Constants.ADD_ATTACHMENT_OPE ->  mTempAttachmentList.add(newAttachment!!)
+            else   ->  mTempAttachmentList.removeAt(position!!)
+        }
+        //notify UI
+        mAttachmentUIList.value = mTempAttachmentList
+        //check if the list include new shots to program or not Pubish Attachment POST on DRIBBBLE
+        hasAttachment = mTempAttachmentList.any { it -> it.id == -1L }
+
+        Timber.d("has attachment: "+ hasAttachment)
+    }
+
+
+    private fun registerOrUpdateDraft(context: Context?, isRegisteringImage: Boolean) {
+        if (isRegisteringImage) {
+            mStoreDrafTask.storeDraftImage(
+                    context!!,
+                    imagePickedFormat!!,
+                    getCroppedImageUri().value!!)
+        } else {
+            changeDraftInfo()
+            storeDraft()
+        }
+    }
+
+    private fun changeDraftInfo(croppedImageUri: String?= mTempDraft!!.imageUri) {
+        //define image format according to cropping state
+        fun imageFormat():String? {
+            val format:String?
+            if (croppedImageUri==mTempDraft?.imageUri) {
+                format = mTempDraft?.imageFormat //Image doesn't change
+            } else {
+                format = imagePickedFormat //Image change
+            }
+            return format
+        }
+
+        mTempDraft!!.changeInfoFromEdit(
+                croppedImageUri,
+                imageFormat(),
+                title.value,
+                description.value,
+                tags.value,
+                mTempAttachmentList)
+
+    }
+
+    private fun storeDraft() {
+        if (mTempDraft!!.draftID == 0L) {
+            //new draft, so save it in db
+            mStoreDrafTask.save(mTempDraft!!)
+        } else {
+            //it is draft fetch from db, update it
+            mStoreDrafTask.update(mTempDraft!!)
+        }
+    }
+
 
 }
