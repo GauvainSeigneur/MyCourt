@@ -34,6 +34,7 @@ import timber.log.Timber
 import java.io.File
 import java.util.concurrent.TimeUnit
 import android.provider.MediaStore
+import androidx.documentfile.provider.DocumentFile
 import androidx.loader.content.CursorLoader
 import seigneur.gauvain.mycourt.utils.image.ImageUtils
 
@@ -144,11 +145,10 @@ class PublishTask(
             shotId:String,
             context: Context,
             uris:List<Attachment>) {
-
         val body = HttpUtils.createFilePart(
                 context,
                 //Uri.parse(uris[0].uri),
-                ImageUtils.getAttachmentFileUrl(context,uris[0].imageFormat),
+                ImageUtils.getAttachmentFileUrl(context,uris[0].uri),
                 uris[0].imageFormat,
                 "file")
         Timber.d("postAttachments called")

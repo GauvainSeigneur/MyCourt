@@ -28,6 +28,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.view.ViewCompat.canScrollVertically
+import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -154,7 +155,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == Constants.PICK_IMAGE_REQUEST) {
-                mShotEditionViewModel.imagePickedUriSource = ImagePicker.getImageUriFromResult(this, resultCode, data)
+                mShotEditionViewModel.imagePickedUriSource = data?.data//ImagePicker.getImageUriFromResult(this, resultCode, data)
                 mShotEditionViewModel.imagePickedFileName = ImagePicker.getPickedImageName(this, mShotEditionViewModel.imagePickedUriSource!!)
                 mShotEditionViewModel.imagePickedFormat = ImageUtils.getImageExtension(this, mShotEditionViewModel.imagePickedUriSource!!)
                 mShotEditionViewModel.imageSize = ImageUtils.imagePickedWidthHeight(this, mShotEditionViewModel.imagePickedUriSource!!, 0)
@@ -166,12 +167,15 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
             }
             else if (requestCode == Constants.PICK_ATTACHMENT_REQUEST) {
                 Timber.d("PICK_ATTACHMENT_REQUEST called")
-                val contentImageUri = ImagePicker.getImageUriFromResult(this, resultCode, data)
+                val contentImageUri = data?.data//ImagePicker.getImageUriFromResult(this, resultCode, data)
                 val attachmentFormat = ImageUtils.getImageExtension(this, contentImageUri!!)
-                mShotEditionViewModel.imageSize = ImageUtils.imagePickedWidthHeight(this, contentImageUri, 0)
                 //id to be -1 for new attachment
                 val attachment=Attachment(-1L,"",contentImageUri.toString(), attachmentFormat!!)
                 mShotEditionViewModel.onAttachmentAdded(attachment)
+                Timber.d("att uri: "+Uri.parse(contentImageUri.toString()))
+                Timber.d("att uri 3: "+getContentResolver().openInputStream(contentImageUri).toString())
+                Timber.d("att uri 4: "+ data?.data)
+
             }
         } else {
             if (resultCode == UCrop.RESULT_ERROR)
@@ -362,7 +366,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         //get image from draft object
         if (draft.imageUri == null)
             croppedImagePreview.setImageResource(R.drawable.add_image_illustration)
-        val imageCroppedUri :Uri? = EditUtils.getImageUrl(this, draft)
+        val imageCroppedUri :Uri? = EditUtils.getShotImageUrl(this, draft)
         if (imageCroppedUri!=null)
             mShotEditionViewModel.onImageCropped(imageCroppedUri)
 

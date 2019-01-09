@@ -19,9 +19,9 @@ class HttpUtils {
          * See : https://stackoverflow.com/a/40873297
          */
         fun createFilePart(context: Context,
-                           fileUri: Uri?,
-                           imageFormat: String?,
-                           partName: String): MultipartBody.Part {
+                             fileUri: Uri?,
+                             imageFormat: String?,
+                             partName: String): MultipartBody.Part {
             //Get file
             val uriOfFile = ImageUtils.getRealPathFromImage(context, fileUri)
             val file = File(uriOfFile)

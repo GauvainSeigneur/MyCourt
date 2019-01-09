@@ -45,7 +45,7 @@ class EditUtils {
         }
 
         //get image uri from data sent by presenter
-        fun getImageUrl(context: Context, draft: Draft): Uri? {
+        fun getShotImageUrl(context: Context, draft: Draft): Uri? {
             return if (draft.imageUri != null) {
                 if (draft.typeOfDraft == Constants.EDIT_MODE_NEW_SHOT) {
                     FileProvider.getUriForFile(
