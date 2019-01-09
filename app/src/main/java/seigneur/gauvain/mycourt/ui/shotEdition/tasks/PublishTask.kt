@@ -145,10 +145,20 @@ class PublishTask(
             shotId:String,
             context: Context,
             uris:List<Attachment>) {
+
+        context.getDir("Content", Context.MODE_PRIVATE)
+        val directory = File(context.filesDir, "Content")
+        if (!directory.exists()) {
+            directory.mkdir()
+        }
+
+        val newFile = File(directory,uris[0].uri.toString())
+
         val body = HttpUtils.createFilePart(
                 context,
                 //Uri.parse(uris[0].uri),
-                ImageUtils.getAttachmentFileUrl(context,uris[0].uri),
+                Uri.parse(newFile.absolutePath),
+               // ImageUtils.getAttachmentFileUrl(context,uris[0].uri),
                 uris[0].imageFormat,
                 "file")
         Timber.d("postAttachments called")
