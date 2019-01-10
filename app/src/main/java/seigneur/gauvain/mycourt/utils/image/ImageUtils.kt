@@ -1,7 +1,5 @@
 package seigneur.gauvain.mycourt.utils.image
 
-import android.app.Activity
-import android.content.ContentResolver
 import android.content.Context
 import android.content.res.AssetFileDescriptor
 import android.database.Cursor
@@ -11,86 +9,22 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
-import android.text.TextUtils
-import android.util.Log
-import android.util.Range
 import android.webkit.MimeTypeMap
 import android.widget.Toast
-
-import com.yalantis.ucrop.UCrop
-import com.yalantis.ucrop.UCropActivity
 
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
-import java.nio.channels.FileChannel
-import java.util.Calendar
 
 import seigneur.gauvain.mycourt.R
-import seigneur.gauvain.mycourt.data.model.Draft
-import seigneur.gauvain.mycourt.utils.Constants
 import timber.log.Timber
 
 class ImageUtils {
     companion object {
-
-        /**
-         * get the uri of the saved cropped image: to be used to save ShotDraft object in Room
-         * @return UriOfImageCroppedSaved
-         */
-        /**
-         * set UriOgImageCropped
-         * @param uriOfImageCroppedSaved
-         */
-        var uriOfImageCroppedSaved: Uri?=null
-
-        /**
-         * Go to cropping activity
-         * @param ImageCroppedFormat -  PNG, JPEG, GIF
-         * @param source of the view  - set by the return intent from ImagePicker
-         * @param destination - uri of destination folder: cacheDif
-         * @param activity - context
-         * @param imageSize - height and width in pixels
-         */
-        fun goToUCropActivity(ImageCroppedFormat: String?,
-                              source: Uri,
-                              destination: Uri,
-                              activity: Activity,
-                              imageSize: IntArray) {
-            val options = UCrop.Options()
-            options.setStatusBarColor(activity.resources.getColor(R.color.colorPrimaryDark))
-            options.setToolbarColor(activity.resources.getColor(R.color.colorPrimary))
-            options.setActiveWidgetColor(activity.resources.getColor(R.color.colorAccent))
-            //if image is Gif, it can't be cropped. so check if the px size is in accordance to
-            //Must be a 4:3 ratio between 400×300 and 1600×1200
-            if (ImageCroppedFormat != null && ImageCroppedFormat == "gif") {
-                //check if image aspect ratio is 4/3
-                val gifRatio = imageSize[1].toDouble() / imageSize[0].toDouble()
-                Timber.d("4/3 :$gifRatio")
-                if (gifRatio == 0.75 && imageSize[0] <= 1600 && imageSize[1] <= 1200 && imageSize[0] > 400 && imageSize[1] >= 300) {
-                    options.setHideBottomControls(true)
-                    options.setAllowedGestures(UCropActivity.NONE, UCropActivity.NONE, UCropActivity.NONE)
-                    UCrop.of(source, destination)
-                            .useSourceImageAspectRatio() //use source aspect ratio
-                            .withOptions(options)
-                            .start(activity)
-                    Toast.makeText(activity, "gif can't be cropped", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(activity, "gif can't be cropped and the format needs to be 4/3 (eg. 400px*300px)", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                UCrop.of(source, destination)
-                        .withAspectRatio(4f, 3f)
-                        .withOptions(options)
-                        .withMaxResultSize(1600, 1200)
-                        .start(activity)
-            }
-        }
 
         /**
          * Return file path of Image after being saved in gallery
@@ -139,29 +73,6 @@ class ImageUtils {
             val mimeTypeMap = MimeTypeMap.getSingleton()
             // Return file Extension
             return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri))
-        }
-
-        /**
-         * Get the the file system path from the content provider uri
-         * @param context - activity or fragment
-         * @param selectedImageUri - Uri of the image
-         * @return the system file url (get the file)
-         */
-        fun getRealPathFromImage(context: Context, selectedImageUri: Uri?): String? {
-            var selectedImagePath: String? = null
-            val projection = arrayOf(MediaStore.Images.Media.DATA)
-            val cursor = context.contentResolver.query(selectedImageUri!!,
-                    projection, null, null, null)
-            if (cursor == null) {
-                selectedImagePath = selectedImageUri.path
-            } else {
-                if (!cursor.moveToFirst()) {
-                    cursor.moveToFirst()
-                    val idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA)
-                    selectedImagePath = cursor.getString(idx)
-                }
-            }
-            return selectedImagePath
         }
 
 
@@ -224,6 +135,11 @@ class ImageUtils {
 
         }
 
+
+        /**
+         * TO DELETE ???
+         */
+
         fun decodeBitmap(context: Context, uri: Uri, sampleSize: Int): Bitmap? {
             val options = BitmapFactory.Options()
             var fileDescriptor: AssetFileDescriptor? = null
@@ -239,20 +155,8 @@ class ImageUtils {
             return actuallyUsableBitmap
         }
 
-        fun getRealPathFromUri(context: Context, contentUri: Uri): String {
-            var cursor: Cursor? = null
-            try {
-                val proj = arrayOf(MediaStore.Images.Media.DATA)
-                cursor = context.contentResolver.query(contentUri, proj, null, null, null)
-                val column_index = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                cursor.moveToFirst()
-                return cursor.getString(column_index)
-            } finally {
-                cursor?.close()
-            }
-        }
 
-        fun getAttachmentFileUrl(context: Context, contentUri: String?): Uri? {
+        fun getContentUriFromFilePath(context: Context, contentUri: String?): Uri? {
             return if (contentUri!= null) {
                 FileProvider.getUriForFile(
                         context,

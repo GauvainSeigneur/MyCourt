@@ -3,6 +3,7 @@ package seigneur.gauvain.mycourt.ui.shotEdition
 import android.Manifest
 import android.app.Activity
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
@@ -14,6 +15,8 @@ import android.net.Uri
 import com.google.android.material.textfield.TextInputEditText
 import androidx.core.app.ActivityCompat
 import android.os.Bundle
+import android.provider.DocumentsContract
+import android.provider.MediaStore
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -61,6 +64,7 @@ import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.UnScrollableLayout
 import seigneur.gauvain.mycourt.utils.Constants
 import seigneur.gauvain.mycourt.utils.image.ImagePicker
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
+import seigneur.gauvain.mycourt.utils.HttpUtils
 import seigneur.gauvain.mycourt.utils.image.ImageUtils
 import seigneur.gauvain.mycourt.utils.MyTextUtils
 import timber.log.Timber
@@ -143,38 +147,69 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     private fun testRvAttachment() {
         if (mRvAttachments.layoutManager==null && mRvAttachments.adapter==null) {
             mGridLayoutManager = UnScrollableLayoutManager(this, 5)
-
             mRvAttachments.layoutManager =  mGridLayoutManager
             mRvAttachments.adapter = mAttachmentsAdapter
-            (mRvAttachments.layoutManager as UnScrollableLayoutManager).disableScrolling()
+            (mRvAttachments.layoutManager as UnScrollableLayoutManager).disableScrolling() //disable scroll
         }
-        //disable scroll
-      //  mRvAttachments.isLayoutFrozen= true
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == Constants.PICK_IMAGE_REQUEST) {
-                mShotEditionViewModel.imagePickedUriSource = data?.data//ImagePicker.getImageUriFromResult(this, resultCode, data)
+                mShotEditionViewModel.imagePickedUriSource = data?.data
                 mShotEditionViewModel.imagePickedFileName = ImagePicker.getPickedImageName(this, mShotEditionViewModel.imagePickedUriSource!!)
                 mShotEditionViewModel.imagePickedFormat = ImageUtils.getImageExtension(this, mShotEditionViewModel.imagePickedUriSource!!)
                 mShotEditionViewModel.imageSize = ImageUtils.imagePickedWidthHeight(this, mShotEditionViewModel.imagePickedUriSource!!, 0)
-                Timber.d("PICK_IMAGE_REQUEST called")
-                Timber.d("imagePicked: "+mShotEditionViewModel.imagePickedUriSource)
                 mShotEditionViewModel.onImagePicked()
             } else if (requestCode == UCrop.REQUEST_CROP) {
                 mShotEditionViewModel.onImageCropped(UCrop.getOutput(data!!)!!)
             }
             else if (requestCode == Constants.PICK_ATTACHMENT_REQUEST) {
                 Timber.d("PICK_ATTACHMENT_REQUEST called")
-                val contentImageUri = data?.data//ImagePicker.getImageUriFromResult(this, resultCode, data)
-                val attachmentFormat = ImageUtils.getImageExtension(this, contentImageUri!!)
-                //id to be -1 for new attachment
-                val attachment=Attachment(-1L,"",contentImageUri.toString(), attachmentFormat!!)
+                val attachmentUri = data?.data
+                val attachmentFormat = ImageUtils.getImageExtension(this, attachmentUri!!)
+                val attachmentFileName = ImagePicker.getPickedImageName(this, attachmentUri)
+                val attachmentFileUri:String = ImagePicker.getImageFilePathFromContentUri(this, attachmentFileName).toString()
+                /*val attachment=Attachment(-1L,    //id to be -1 for new attachment
+                        "",
+                        attachmentUri.toString(),
+                        attachmentFormat!!,
+                        attachmentFileName)
+                mShotEditionViewModel.onAttachmentAdded(attachment)*/
+
+
+
+                val uri  = data.data
+                Timber.d("uri: $uri")
+                //val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
+                //val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
+                val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
+                // Get the cursor
+                val cursor = contentResolver.query(uri,
+                        filePathColumn,
+                        null,
+                        null,
+                        null)
+                // Move to first row
+                cursor.moveToFirst()
+                val columnIndex = cursor.getColumnIndex(filePathColumn[0])
+                var imgDecodableString:String?=""
+                imgDecodableString = cursor.getString(columnIndex)
+                cursor.close()
+
+                Timber.d("imgDecodableString: $imgDecodableString")
+                //val imgView = (ImageView) findViewById(R.id.groupPic);
+                // Set the Image in ImageView after decoding the String
+                //imgView.setImageBitmap(BitmapFactory.decodeFile(imgDecodableString));
+
+                val attachment=Attachment(-1L,    //id to be -1 for new attachment
+                        "",
+                        imgDecodableString,
+                        attachmentFormat!!,
+                        attachmentFileName)
                 mShotEditionViewModel.onAttachmentAdded(attachment)
-                Timber.d("att uri: "+Uri.parse(contentImageUri.toString()))
-                Timber.d("att uri 3: "+getContentResolver().openInputStream(contentImageUri).toString())
-                Timber.d("att uri 4: "+ data?.data)
+
 
             }
         } else {
@@ -182,8 +217,6 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
                 mShotEditionViewModel.onPickCropError(resultCode)
         }
     }
-
-
 
     public override fun onDestroy() {
         super.onDestroy()
@@ -339,9 +372,11 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
                           imagePickedUriSource: Uri?,
                           imagePickedFileName: String?,
                           imageSize: IntArray?) {
-        ImageUtils.goToUCropActivity(imagePickedformat,
+        ImagePicker.goToUCropActivity(imagePickedformat,
                 imagePickedUriSource!!,
-                Uri.fromFile(File(cacheDir, imagePickedFileName!!)), this,
+                ImagePicker.getImageFilePathFromContentUri(this, imagePickedFileName!!),
+                //Uri.fromFile(File(cacheDir, imagePickedFileName!!)),
+                this,
                 imageSize!!)
     }
 
@@ -483,6 +518,8 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
            //mBSPublish.foreground = ColorDrawable(ContextCompat.getColor(this, R.color.colorError))
         }
     }
+
+
 
     /*
     *********************************************************************************************

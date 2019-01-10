@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit
 import android.provider.MediaStore
 import androidx.documentfile.provider.DocumentFile
 import androidx.loader.content.CursorLoader
+import seigneur.gauvain.mycourt.utils.image.ImagePicker
 import seigneur.gauvain.mycourt.utils.image.ImageUtils
 
 
@@ -107,7 +108,7 @@ class PublishTask(
                     shotId=locationTrunkAfter.substringBefore("-",locationTrunkAfter)
                     Timber.d("testTrunk: $locationTrunkAfter")
                     Timber.d("shotid: $shotId")
-                    postAttachments( "5381467", context, attachments!!)
+                    postAttachments( shotId, context, attachments!!)
                     //getPublishedShotAndPublishAttachment()
                 } else {
                     //stop process and confirm to user that the post has been successfully published
@@ -141,28 +142,42 @@ class PublishTask(
     /**
      * Post one or several attachments to an existing shot
      */
+
+    private fun getRealPathFromImage(context: Context, selectedImageUri: Uri?): String? {
+        var selectedImagePath: String? = null
+        val projection = arrayOf(MediaStore.Images.Media.DATA)
+        val cursor = context.contentResolver.query(selectedImageUri!!,
+                projection, null, null, null)
+        if (cursor == null) {
+            selectedImagePath = selectedImageUri.path
+        } else {
+            if (!cursor.moveToFirst()) {
+                cursor.moveToFirst()
+                val idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA)
+                selectedImagePath = cursor.getString(idx)
+            }
+        }
+        cursor?.let{
+            cursor.close()
+        }
+        return selectedImagePath
+    }
+
+
     fun postAttachments(
             shotId:String,
             context: Context,
             uris:List<Attachment>) {
 
-        context.getDir("Content", Context.MODE_PRIVATE)
-        val directory = File(context.filesDir, "Content")
-        if (!directory.exists()) {
-            directory.mkdir()
-        }
-
-        val newFile = File(directory,uris[0].uri.toString())
-
-        val body = HttpUtils.createFilePart(
-                context,
-                //Uri.parse(uris[0].uri),
-                Uri.parse(newFile.absolutePath),
-               // ImageUtils.getAttachmentFileUrl(context,uris[0].uri),
-                uris[0].imageFormat,
-                "file")
+           //val attachmentFileUri = Uri.parse(uris[0].uri!!).lastPathSegment + "." + uris[0].fileName
+           val attachmentFileUri:String = ImagePicker.getImageFilePathFromContentUri(context, uris[0].fileName!!).toString()
+           val body = HttpUtils.createFilePart(
+                   context,
+                   Uri.parse(uris[0].uri), // Uri.parse(getRealPathFromImage(context,Uri.parse(attachmentFileUri))),
+                   uris[0].imageFormat,
+                   "file")
         Timber.d("postAttachments called")
-        mCompositeDisposable.add(mShotRepository.addAttachment("5381467", body)
+        /*mCompositeDisposable.add(mShotRepository.addAttachment(shotId, body)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -170,12 +185,12 @@ class PublishTask(
                         {t -> onPostFailed(t)},
                         {Timber.d("complete")}
                 )
-        )
-        /*mCompositeDisposable.add(
-                Observable.fromIterable(uris) //map the list to an Observable that emits every item as an observable
-                        .filter {it -> it.id!=-1L } //send only item in the list which ids is -1L
-                        .flatMap {it -> //perform following operation on every filtered item
-                            // create RequestBody instance from file
+        )*/
+        mCompositeDisposable.add(
+                Observable.just(uris) //we create an Observable that emits a single array
+                        .flatMapIterable { it} //map the list to an Observable that emits every item as an observable
+                        .filter {it -> it.id==-1L } //send only item in the list which ids is -1L
+                        .flatMap {it -> //perform following operation on every item
                             val body = HttpUtils.createFilePart(
                                     context,
                                     Uri.parse(it.uri),
@@ -195,7 +210,7 @@ class PublishTask(
                                 {t -> onPostFailed(t)},
                                 {Timber.d("complete")}
                         )
-        )*/
+        )
     }
     /*
     *************************************************************************
