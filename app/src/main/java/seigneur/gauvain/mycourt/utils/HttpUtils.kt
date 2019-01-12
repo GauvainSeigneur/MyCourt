@@ -10,6 +10,7 @@ import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import seigneur.gauvain.mycourt.utils.image.ImageUtils
+import timber.log.Timber
 
 class HttpUtils {
     companion object {
@@ -25,15 +26,11 @@ class HttpUtils {
                            partName: String): MultipartBody.Part {
             //Get file
             val uriOfFile = getRealPathFromImage(context, fileUri)
-            val file = File(uriOfFile)
-            val imageFormatFixed: String?
-            //Word around for jpg format - refused by dribbble
-            if (imageFormat == "jpg")
-                imageFormatFixed = "JPG" // todo - to be tested
-            else
-                imageFormatFixed = imageFormat
+            Timber.d("uriOfFile $uriOfFile")
+            val file = File(uriOfFile.toString())
             // create RequestBody instance from file
-            val requestFile = RequestBody.create(MediaType.parse("image/$imageFormatFixed"), file)
+            val requestFile = RequestBody.create(MediaType.parse(imageFormat!!), file)
+            Timber.d("requestFile $requestFile")
             // MultipartBody.Part is used to send also the actual file name
             return MultipartBody.Part.createFormData(partName, file.name, requestFile)
         }

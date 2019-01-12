@@ -40,11 +40,12 @@ class ImageUtils {
             Timber.d(croppedFileUri?.lastPathSegment)
             //1: define path and create folder "MyCourt" inside Gallery
             val appDirectoryName = "MyCourt"
-            val myCourtDraftFolder = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).absolutePath, appDirectoryName)
+            val myCourtDraftFolder = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).absolutePath,
+                    appDirectoryName)
             myCourtDraftFolder.mkdirs()
             //2: give to image a name
             //String filename = String.format("%d_%s", Calendar.getInstance().getTimeInMillis(), croppedFileUri.getLastPathSegment())+"."+ImageCroppedFormat;
-            val filename = croppedFileUri?.lastPathSegment + "." + ImageCroppedFormat
+            val filename = croppedFileUri?.lastPathSegment + "."+ ImageCroppedFormat.substringAfterLast("/",ImageCroppedFormat )
             //3: create a file with the path of myCourtDraftFolder and the given name
             val saveFile = File(myCourtDraftFolder.absolutePath, filename)
             //4: Copy file and close process
@@ -60,6 +61,7 @@ class ImageUtils {
             //showNotification(saveFile);
             //6: get the new URI of the file after it has been copied to save it in Room
             //Uri fileUri = FileProvider.getUriForFile(context, context.getString(R.string.file_provider_authorities), saveFile);
+            Timber.d("saved uri: "+saveFile.absolutePath)
             return saveFile.absolutePath//fileUri;
         }
 
