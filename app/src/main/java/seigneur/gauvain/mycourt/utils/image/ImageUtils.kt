@@ -156,19 +156,6 @@ class ImageUtils {
         }
 
 
-        fun getContentUriFromFilePath(context: Context, contentUri: String?): Uri? {
-            return if (contentUri!= null) {
-                FileProvider.getUriForFile(
-                        context,
-                        context.getString(R.string.file_provider_authorities),
-                        File(contentUri))
-            } else {
-                null
-            }
-
-        }
-
-
     }
 
 }

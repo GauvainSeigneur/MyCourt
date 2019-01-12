@@ -161,19 +161,20 @@ constructor() : ViewModel(),
     }
 
     fun onPermGranted() {
-        registerOrUpdateDraft(mApplication, true)
+        //registerOrUpdateDraft(mApplication, true)
     }
 
     fun onStoreDraftClicked() {
         if (title.value == null || title.value!!.isEmpty()) {
             //TODO - single live event
-            //mEditShotView.showMessageEmptyTitle();
+            Timber.d("niquetamere")
         } else {
-            if (getCroppedImageUri().value != null && imagePickedFormat != null) {
+            registerOrUpdateDraft(mApplication, true)
+           /* if (getCroppedImageUri().value != null && imagePickedFormat != null) {
                 checkPerm.call()
             } else {
                 registerOrUpdateDraft(mApplication, false)
-            }
+            }*/
         }
     }
 

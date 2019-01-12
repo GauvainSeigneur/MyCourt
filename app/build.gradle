@@ -32,8 +32,10 @@ kapt {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.tools.build.jetifier:jetifier-core:1.0.0-beta02'
-
-    //Android UI elements
+    /*
+    *********************************************************************************************
+    * Android X & Android Material
+    *********************************************************************************************/
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'
@@ -41,26 +43,10 @@ dependencies {
     implementation 'androidx.palette:palette:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
     implementation 'com.google.android:flexbox:1.1.0'
-
-    //timber
-    implementation 'com.jakewharton.timber:timber:4.6.1'
-
-    //Ucrop - to crop
-    implementation 'com.github.yalantis:ucrop:2.2.2-native'
-
-    //Serialize/deserialize JSON with retrofit
-    implementation 'com.google.code.gson:gson:2.8.2'
-
-    //Pinentryedittext : used for password entries
-    implementation 'com.alimuzaffar.lib:pinentryedittext:2.0.6'
-
-    //RxJava & RxAndroid
-    def rxJavaVersion = '2.1.1'
-    def rxAndroidVersion = '2.0.2'
-    implementation "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
-    implementation "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
-
-    //Android Architecture Components
+    /*
+    *********************************************************************************************
+    * Android Architecture Components
+    *********************************************************************************************/
     def archVersion = '2.0.0'
     implementation "androidx.room:room-runtime:$archVersion"
     kapt "androidx.room:room-compiler:$archVersion"
@@ -79,46 +65,93 @@ dependencies {
     testImplementation "androidx.paging:paging-common:$paging_version"
     // optional - RxJava support, currently in release candidate
     implementation "android.arch.paging:rxjava2:1.0.1"
-
-    //Glide
+    /*
+    *********************************************************************************************
+    * Timber
+    *********************************************************************************************/
+    implementation 'com.jakewharton.timber:timber:4.6.1'
+    /*
+    *********************************************************************************************
+    * File Picker
+    *********************************************************************************************/
+    implementation 'com.droidninja:filepicker:2.2.0'
+    /*
+    *********************************************************************************************
+    * Ucrop
+    *********************************************************************************************/
+    implementation 'com.github.yalantis:ucrop:2.2.2-native'
+    /*
+    *********************************************************************************************
+    * Gson - Serialize/deserialize JSON with retrofit
+    *********************************************************************************************/
+    implementation 'com.google.code.gson:gson:2.8.2'
+    /*
+    *********************************************************************************************
+    * Custom Pin entry edit text
+    *********************************************************************************************/
+    implementation 'com.alimuzaffar.lib:pinentryedittext:2.0.6'
+    /*
+    *********************************************************************************************
+    * RxJava & RxAndroid
+    *********************************************************************************************/
+    def rxJavaVersion = '2.1.1'
+    def rxAndroidVersion = '2.0.2'
+    implementation "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
+    implementation "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
+    /*
+    *********************************************************************************************
+    * Glide
+    *********************************************************************************************/
     def glideVersion = '4.7.1'
     implementation "com.github.bumptech.glide:glide:$glideVersion"
     annotationProcessor "com.github.bumptech.glide:compiler:$glideVersion"
-
-    //Okhttp
+    /*
+    *********************************************************************************************
+    * Okhttp
+    *********************************************************************************************/
     def okHttpVersion = '3.10.0'
     implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
-
-    //Retrofit
+    /*
+    *********************************************************************************************
+    * Retrofit
+    *********************************************************************************************/
     def retrofitVersion = '2.4.0'
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-scalars:$retrofitVersion"
     // optional - RxJava support for Retrofit
     implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
-
-    //Butterknife
+    /*
+    *********************************************************************************************
+    * Butterknife
+    *********************************************************************************************/
     def butterKnifeVersion = '9.0.0-rc3'
     kapt "com.jakewharton:butterknife-compiler:$butterKnifeVersion"
     implementation "com.jakewharton:butterknife:$butterKnifeVersion"
-
-    //Dagger
+    /*
+    *********************************************************************************************
+    * Dagger
+    *********************************************************************************************/
     def daggerVersion = '2.16'
     kapt  "com.google.dagger:dagger-compiler:$daggerVersion"
     kapt  "com.google.dagger:dagger-android-processor:$daggerVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
     implementation "com.google.dagger:dagger-android:$daggerVersion"
     implementation "com.google.dagger:dagger-android-support:$daggerVersion"
-
-    //Canary leak
+    /*
+    *********************************************************************************************
+    * Canary leak
+    *********************************************************************************************/
     def canaryVersion = '1.6.1'
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$canaryVersion"
-    //releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$canaryVersion"
+    releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$canaryVersion"
     // Optional, if you use support library fragments:
     debugImplementation "com.squareup.leakcanary:leakcanary-support-fragment:$canaryVersion"
-
-    //Tests
+    /*
+    *********************************************************************************************
+    * Tests
+    *********************************************************************************************/
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'

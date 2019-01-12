@@ -142,50 +142,11 @@ class PublishTask(
     /**
      * Post one or several attachments to an existing shot
      */
-
-    private fun getRealPathFromImage(context: Context, selectedImageUri: Uri?): String? {
-        var selectedImagePath: String? = null
-        val projection = arrayOf(MediaStore.Images.Media.DATA)
-        val cursor = context.contentResolver.query(selectedImageUri!!,
-                projection, null, null, null)
-        if (cursor == null) {
-            selectedImagePath = selectedImageUri.path
-        } else {
-            if (!cursor.moveToFirst()) {
-                cursor.moveToFirst()
-                val idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA)
-                selectedImagePath = cursor.getString(idx)
-            }
-        }
-        cursor?.let{
-            cursor.close()
-        }
-        return selectedImagePath
-    }
-
-
     fun postAttachments(
             shotId:String,
             context: Context,
             uris:List<Attachment>) {
-
-           //val attachmentFileUri = Uri.parse(uris[0].uri!!).lastPathSegment + "." + uris[0].fileName
-           val attachmentFileUri:String = ImagePicker.getImageFilePathFromContentUri(context, uris[0].fileName!!).toString()
-           val body = HttpUtils.createFilePart(
-                   context,
-                   Uri.parse(uris[0].uri), // Uri.parse(getRealPathFromImage(context,Uri.parse(attachmentFileUri))),
-                   uris[0].imageFormat,
-                   "file")
         Timber.d("postAttachments called")
-        /*mCompositeDisposable.add(mShotRepository.addAttachment(shotId, body)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { response -> Timber.d(response.message())},
-                        {t -> onPostFailed(t)},
-                        {Timber.d("complete")}
-                )
-        )*/
         mCompositeDisposable.add(
                 Observable.just(uris) //we create an Observable that emits a single array
                         .flatMapIterable { it} //map the list to an Observable that emits every item as an observable

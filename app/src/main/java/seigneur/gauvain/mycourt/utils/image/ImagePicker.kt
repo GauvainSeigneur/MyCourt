@@ -93,27 +93,29 @@ object ImagePicker {
         options.withMaxResultSize(1600, 1200)
         //if image is Gif, it can't be cropped. so check if the px size is in accordance to
         //Must be a 4:3 ratio between 400×300 and 1600×1200
-        if (ImageCroppedFormat != null && ImageCroppedFormat == "gif") {
-            //check if image aspect ratio is 4/3
-            val gifRatio = imageSize[1].toDouble() / imageSize[0].toDouble()
-            Timber.d("4/3 :$gifRatio")
-            if (gifRatio == 0.75 && imageSize[0] <= 1600 && imageSize[1] <= 1200 && imageSize[0] > 400 && imageSize[1] >= 300) {
-                options.setHideBottomControls(true)
-                options.setAllowedGestures(UCropActivity.NONE, UCropActivity.NONE, UCropActivity.NONE)
-                UCrop.of(source, destination)
-                        .useSourceImageAspectRatio() //use source aspect ratio
-                        .withOptions(options)
-                        .start(activity)
-                Toast.makeText(activity, "gif can't be cropped", Toast.LENGTH_SHORT).show()
+        if (ImageCroppedFormat != null) {
+            if (ImageCroppedFormat.contains( "gif")){
+                //check if image aspect ratio is 4/3
+                val gifRatio = imageSize[1].toDouble() / imageSize[0].toDouble()
+                Timber.d("4/3 :$gifRatio")
+                if (gifRatio == 0.75 && imageSize[0] <= 1600 && imageSize[1] <= 1200 && imageSize[0] > 400 && imageSize[1] >= 300) {
+                    options.setHideBottomControls(true)
+                    options.setAllowedGestures(UCropActivity.NONE, UCropActivity.NONE, UCropActivity.NONE)
+                    UCrop.of(source, destination)
+                            .useSourceImageAspectRatio() //use source aspect ratio
+                            .withOptions(options)
+                            .start(activity)
+                    Toast.makeText(activity, "gif can't be cropped", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(activity, "gif can't be cropped and the format needs to be 4/3 (eg. 400px*300px)", Toast.LENGTH_SHORT).show()
+                }
             } else {
-                Toast.makeText(activity, "gif can't be cropped and the format needs to be 4/3 (eg. 400px*300px)", Toast.LENGTH_SHORT).show()
+                UCrop.of(source, destination)
+                        .withAspectRatio(4f, 3f)
+                        .withOptions(options)
+                        .withMaxResultSize(1600, 1200)
+                        .start(activity)
             }
-        } else {
-            UCrop.of(source, destination)
-                    .withAspectRatio(4f, 3f)
-                    .withOptions(options)
-                    .withMaxResultSize(1600, 1200)
-                    .start(activity)
         }
     }
 
