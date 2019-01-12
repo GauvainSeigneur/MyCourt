@@ -190,11 +190,7 @@ constructor() : ViewModel(),
         } else
             mPublishTask.postShot(
                     mTempDraft!!,
-                    mApplication,
-                    getCroppedImageUri().value!!, //when image is changed
-                    imagePickedFormat!!,
-                    hasAttachment,
-                    mTempAttachmentList)
+                    mApplication)
     }
 
     /*

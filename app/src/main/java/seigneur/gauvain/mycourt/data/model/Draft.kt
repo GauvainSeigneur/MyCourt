@@ -19,8 +19,7 @@ data class Draft(
     var schedulingDate: Date?=null,//ONLY FOR UPDATE OF AN ALREADY PUBLISHED SHOT
     //Embed shot object
     @Embedded
-    var shot: Shot
-    /*var attachments:List<Attachment>?*/) {
+    var shot: Shot) {
 
     fun changeInfoFromEdit(
             inImageUri: String?,
@@ -35,6 +34,9 @@ data class Draft(
         shot.description = desc
         shot.tagList = tags
         shot.attachment = newAttachments
-        //attachments =newAttachments
+    }
+
+    fun hasAttachment():Boolean? {
+        return shot.attachment.isNullOrEmpty()
     }
 }

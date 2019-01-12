@@ -3,6 +3,7 @@ package seigneur.gauvain.mycourt.ui.shotEdition.tasks
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Consumer
+import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository
@@ -42,13 +43,15 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
             //User wishes to create a shot
             Constants.SOURCE_FAB -> {
                 val shot = Shot("","","",null, null) //create an empty shot
+                val attachmentList=ArrayList<Attachment>()
                 val draft = Draft(
                         0,
                         Constants.EDIT_MODE_NEW_SHOT,
                         null,
                         null,
                         null,
-                        shot)
+                        shot
+                )
                 mSourceCallback.setUpTempDraft(draft)
                 mSourceCallback.dataForUIReady()
             }

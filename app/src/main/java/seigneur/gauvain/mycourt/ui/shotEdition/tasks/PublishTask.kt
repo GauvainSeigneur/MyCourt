@@ -56,12 +56,11 @@ class PublishTask(
     //1 - load the shot ! check that the name is the same as the one published, or get the id from the response!
     //2 - with the id perform attachment operation
     fun postShot(draft: Draft,
-                 context: Context,
-                 fileUri: Uri,
-                 imageFormat: String,
-                 hasAttachements: Boolean?=false,
-                 attachments:List<Attachment>?) {
-        val body = HttpUtils.createFilePart(context, fileUri, imageFormat, "image")
+                 context: Context) { //todo - set it in Draft
+        val body = HttpUtils.createFilePart(
+                context,
+                Uri.parse(draft.imageUri),
+                draft.imageFormat, "image")
         //add to HashMap key and RequestBody
         val map = HashMap<String, RequestBody>()
         // executes the request
@@ -79,7 +78,10 @@ class PublishTask(
                             handleNetworkOperationError(t, 100)
                         }
                         .subscribe(
-                                { response -> onPostSucceed(response, draft, hasAttachements,context,attachments) },
+                                { response -> onPostSucceed(response, draft,
+                                        draft.hasAttachment(),
+                                        context,
+                                        draft.shot.attachment) },
                                 {t -> onPostFailed(t)}
                         )
         )
