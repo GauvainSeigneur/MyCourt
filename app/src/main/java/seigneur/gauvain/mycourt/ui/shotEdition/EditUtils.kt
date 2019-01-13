@@ -128,13 +128,19 @@ class EditUtils {
             }
             return tempList
         }
+
+
+        //return true if the cropped image has changed (manually by the user),
+        //either return false
+        fun itHasNewImageToSave(draft:Draft?, newCroppedImageUri:Uri?):Boolean {
+            if (newCroppedImageUri!=null) {
+                return (draft?.imageUri != newCroppedImageUri.toString())
+            } else {
+                return false
+            }
+
+        }
     }
 
-    fun itHasNewImageToSave(draft:Draft?,
-                                      newCroppedImageUri:String?):Boolean {
-
-            return !(draft?.imageUri!=null && draft.imageUri == newCroppedImageUri)
-
-    }
 
 }

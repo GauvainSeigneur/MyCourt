@@ -129,7 +129,6 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         AttachmentsAdapter(attachments, this)
     }
 
-
     /*
     *********************************************************************************************
     * LIFECYCLE
@@ -175,12 +174,12 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
                 if (data != null) {
                     val shotIMG = ArrayList<String>()
                     shotIMG.addAll(data.getStringArrayListExtra(FilePickerConst.KEY_SELECTED_MEDIA))
-                    mShotEditionViewModel.imagePickedUriSource = Uri.parse(shotIMG[0])
+                    mShotEditionViewModel.mPickedFileUri = Uri.parse(shotIMG[0])
                     val shotFileName = FileUtils.getFileName(Uri.parse(shotIMG[0]))
                     val shotFileNameWithoutExtension = shotFileName.substringBefore(".",shotFileName)
-                    mShotEditionViewModel.imagePickedFileName = shotFileNameWithoutExtension
-                    mShotEditionViewModel.imagePickedFormat = FileUtils.getMimeType((shotIMG[0]))
-                    mShotEditionViewModel.imageSize = FileUtils.getImageFilePixelSize(Uri.parse(shotIMG[0]))
+                    mShotEditionViewModel.mPickedFileName = shotFileNameWithoutExtension
+                    mShotEditionViewModel.mPickedFileMymeType = FileUtils.getMimeType((shotIMG[0]))
+                    mShotEditionViewModel.mPickedImageDimens = FileUtils.getImageFilePixelSize(Uri.parse(shotIMG[0]))
                     //notify viewModel to call Ucrop command
                     mShotEditionViewModel.onImagePicked()
                 }
@@ -268,31 +267,31 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         }
         )
 
-        viewModel.pickShotCommand.observe(this, Observer {
+        viewModel.mPickShotCmd.observe(this, Observer {
             openImagePicker()
         })
 
-        viewModel.pickAttachmentCommand.observe(this, Observer {
+        viewModel.mPickAttachmentCmd.observe(this, Observer {
             openAttachmentPicker()
         })
 
-        viewModel.cropImageCmd.observe(this,
+        viewModel.mCropImgCmd.observe(this,
                  Observer {
                     goToUCropActivity(
-                            mShotEditionViewModel.imagePickedFormat,
+                            mShotEditionViewModel.mPickedFileMymeType,
                             FileUtils.getContentUriFromFilePath(this,
-                                    mShotEditionViewModel.imagePickedUriSource.toString()),
-                            Uri.fromFile( File(this.cacheDir, mShotEditionViewModel.imagePickedFileName)),
-                            mShotEditionViewModel.imageSize)
+                                    mShotEditionViewModel.mPickedFileUri.toString()),
+                            Uri.fromFile( File(this.cacheDir, mShotEditionViewModel.mPickedFileName)),
+                            mShotEditionViewModel.mPickedImageDimens)
                 })
 
         viewModel.pickCropImgErrorCmd.observe(this,
                 Observer { Toast.makeText(this, "oops :" + it, Toast.LENGTH_SHORT).show() })
 
-        viewModel.checkPerm.observe(this,
+        viewModel.mCheckPerm.observe(this,
                 Observer { checkPermissionExtStorage() })
 
-        viewModel.requestPermCmd.observe(this,
+        viewModel.mRequestPermCmd.observe(this,
                 Observer {  requestPermission() })
 
         viewModel.onPublishSucceed.observe(this,

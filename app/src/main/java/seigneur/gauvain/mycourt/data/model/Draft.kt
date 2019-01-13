@@ -36,7 +36,11 @@ data class Draft(
         shot.attachment = newAttachments
     }
 
-    fun hasAttachment():Boolean? {
+    fun hasAttachment():Boolean {
         return shot.attachment.isNullOrEmpty()
+    }
+
+    fun hasAttachmentToPublish():Boolean {
+        return hasAttachment() &&  shot.attachment!!.any { it -> it.id == -1L }
     }
 }
