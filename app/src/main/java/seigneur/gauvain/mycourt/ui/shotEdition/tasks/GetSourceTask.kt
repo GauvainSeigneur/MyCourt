@@ -43,7 +43,6 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
             //User wishes to create a shot
             Constants.SOURCE_FAB -> {
                 val shot = Shot("","","",null, null) //create an empty shot
-                val attachmentList=ArrayList<Attachment>()
                 val draft = Draft(
                         0,
                         Constants.EDIT_MODE_NEW_SHOT,
@@ -53,7 +52,7 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
                         shot
                 )
                 mSourceCallback.setUpTempDraft(draft)
-                mSourceCallback.dataForUIReady()
+                //mSourceCallback.dataForUIReady()
             }
         }
     }
@@ -85,7 +84,7 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
                 shot.imageHidpi, null, null,
                 shot)
         mSourceCallback.setUpTempDraft(draft)
-        mSourceCallback.dataForUIReady()
+       // mSourceCallback.dataForUIReady()
     }
 
     private fun onGetShotError(throwable: Throwable) {
@@ -107,7 +106,7 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
 
     private fun manageShotDraftInfo(shotDraft: Draft) {
         mSourceCallback.setUpTempDraft(shotDraft)
-        mSourceCallback.dataForUIReady()
+       // mSourceCallback.dataForUIReady()
         Timber.d("typeofDraft : " + shotDraft.typeOfDraft)
     }
 
@@ -120,7 +119,7 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
 
         fun setUpTempDraft(draft: Draft)
 
-        fun dataForUIReady()
+       // fun dataForUIReady()
 
 
     }

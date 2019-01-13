@@ -129,7 +129,6 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         AttachmentsAdapter(attachments, this)
     }
 
-    //var photoPaths =  ArrayList<String>();
 
     /*
     *********************************************************************************************
@@ -181,7 +180,6 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
                     val shotFileNameWithoutExtension = shotFileName.substringBefore(".",shotFileName)
                     mShotEditionViewModel.imagePickedFileName = shotFileNameWithoutExtension
                     mShotEditionViewModel.imagePickedFormat = FileUtils.getMimeType((shotIMG[0]))
-
                     mShotEditionViewModel.imageSize = FileUtils.getImageFilePixelSize(Uri.parse(shotIMG[0]))
                     //notify viewModel to call Ucrop command
                     mShotEditionViewModel.onImagePicked()
@@ -241,7 +239,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     private fun subscribeToLiveData(viewModel: ShotEditionViewModel) {
 
         viewModel.getCroppedImageUri().observe(this, Observer<Uri> {
-            this.displayShotImagePreview(it)
+            this.displayShotImagePreview(it.toString())
             Timber.d("Uri change :$it")
         })
 
@@ -265,7 +263,9 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
     private fun subscribeToSingleEvent(viewModel: ShotEditionViewModel) {
         viewModel.setUpUiCmd.observe(
-                this, Observer { setUpEditionUI(mShotEditionViewModel.getTempDraft()!!) }
+                this, Observer { it ->
+            setUpEditionUI(it)
+        }
         )
 
         viewModel.pickShotCommand.observe(this, Observer {
@@ -319,7 +319,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
     /*
     *********************************************************************************************
-    * INNER
+    * Private
     *********************************************************************************************/
     private fun checkPermissionExtStorage() {
         if (ActivityCompat.checkSelfPermission(this,
@@ -386,13 +386,6 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
             mToolbar.title = "Edit a shot"
         }
 
-        //get image from draft object
-        if (draft.imageUri == null)
-            croppedImagePreview.setImageResource(R.drawable.add_image_illustration)
-        val imageCroppedUri :Uri? = EditUtils.getShotImageUrl(this, draft)
-        if (imageCroppedUri!=null)
-            mShotEditionViewModel.onImageCropped(imageCroppedUri)
-
         //get title from draft object
         mShotTitleEditor.setText(draft.shot.title)
 
@@ -404,21 +397,26 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         //get tags from draft objects
         mTagEditor.setText(EditUtils.getTagList(draft))
 
-        //get attachments from Draft object and send data to ViewModel to update UI
         draft.shot.attachment?.let {
             updateAttachmentList(ArrayList(draft.shot.attachment))
             for (i in ArrayList(draft.shot.attachment)) {
                 mShotEditionViewModel.onAttachmentAdded(i)
             }
         }
+        //get image from draft object
+        if (draft.typeOfDraft == Constants.EDIT_MODE_UPDATE_SHOT) {
+            displayShotImagePreview(draft.shot.imageNormal)
+        } else {
+            displayShotImagePreview(draft.imageUri)
+        }
 
     }
 
-    private fun displayShotImagePreview(uriImageCropped: Uri?) {
+    private fun displayShotImagePreview(uriImageCropped: String?) {
         if (uriImageCropped != null) {
             Glide.with(mApplication)
                     .asBitmap()
-                    .load(uriImageCropped)
+                    .load(Uri.parse(uriImageCropped))
                     .apply(RequestOptions()
                             .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .error(R.drawable.ic_my_shot_black_24dp)

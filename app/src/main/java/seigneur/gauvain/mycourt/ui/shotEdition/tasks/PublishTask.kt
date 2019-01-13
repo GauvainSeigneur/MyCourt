@@ -31,13 +31,6 @@ import seigneur.gauvain.mycourt.utils.Constants
 import seigneur.gauvain.mycourt.utils.HttpUtils
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler
 import timber.log.Timber
-import java.io.File
-import java.util.concurrent.TimeUnit
-import android.provider.MediaStore
-import androidx.documentfile.provider.DocumentFile
-import androidx.loader.content.CursorLoader
-import seigneur.gauvain.mycourt.utils.image.ImagePicker
-import seigneur.gauvain.mycourt.utils.image.ImageUtils
 
 
 class PublishTask(

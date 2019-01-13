@@ -86,11 +86,15 @@ object ImagePicker {
                           destination: Uri,
                           activity: Activity,
                           imageSize: IntArray) {
+
         val options = UCrop.Options()
         options.setStatusBarColor(activity.resources.getColor(R.color.colorPrimaryDark))
         options.setToolbarColor(activity.resources.getColor(R.color.colorPrimary))
         options.setActiveWidgetColor(activity.resources.getColor(R.color.colorAccent))
-        options.withMaxResultSize(1600, 1200)
+        if (imageSize!=null)
+            Timber.d("image size before cropping "+imageSize[0]+" "+imageSize[1])
+        else
+            Timber.d("image size empty")
         //if image is Gif, it can't be cropped. so check if the px size is in accordance to
         //Must be a 4:3 ratio between 400×300 and 1600×1200
         if (ImageCroppedFormat != null) {

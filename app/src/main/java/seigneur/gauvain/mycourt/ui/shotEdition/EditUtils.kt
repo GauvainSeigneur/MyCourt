@@ -130,4 +130,11 @@ class EditUtils {
         }
     }
 
+    fun itHasNewImageToSave(draft:Draft?,
+                                      newCroppedImageUri:String?):Boolean {
+
+            return !(draft?.imageUri!=null && draft.imageUri == newCroppedImageUri)
+
+    }
+
 }
