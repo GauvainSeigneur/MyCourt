@@ -23,6 +23,7 @@ import seigneur.gauvain.mycourt.utils.MyTextUtils
 class EditUtils {
     companion object {
 
+
         /**
          * Manage description String
          * @param draft

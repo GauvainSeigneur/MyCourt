@@ -251,6 +251,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         viewModel.tags.observe(this,  Observer<ArrayList<String>> { Timber.d("tags change:$it") })
 
         viewModel.attachmentsTobeUploaded.observe(this,  Observer<ArrayList<Attachment>> {
+            Timber.d("attachmentList changed: "+it)
             updateAttachmentList(it)
         })
 
@@ -387,39 +388,30 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
         //get title from draft object
         mShotTitleEditor.setText(draft.shot.title)
-
         //get description from draft objects
         val description = EditUtils.getDescription(draft)
         if (description != null && !description.isEmpty())
             mShotDescriptionEditor.setText(MyTextUtils.noTrailingwhiteLines(description))
-
         //get tags from draft objects
         mTagEditor.setText(EditUtils.getTagList(draft))
-
-        draft.shot.attachment?.let {
-            updateAttachmentList(ArrayList(draft.shot.attachment))
-            for (i in ArrayList(draft.shot.attachment)) {
-                mShotEditionViewModel.onAttachmentAdded(i)
-            }
-        }
-        //get image from draft object
+        //DISPLAY DEFAULT SHOT IMAGE FOR PUBLISHED SHOT AND NEW DRAFT
+        //FOR DRAFT WITH STORED CROPPED IMAGE, WE GET IT FROM LIVEDATA
         if (draft.typeOfDraft == Constants.EDIT_MODE_UPDATE_SHOT) {
-            displayShotImagePreview(draft.shot.imageNormal)
+            displayShotImagePreview(draft.shot.imageHidpi)
         } else {
-            displayShotImagePreview(draft.imageUri)
+            if (draft.imageUri.isNullOrEmpty())
+                displayShotImagePreview(null)
         }
-
     }
 
     private fun displayShotImagePreview(uriImageCropped: String?) {
-        if (uriImageCropped != null) {
+        if (!uriImageCropped.isNullOrEmpty()) {
             Glide.with(mApplication)
                     .asBitmap()
                     .load(Uri.parse(uriImageCropped))
                     .apply(RequestOptions()
                             .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .error(R.drawable.ic_my_shot_black_24dp)
-                            // .diskCacheStrategy(DiskCacheStrategy.ALL)
                     )
                     .listener(object : RequestListener<Bitmap> {
                         override fun onLoadFailed(e: GlideException?, model: Any, target: Target<Bitmap>, isFirstResource: Boolean): Boolean {
@@ -459,11 +451,12 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         })
     }
 
-    private fun updateAttachmentList(atatchments: ArrayList<Attachment>) {
+    private fun updateAttachmentList(newAttachmentList: ArrayList<Attachment>) {
+        Timber.d("updateAttachmentList called")
         attachments.clear() //clear list
-        for (i in atatchments.indices) {
+        for (i in newAttachmentList.indices) {
             //repopulate list
-            attachments.add(atatchments[i])
+            attachments.add(newAttachmentList[i])
         }
         mAttachmentsAdapter.updateRv()
     }

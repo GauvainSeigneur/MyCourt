@@ -37,7 +37,7 @@ data class Draft(
     }
 
     fun hasAttachment():Boolean {
-        return shot.attachment.isNullOrEmpty()
+        return !shot.attachment.isNullOrEmpty()
     }
 
     fun hasAttachmentToPublish():Boolean {

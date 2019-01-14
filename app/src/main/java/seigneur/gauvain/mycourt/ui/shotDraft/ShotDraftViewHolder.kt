@@ -75,20 +75,10 @@ class ShotDraftViewHolder(itemView: View, private var mCallback: ShotDraftListCa
      * @return uri of the image
      */
     private fun getImageUri(item: Draft): Uri? {
-
-        if (item.imageUri != null)
-            return  Uri.parse(item.imageUri)
+        if (item.typeOfDraft == Constants.EDIT_MODE_UPDATE_SHOT)
+            return Uri.parse(item.shot.imageNormal)
         else
-            return  Uri.parse("") //empty uri which provokes Glide Error and so dedicated drawable will be displayed
-            /*if (item.typeOfDraft == Constants.EDIT_MODE_NEW_SHOT)
-                FileProvider.getUriForFile(itemView.context,
-                        itemView.context.getString(R.string.file_provider_authorities),
-                        File(item.imageUri!!))
-            else
-                Uri.parse(item.imageUri)
-        else
-            Uri.parse("") //empty uri which provokes Glide Error and so dedicated drawable will be displayed
-            */
+            return Uri.parse(item.imageUri)
     }
 
 }
