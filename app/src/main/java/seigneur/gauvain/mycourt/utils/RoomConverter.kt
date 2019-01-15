@@ -87,6 +87,22 @@ object RoomConverter {
         return list
     }
 
+    @TypeConverter
+    @JvmStatic
+    fun intArrayToString(array: IntArray?): String? {
+        val gson = Gson()
+        return if (array == null) null else gson.toJson(array)
+    }
+
+    @TypeConverter
+    @JvmStatic
+    fun stringToArrayIntArray(string: String): IntArray? {
+        val listType = object : TypeToken<IntArray>() {
+
+        }.type
+        return Gson().fromJson<IntArray>(string, listType)
+    }
+
 
 
 }

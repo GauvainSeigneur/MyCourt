@@ -19,60 +19,6 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 
 object ImagePicker {
-    //https://stackoverflow.com/questions/38619563/sending-image-file-with-retrofit-2
-
-    private const val TAG = "ImagePicker"
-    private const val TEMP_IMAGE_NAME = "tempImage"
-
-    fun pickImage(activity: Activity, requestCode: Int) {
-        activity.startActivityForResult(
-                createChooserIntent(),
-                requestCode)
-    }
-
-    private fun createChooserIntent(): Intent {
-        val intent = Intent()
-        intent.type = "image/*"
-        intent.action = Intent.ACTION_GET_CONTENT
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
-        return Intent.createChooser(intent, null)
-    }
-
-    /**
-     * get the file name of the picked Image - it allows to get the URI of the file image
-     * @param context - context provided by activity
-     * @param uri - uri from intent data
-     * @return file name
-     */
-    fun getPickedImageName(context: Context, uri: Uri): String {
-        val returnCursor = context.contentResolver.query(uri, null, null, null, null)!!
-        val nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        returnCursor.moveToFirst()
-        val name = returnCursor.getString(nameIndex)
-        returnCursor.close()
-        val nameWithoutExtenstion: String
-        if (name != null) {
-            nameWithoutExtenstion = name.substring(0, name.lastIndexOf('.'))
-        } else {
-            val imageFile = getTempFile(context)
-            nameWithoutExtenstion = imageFile.name
-        }
-
-        return nameWithoutExtenstion
-    }
-
-    fun getImageFilePathFromContentUri(context: Context,fileName:String):Uri {
-        //get Image picked file uri path from the one picked with picker
-       // return Uri.fromFile(File(context.externalCacheDir, fileName))
-        return Uri.fromFile(File(context.cacheDir, fileName))
-    }
-
-    private fun getTempFile(context: Context): File {
-        val imageFile = File(context.externalCacheDir, TEMP_IMAGE_NAME)
-        imageFile.parentFile.mkdirs()
-        return imageFile
-    }
-
     /**
      * Go to cropping activity
      * @param ImageCroppedFormat -  PNG, JPEG, GIF
@@ -114,10 +60,20 @@ object ImagePicker {
                     Toast.makeText(activity, "gif can't be cropped and the format needs to be 4/3 (eg. 400px*300px)", Toast.LENGTH_SHORT).show()
                 }
             } else {
+                /* if (imageSize[0] >= 1600 && imageSize[1] >= 1200) {
+                    options.withMaxResultSize(1600, 1200)
+                } else if ( imageSize[0] <= 1600 && imageSize[1] <= 1200 && imageSize[0] >= 800 && imageSize[1] >= 600) {
+                    options.withMaxResultSize(800, 600)
+                } else {
+                    options.withMaxResultSize(400, 300)
+                }*/
+
+                options.setCompressionQuality(100)
+                options.setMaxBitmapSize(100000)
+
                 UCrop.of(source, destination)
                         .withAspectRatio(4f, 3f)
                         .withOptions(options)
-                        .withMaxResultSize(1600, 1200)
                         .start(activity)
             }
         }
@@ -127,6 +83,56 @@ object ImagePicker {
     ******************************************************************************************
     * OLD
     ******************************************************************************************/
+    private const val TAG = "ImagePicker"
+    private const val TEMP_IMAGE_NAME = "tempImage"
+
+    //https://stackoverflow.com/questions/38619563/sending-image-file-with-retrofit-2
+
+    /**
+     * get the file name of the picked Image - it allows to get the URI of the file image
+     * @param context - context provided by activity
+     * @param uri - uri from intent data
+     * @return file name
+     */
+    fun getPickedImageName(context: Context, uri: Uri): String {
+        val returnCursor = context.contentResolver.query(uri, null, null, null, null)!!
+        val nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        returnCursor.moveToFirst()
+        val name = returnCursor.getString(nameIndex)
+        returnCursor.close()
+        val nameWithoutExtenstion: String
+        if (name != null) {
+            nameWithoutExtenstion = name.substring(0, name.lastIndexOf('.'))
+        } else {
+            val imageFile = getTempFile(context)
+            nameWithoutExtenstion = imageFile.name
+        }
+
+        return nameWithoutExtenstion
+    }
+
+    fun getImageFilePathFromContentUri(context: Context,fileName:String):Uri {
+        //get Image picked file uri path from the one picked with picker
+       // return Uri.fromFile(File(context.externalCacheDir, fileName))
+        return Uri.fromFile(File(context.cacheDir, fileName))
+    }
+
+    fun pickImage(activity: Activity, requestCode: Int) {
+        activity.startActivityForResult(
+                createChooserIntent(),
+                requestCode)
+    }
+
+    private fun createChooserIntent(): Intent {
+        val intent = Intent()
+        intent.type = "image/*"
+        intent.action = Intent.ACTION_GET_CONTENT
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        return Intent.createChooser(intent, null)
+    }
+
+
+
     fun getImageUriFromResult(context: Context, resultCode: Int, imageReturnedIntent: Intent?): Uri? {
         Log.d(TAG, "getImageFromResult, resultCode: $resultCode")
         val imageFile = getTempFile(context)
@@ -145,6 +151,12 @@ object ImagePicker {
         }
         //getImageSize(context,selectedImage!!)
         return selectedImage
+    }
+
+    private fun getTempFile(context: Context): File {
+        val imageFile = File(context.externalCacheDir, TEMP_IMAGE_NAME)
+        imageFile.parentFile.mkdirs()
+        return imageFile
     }
 
     private fun calculateFileSize(file: File): String {

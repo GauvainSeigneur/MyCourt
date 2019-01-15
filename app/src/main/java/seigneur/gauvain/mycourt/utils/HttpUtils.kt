@@ -1,16 +1,20 @@
 package seigneur.gauvain.mycourt.utils
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
+import com.yalantis.ucrop.UCrop
 
 import java.io.File
 
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import seigneur.gauvain.mycourt.utils.image.ImageUtils
 import timber.log.Timber
+import java.io.ByteArrayOutputStream
+import java.io.FileOutputStream
 
 class HttpUtils {
     companion object {
@@ -21,44 +25,60 @@ class HttpUtils {
          * See : https://stackoverflow.com/a/40873297
          */
         fun createFilePart(context: Context,
+                           originalImgDimen: IntArray,
                            fileUri: Uri?,
                            imageFormat: String?,
                            partName: String): MultipartBody.Part {
             //Get file
-            val uriOfFile = getRealPathFromImage(context, fileUri)
-            Timber.d("uriOfFile $uriOfFile")
-            val file = File(uriOfFile.toString())
+            //create a file to write bitmap data
+            val f =  createCacheFileFromBitmap(context, originalImgDimen, fileUri)
+            Timber.d("originalImgDimen "+ originalImgDimen[0] + originalImgDimen[1])
             // create RequestBody instance from file
-            val requestFile = RequestBody.create(MediaType.parse(imageFormat!!), file)
+            val requestFile = RequestBody.create(MediaType.parse(imageFormat!!), f)
             Timber.d("requestFile $requestFile")
             // MultipartBody.Part is used to send also the actual file name
-            return MultipartBody.Part.createFormData(partName, file.name, requestFile)
+            return MultipartBody.Part.createFormData(partName, f.name, requestFile)
+
+
         }
 
         /**
-         * Get the the file system path from the content provider uri
-         * @param context - activity or fragment
-         * @param selectedImageUri - Uri of the image
-         * @return the system file url (get the file)
+         * As the Ucrop image resize function doesn't work well, we :
+         * 1 - create bitmap from the Uri
+         * 2 - adjust its width and height while keeping the ratio from cropping
+         * 3 - convert it in a file to operation is finished
          */
-        private fun getRealPathFromImage(context: Context, selectedImageUri: Uri?): String? {
-            var selectedImagePath: String? = null
-            val projection = arrayOf(MediaStore.Images.Media.DATA)
-            val cursor = context.contentResolver.query(selectedImageUri!!,
-                    projection, null, null, null)
-            if (cursor == null) {
-                selectedImagePath = selectedImageUri.path
-            } else {
-                if (!cursor.moveToFirst()) {
-                    cursor.moveToFirst()
-                    val idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA)
-                    selectedImagePath = cursor.getString(idx)
-                }
-            }
-            cursor?.let{
-                cursor.close()
-            }
-            return selectedImagePath
+        private fun createCacheFileFromBitmap(context: Context,
+                                              originalImgDimen: IntArray,
+                                              fileUri: Uri?): File {
+            //Get file
+            //create a file to write bitmap data
+            val f =  File(context.cacheDir, fileUri?.lastPathSegment) //todo - change image name
+            f.createNewFile()
+            Timber.d("originalImgDimen "+ originalImgDimen[0] + originalImgDimen[1])
+            //Convert bitmap to byte array
+            val bitmap = FileUtils.getAdjustedBitmap(
+                    originalImgDimen,
+                    FileUtils.getFilePathFromContentUri(context, fileUri)!!)
+            Timber.d("bitmap adjusted "+ bitmap.width)
+            val bos = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100 /*ignored for PNG*/, bos)
+            val bitmapdata = bos.toByteArray()
+            //write the bytes in file
+            val fos =  FileOutputStream(f)
+            fos.write(bitmapdata)
+            fos.flush()
+            fos.close()
+            //recycler it after you don't need it
+            bitmap.recycle()
+            return f
+        }
+
+        //old version
+        private fun createFileFromuri(context: Context, fileUri: Uri?):File {
+            val uriOfFile = FileUtils.getFilePathFromContentUri(context, fileUri)
+            Timber.d("uriOfFile $uriOfFile")
+            return File(uriOfFile.toString())
         }
     }
 

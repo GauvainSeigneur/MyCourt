@@ -11,14 +11,15 @@ import java.util.Date
 
 @Entity
 data class Draft(
-    @PrimaryKey(autoGenerate = true)
+        @PrimaryKey(autoGenerate = true)
     var draftID: Long = 0, //Insert methods treat 0 as not-set while inserting the item, so Room will auto generated an ID
-    var typeOfDraft: Int = Int.MIN_VALUE, //NEW SHOT OR UPDATE
-    var imageUri: String? = "" ,//for viewing TODO - maybe delete ?
-    var imageFormat: String? = "",
-    var schedulingDate: Date?=null,//ONLY FOR UPDATE OF AN ALREADY PUBLISHED SHOT
+        var typeOfDraft: Int = Int.MIN_VALUE, //NEW SHOT OR UPDATE
+        var imageUri: String? = "",//for viewing TODO - maybe delete ?
+        var imageFormat: String? = "",
+        var schedulingDate: Date?=null,//ONLY FOR UPDATE OF AN ALREADY PUBLISHED SHOT
+        var croppedImgDimen:IntArray?=intArrayOf(400, 300), //minimal Dribble dimens by default
     //Embed shot object
-    @Embedded
+        @Embedded
     var shot: Shot) {
 
     fun changeInfoFromEdit(
@@ -27,13 +28,15 @@ data class Draft(
             title: String?,
             desc: String?,
             tags: ArrayList<String>?,
-            newAttachments: List<Attachment>?) {
+            newAttachments: List<Attachment>?,
+            newImgDimen:IntArray?){
         imageUri = inImageUri
         imageFormat = inImageFormat
         shot.title = title
         shot.description = desc
         shot.tagList = tags
         shot.attachment = newAttachments
+        croppedImgDimen = newImgDimen
     }
 
     fun hasAttachment():Boolean {
@@ -43,4 +46,5 @@ data class Draft(
     fun hasAttachmentToPublish():Boolean {
         return hasAttachment() &&  shot.attachment!!.any { it -> it.id == -1L }
     }
+
 }

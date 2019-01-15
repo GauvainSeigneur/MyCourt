@@ -88,6 +88,7 @@ constructor() : ViewModel(),
     var mPickedFileName: String? = ""                   //non UI data
     var mPickedFileMymeType: String? = ""               //non UI data
     var mPickedImageDimens: IntArray? = null            //non UI data
+    var mCroppedImgDimen: IntArray? = intArrayOf(400, 300)              //non UI data
     //Draft data
     private val croppedImageUri = MutableLiveData<Uri>()
     private val mTitle = MutableLiveData<String>()
@@ -257,7 +258,8 @@ constructor() : ViewModel(),
                 title.value,
                 description.value,
                 tags.value,
-                mAttachmentList.value)
+                mAttachmentList.value,
+                mCroppedImgDimen)
 
     }
     /*

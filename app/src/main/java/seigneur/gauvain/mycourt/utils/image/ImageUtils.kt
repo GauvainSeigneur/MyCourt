@@ -110,54 +110,6 @@ class ImageUtils {
             return bitmap
         }
 
-
-        /**
-         * Get the image height and width to
-         * @param context
-         * @param uri
-         * @param sampleSize
-         * @return
-         */
-        fun imagePickedWidthHeight(context: Context, uri: Uri, sampleSize: Int): IntArray {
-            val options = BitmapFactory.Options()
-            var fileDescriptor: AssetFileDescriptor? = null
-            var bitmap: Bitmap? = null
-            try {
-                fileDescriptor = context.contentResolver.openAssetFileDescriptor(uri, "r")
-                bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor!!.fileDescriptor, null, options)
-            } catch (e: FileNotFoundException) {
-                e.printStackTrace()
-            }
-
-            if (bitmap != null) {
-                Timber.d("image sized - width: " + bitmap.width + " height: " + bitmap.height)
-                return intArrayOf(bitmap.width, bitmap.height)
-            } else
-                return intArrayOf(0, 0)
-
-        }
-
-
-        /**
-         * TO DELETE ???
-         */
-
-        fun decodeBitmap(context: Context, uri: Uri, sampleSize: Int): Bitmap? {
-            val options = BitmapFactory.Options()
-            var fileDescriptor: AssetFileDescriptor? = null
-            var actuallyUsableBitmap: Bitmap? = null
-            try {
-                fileDescriptor = context.contentResolver.openAssetFileDescriptor(uri, "r")
-                actuallyUsableBitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor!!.fileDescriptor, null, options)
-            } catch (e: FileNotFoundException) {
-                e.printStackTrace()
-                Timber.d("error")
-            }
-
-            return actuallyUsableBitmap
-        }
-
-
     }
 
 }

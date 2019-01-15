@@ -49,6 +49,7 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
                         null,
                         null,
                         null,
+                        null,
                         shot
                 )
                 mSourceCallback.setUpTempDraft(draft)
@@ -82,6 +83,7 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
                 0,
                 Constants.EDIT_MODE_UPDATE_SHOT,
                 shot.imageHidpi, null, null,
+                null,
                 shot)
         mSourceCallback.setUpTempDraft(draft)
        // mSourceCallback.dataForUIReady()

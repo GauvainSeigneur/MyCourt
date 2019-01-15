@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
 import android.media.ExifInterface
 import android.net.Uri
@@ -67,13 +68,10 @@ import seigneur.gauvain.mycourt.ui.base.BaseActivity
 import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.AttachmentItemCallback
 import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.AttachmentsAdapter
 import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.UnScrollableLayoutManager
-import seigneur.gauvain.mycourt.utils.Constants
 import seigneur.gauvain.mycourt.utils.image.ImagePicker
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
-import seigneur.gauvain.mycourt.utils.FileUtils
-import seigneur.gauvain.mycourt.utils.HttpUtils
+import seigneur.gauvain.mycourt.utils.*
 import seigneur.gauvain.mycourt.utils.image.ImageUtils
-import seigneur.gauvain.mycourt.utils.MyTextUtils
 import timber.log.Timber
 
 class EditShotActivity : BaseActivity() , AttachmentItemCallback {
@@ -182,10 +180,13 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
                     mShotEditionViewModel.mPickedImageDimens = FileUtils.getImageFilePixelSize(Uri.parse(shotIMG[0]))
                     //notify viewModel to call Ucrop command
                     mShotEditionViewModel.onImagePicked()
-                }
 
+                    Timber.tag("image cropping").d("picked iamge  size :" + mShotEditionViewModel.mPickedImageDimens!![0] + " "+ mShotEditionViewModel.mPickedImageDimens!![1])
+                }
             } else if (requestCode == UCrop.REQUEST_CROP) {
                 mShotEditionViewModel.onImageCropped(UCrop.getOutput(data!!)!!)
+                mShotEditionViewModel.mCroppedImgDimen =  FileUtils.getImageFilePixelSize(UCrop.getOutput(data!!)!!)
+                Timber.tag("image cropping").d("image cropped size :" + mShotEditionViewModel.mCroppedImgDimen!![0] + " "+ mShotEditionViewModel.mCroppedImgDimen!![1])
             } else if (requestCode == Constants.PICK_ATTACHMENT_REQUEST) {
                 if (data != null) {
                     val attachmentPaths=ArrayList<String>()

@@ -52,6 +52,7 @@ class PublishTask(
                  context: Context) { //todo - set it in Draft
         val body = HttpUtils.createFilePart(
                 context,
+                draft.croppedImgDimen!!,
                 Uri.parse(draft.imageUri),
                 draft.imageFormat, "image")
         //add to HashMap key and RequestBody
@@ -142,7 +143,7 @@ class PublishTask(
             context: Context,
             uris:List<Attachment>) {
         Timber.d("postAttachments called")
-        mCompositeDisposable.add(
+        /*mCompositeDisposable.add(
                 Observable.just(uris) //we create an Observable that emits a single array
                         .flatMapIterable { it} //map the list to an Observable that emits every item as an observable
                         .filter {it -> it.id==-1L } //send only item in the list which ids is -1L
@@ -166,7 +167,7 @@ class PublishTask(
                                 {t -> onPostFailed(t)},
                                 {Timber.d("complete")}
                         )
-        )
+        )*/
     }
     /*
     *************************************************************************
