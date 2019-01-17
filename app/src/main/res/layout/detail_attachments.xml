@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:visibility="gone"
+    android:id="@+id/detail_attachment_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <View
+        android:layout_marginStart="@dimen/padding_16"
+        android:layout_marginTop="@dimen/padding_8"
+        android:layout_marginBottom="@dimen/padding_8"
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:background="@color/colorPrimaryLight"/>
+
+    <TextView
+        style="@style/TextAppearance.TitlePrimary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/padding_8"
+        android:paddingLeft="@dimen/padding_16"
+        android:paddingRight="@dimen/padding_16"
+        android:text="@string/title_attachment"/>
+
+    <GridView
+        android:id="@+id/attachments"
+        android:layout_margin="@dimen/padding_16"
+        android:layout_width="match_parent"
+        android:numColumns="5"
+        android:horizontalSpacing="@dimen/padding_8"
+        android:layout_height="56dp"/>
+
+</LinearLayout>

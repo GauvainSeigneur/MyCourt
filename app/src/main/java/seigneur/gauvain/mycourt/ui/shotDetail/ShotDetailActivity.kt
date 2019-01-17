@@ -1,20 +1,17 @@
 package seigneur.gauvain.mycourt.ui.shotDetail
 
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import androidx.palette.graphics.Palette
-import androidx.recyclerview.widget.RecyclerView
 import androidx.appcompat.widget.Toolbar
 import android.text.Html
 import android.util.DisplayMetrics
@@ -25,19 +22,12 @@ import android.view.Window
 import android.view.animation.AlphaAnimation
 import android.view.animation.DecelerateInterpolator
 import android.widget.*
-import androidx.recyclerview.widget.GridLayoutManager
-
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
-
 import javax.inject.Inject
-
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -45,35 +35,19 @@ import butterknife.Optional
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import dagger.android.AndroidInjection
-import kotlinx.android.synthetic.main.list_item_add.view.*
 import seigneur.gauvain.mycourt.R
-import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.ui.base.BaseActivity
 import seigneur.gauvain.mycourt.ui.shotEdition.EditShotActivity
-import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.AttachmentsAdapter
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
-import seigneur.gauvain.mycourt.ui.widget.ParallaxImageView
 import seigneur.gauvain.mycourt.utils.image.ImageUtils
 import seigneur.gauvain.mycourt.utils.MyColorUtils
 import seigneur.gauvain.mycourt.utils.MyTextUtils
 import seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp
 import timber.log.Timber
 import java.text.SimpleDateFormat
-import java.util.*
 
 class ShotDetailActivity : BaseActivity() {
-
-    private var differenceHeightBigShotMiniShot: Float = 0.toFloat()
-    private var differenceWidthBigShotMiniShot: Float = 0.toFloat()
-    private var ratioBigShotMiniShot: Float = 0.toFloat()
-
-    private var scrolldiff: Float = 0.toFloat()
-    val zvalue:Float by lazy {
-        resources.getDimension(R.dimen.shot_detail_toolbar_height)
-    }
-    var yvalue:Float =0.toFloat()
-    //private val mTargetElevation: Float? = null
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -82,17 +56,11 @@ class ShotDetailActivity : BaseActivity() {
         ViewModelProviders.of(this, viewModelFactory).get(ShotDetailViewModel::class.java)
     }
 
+    @BindView(R.id.custom_status_bar_background)
+    lateinit var customStatusBarbackground: View
+
     @BindView(R.id.app_bar)
     lateinit var appBarLayout: AppBarLayout
-
-    @BindView(R.id.shot_title)
-    lateinit var shotTitle: TextView
-
-    @BindView(R.id.shot_description)
-    lateinit var shotDescription: TextView
-
-    @BindView(R.id.shot_update_date)
-    lateinit var shotUpdate: TextView
 
     @BindView(R.id.toolbar)
     lateinit var mToolbar: Toolbar
@@ -100,36 +68,37 @@ class ShotDetailActivity : BaseActivity() {
     @BindView(R.id.dummy_fourthree_view)
     lateinit var emptyFourthreeView: FourThreeImageView
 
-    @BindView(R.id.shot_image)
-    lateinit var picture: FourThreeImageView
-
     @BindView(R.id.image_scrim)
     lateinit var imgScrim: View
 
-    @BindView(R.id.white_back_arrow)
-    lateinit var backArrow: ImageView
+    @BindView(R.id.shot_image)
+    lateinit var picture: FourThreeImageView
 
-    @BindView(R.id.custom_status_bar_background)
-    lateinit var customStatusBarbackground: View
+    @BindView(R.id.shot_title)
+    lateinit var shotTitle: TextView
 
-    @BindView(R.id.fab)
-    lateinit var fab: FloatingActionButton
+    @BindView(R.id.shot_description)
+    lateinit var shotDescription: TextView
+
+    @BindView(R.id.tagGroup)
+    lateinit var mTagGrpoup: ChipGroup
+
+    @BindView(R.id.detail_attachment_layout)
+    lateinit var mAttachmentLayout :LinearLayout
 
     @BindView(R.id.attachments)
     lateinit var mAttachments: GridView
 
     lateinit var mGridAdapter:AttachmentGridAdapter
 
-    /*lateinit var shotTags: RecyclerView
-    private var mTagListAdapter: TagListAdapter? = null*/
+    @BindView(R.id.shot_update_date)
+    lateinit var shotUpdate: TextView
 
-    @BindView(R.id.tagGroup)
-    lateinit var mTagGrpoup: ChipGroup
+    @BindView(R.id.white_back_arrow)
+    lateinit var backArrow: ImageView
 
-    //Attachments
-    /*@BindView(R.id.rv_attachment)
-    lateinit var mRvAttachments: RecyclerView
-    lateinit var mGridLayoutManager: GridLayoutManager*/
+    @BindView(R.id.fab)
+    lateinit var fab: FloatingActionButton
 
     private var statusbarheight: Int = 0
     private var isLightStatusBar = false
@@ -145,16 +114,16 @@ class ShotDetailActivity : BaseActivity() {
         mWindow.decorView
     }
 
-
-    var appBarOffsetListener: AppBarLayout.OnOffsetChangedListener = AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+    private var appBarOffsetListener: AppBarLayout.OnOffsetChangedListener = AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
         val vTotalScrollRange = appBarLayout.totalScrollRange
         val vRatio = (vTotalScrollRange.toFloat() + verticalOffset) / vTotalScrollRange
-        val offsetAlpha = appBarLayout.y / appBarLayout.totalScrollRange
-        val imageIntoolbarPaddingIng = resources.getDimension(R.dimen.shot_image_toolbar_padding)
-        // manageImageAspectOldVersion(verticalOffset, vRatio, imageIntoolbarPaddingIng)
         manageImageAspectNewStyle(vRatio)
     }
 
+    /*
+    *********************************************************************************************
+    * LIFECYCLE
+    *********************************************************************************************/
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
@@ -175,12 +144,22 @@ class ShotDetailActivity : BaseActivity() {
         finishAfterTransition()
     }
 
+    @Optional
+    @OnClick(R.id.fab)
+    fun goToEdition() {
+        mShotDetailViewModel.onEditClicked()
+    }
+
+    /*
+    *********************************************************************************************
+    * LIVEDATA
+    *********************************************************************************************/
     private fun subscribeToLiveData(viewModel: ShotDetailViewModel) {
         viewModel.shot
                 .observe(
                         this,
                         Observer<Shot?> {
-                            shot -> loadShotImage(shot)
+                            shot -> setUpShotImage(shot)
                         }
 
                 )
@@ -192,8 +171,49 @@ class ShotDetailActivity : BaseActivity() {
 
     }
 
-    private fun loadShotImage(shot: Shot?) {
+    /*
+    *********************************************************************************************
+    * PRIVATE METHODS
+    *********************************************************************************************/
+    private fun goToShotEdition() {
+        val intent = Intent(this, EditShotActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun setUpShotImage(shot: Shot?) {
         loadShotImage(true, shot)
+    }
+
+    private fun loadShotImage(isTransactionPostponed: Boolean, shot: Shot?) {
+        if (isTransactionPostponed)
+            postponeEnterTransition()
+        /**
+         * AS shot image is loaded from Glide ressource, put listener to define when to start startPostponedEnterTransition
+         */
+        Glide
+                .with(this)
+                .asDrawable()
+                .load(Uri.parse(shot!!.imageUrl))
+                //.apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE))
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(e: GlideException?, model: Any, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
+                        //do something! - make an API call or load another image and call mShotDetailPresenter.onShotImageAvailable();
+                        if (isTransactionPostponed) {
+                            setUpShotInfoView(shot, false, null)
+                        }
+
+                        return false
+                    }
+
+                    override fun onResourceReady(resource: Drawable, model: Any, target: Target<Drawable>, dataSource: DataSource, isFirstResource: Boolean): Boolean {
+                        if (isTransactionPostponed) {
+                            //TODO - singleLive event and try reload it
+                            setUpShotInfoView(shot, true, resource)
+                        }
+                        return false
+                    }
+                })
+                .into(picture)
     }
 
     private fun setUpShotInfoView(shot: Shot?, isImageReady: Boolean, drawable: Drawable?) {
@@ -205,63 +225,10 @@ class ShotDetailActivity : BaseActivity() {
         setUpShotInfo(shot)
     }
 
-    @Optional
-    @OnClick(R.id.fab)
-    fun goToEdition() {
-        mShotDetailViewModel.onEditClicked()
-    }
-
-    private fun goToShotEdition() {
-        val intent = Intent(this, EditShotActivity::class.java)
-        startActivity(intent)
-    }
-
-    private fun showErrorView(visible: Boolean) {
-        if (visible)
-            Toast.makeText(this, "error", Toast.LENGTH_SHORT).show()
-    }
-
-
-    private fun showPaletteShot(isVisible: Boolean) {
-        //if isVisible show layout and show palette color!
-    }
-
-
     private fun adaptColorToShot(resource: Drawable) {
         val bitmap = ImageUtils.drawableToBitmap(resource)
         recolorStatusBar(bitmap)
         recolorShadowColor(bitmap)
-    }
-
-
-    private fun initImageScrollBehavior() {
-        //initMathDataForImageAspectOdStyle()
-        initMathDataForImageAspectNewStyle()
-        appBarLayout.addOnOffsetChangedListener(appBarOffsetListener)
-    }
-
-
-    private fun setUpShotInfo(shot: Shot?) {
-        shotTitle.text = shot!!.title
-        shotDescription.text = shotDescription(shot)
-        val dateFormat = SimpleDateFormat("dd.MM.yyyy 'at' HH:mm:ss")
-        val publishDate = dateFormat.format( shot.publishDate)
-        shotUpdate.text = "Published: "+publishDate
-        setUpTagList(shot)
-        //attachments
-        shot.attachment?.let {
-            if (shot.attachment!!.isNotEmpty()) {
-                mAttachments.visibility= View.VISIBLE
-                mGridAdapter = AttachmentGridAdapter(this, shot.attachment!!)
-                mAttachments.adapter =mGridAdapter
-            }
-
-        }
-
-
-    }
-
-    private fun showEditionResult(result: Int) {
     }
 
     private fun recolorStatusBar(bitmap: Bitmap) {
@@ -321,36 +288,39 @@ class ShotDetailActivity : BaseActivity() {
                 }
     }
 
-    private fun loadShotImage(isTransactionPostponed: Boolean, shot: Shot?) {
-        if (isTransactionPostponed)
-            postponeEnterTransition()
-        /**
-         * AS shot image is loaded from Glide ressource, put listener to define when to start startPostponedEnterTransition
-         */
-        Glide
-                .with(this)
-                .asDrawable()
-                .load(Uri.parse(shot!!.imageUrl))
-                //.apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE))
-                .listener(object : RequestListener<Drawable> {
-                    override fun onLoadFailed(e: GlideException?, model: Any, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
-                        //do something! - make an API call or load another image and call mShotDetailPresenter.onShotImageAvailable();
-                        if (isTransactionPostponed) {
-                            setUpShotInfoView(shot, false, null)
-                        }
+    private fun showErrorView(visible: Boolean) {
+        if (visible)
+            Toast.makeText(this, "error", Toast.LENGTH_SHORT).show()
+    }
 
-                        return false
-                    }
 
-                    override fun onResourceReady(resource: Drawable, model: Any, target: Target<Drawable>, dataSource: DataSource, isFirstResource: Boolean): Boolean {
-                        if (isTransactionPostponed) {
-                            //TODO - singleLive event
-                            setUpShotInfoView(shot, true, resource)
-                        }
-                        return false
-                    }
-                })
-                .into(picture)
+    private fun showPaletteShot(isVisible: Boolean) {
+        //if isVisible show layout and show palette color!
+    }
+
+    private fun setUpShotInfo(shot: Shot?) {
+        shotTitle.text = shot!!.title
+        shotDescription.text = shotDescription(shot)
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy 'at' HH:mm:ss")
+        val publishDate = dateFormat.format( shot.publishDate)
+        shotUpdate.text = "Published: "+publishDate
+        setUpTagList(shot)
+        //attachments
+        setUpAttachmentList(shot)
+    }
+
+    private fun setUpAttachmentList(shot: Shot?) {
+        shot?.attachment?.let {
+            if (shot.attachment!!.isNotEmpty()) {
+                mAttachmentLayout.visibility = View.VISIBLE
+                mGridAdapter = AttachmentGridAdapter(this, shot.attachment!!)
+                mAttachments.adapter =mGridAdapter
+            }
+
+        }
+    }
+
+    private fun showEditionResult(result: Int) {
     }
 
     private fun shotDescription(shot: Shot): String {
@@ -362,7 +332,6 @@ class ShotDetailActivity : BaseActivity() {
         }
     }
 
-
     private fun setUpTagList(shot: Shot) {
         //https://stackoverflow.com/questions/50494502/how-can-i-add-the-new-android-chips-dynamically-in-android
         if (shot.tagList != null && shot.tagList!!.size > 0) {
@@ -372,104 +341,22 @@ class ShotDetailActivity : BaseActivity() {
                 // necessary to get single selection working
                 //chip.isClickable = true
                 //chip.isCheckable = true
-                chip.setTextAppearance(R.style.tagTextStyle)
+                chip.setTextAppearance(R.style.chipTextAppearance)
+                //chip.chipBackgroundColor = this.resources.getColorStateList(R.drawable.chip_state_list)
                 chip.setChipBackgroundColorResource(R.color.colorPrimaryLight)
+                chip.setChipStrokeColorResource(R.color.colorPrimaryLight)
                 mTagGrpoup.addView(chip)
             }
 
         }
-
-        /* if (shot.tagList != null && shot.tagList!!.size > 0) {
-             val layoutManager = FlexboxLayoutManager(this)
-             layoutManager.flexDirection = FlexDirection.ROW
-             layoutManager.justifyContent = JustifyContent.FLEX_START
-             shotTags.layoutManager = layoutManager
-             mTagListAdapter = TagListAdapter(this, shot.tagList!!)
-             shotTags.adapter = mTagListAdapter
-         }*/
     }
 
-    private fun initMathDataForImageAspectNewStyle() {
-        //get status bar height
-        val resourceId  = resources.getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            statusbarheight = resources.getDimensionPixelSize(resourceId)
-        }
-
-        yvalue =  emptyFourthreeView.measuredHeight.toFloat()
-        scrolldiff = yvalue-zvalue
+    private fun initImageScrollBehavior() {
+        appBarLayout.addOnOffsetChangedListener(appBarOffsetListener)
     }
 
     private fun manageImageAspectNewStyle(vRatio:Float) {
-        /**
-         * Vertical Transition effect on ShotImage
-         */
-        val transitionY = (vRatio + scrolldiff * (vRatio - 1) )-1//+ statusbarheight.toFloat()
-        //picture.setOffset(transitionY)
         imgScrim.alpha=(vRatio*-0.7f)+0.7f
-        Timber.d("b2oba: "+imgScrim.alpha)
     }
 
-    private fun initMathDataForImageAspectOdStyle() {
-        //ini math data
-        val display = windowManager.defaultDisplay
-        val displayMetrics = DisplayMetrics()
-        display.getMetrics(displayMetrics)
-        val screenHeight = displayMetrics.heightPixels
-        val screenHeightInDp = convertPixelsToDp(screenHeight.toFloat(), this@ShotDetailActivity)
-        val emptyFourthreeViewHeight = emptyFourthreeView.measuredHeight
-        val emptyFourthreeViewWidth = emptyFourthreeView.measuredWidth
-        val emptyFourthreeViewHeightInDP = convertPixelsToDp(emptyFourthreeViewHeight.toFloat(), this@ShotDetailActivity)
-        val shotImageToolbarHeightinDP = convertPixelsToDp(resources.getDimension(R.dimen.shot_image_toolbar_height), this@ShotDetailActivity)
-        val shotImageToolbarHeightinPX = resources.getDimension(R.dimen.shot_image_toolbar_height)
-        val ratioBigShotScreen = emptyFourthreeViewHeightInDP / screenHeightInDp
-        val ratioMiniShotScreen = shotImageToolbarHeightinDP / screenHeightInDp
-
-        ratioBigShotMiniShot = ratioMiniShotScreen / ratioBigShotScreen
-        differenceWidthBigShotMiniShot = emptyFourthreeViewWidth / 2 - shotImageToolbarHeightinPX * 1.25f / 2//keep FourThreeImageView ratio
-        differenceHeightBigShotMiniShot = emptyFourthreeViewHeight / 2 - shotImageToolbarHeightinPX / 2
-    }
-
-    private fun manageImageAspectOldVersion(verticalOffset:Int, vRatio:Float, imageIntoolbarPaddingIng:Float) {
-        /**
-         * Horizontal Transition effect on ShotImage
-         */
-        val transitionX = vRatio + (differenceWidthBigShotMiniShot - differenceWidthBigShotMiniShot * vRatio)
-        val transitionXWithPadding = transitionX - (vRatio + -imageIntoolbarPaddingIng * (vRatio - 1))
-        picture.x = transitionXWithPadding
-        /**
-         * Vertical Transition effect on ShotImage
-         */
-        val transitionY = vRatio + differenceHeightBigShotMiniShot * (vRatio - 1) + statusbarheight.toFloat()
-        val transitionYWithPadding = transitionY - (vRatio + imageIntoolbarPaddingIng * (vRatio - 1))
-        picture.y = transitionYWithPadding
-        /**
-         * scale effect effect on ShotImage
-         */
-        val scale = vRatio + differenceHeightBigShotMiniShot * (vRatio - 1)
-        picture.scaleX = scale
-        picture.scaleY = scale
-
-        //Mnage shadow elevation according to scrol offset
-        if (Math.abs(verticalOffset) == appBarLayout.totalScrollRange) {
-            // Collapse
-            picture.outlineProvider = ViewOutlineProvider.PADDED_BOUNDS
-        } else if (verticalOffset == 0) {
-            // Expanded
-            picture.outlineProvider = null
-        } else {
-            // Somewhere in between
-            picture.outlineProvider = null
-        }
-
-        customStatusBarbackground.alpha = vRatio
-        if (isLightStatusBar) {
-            // blackBackArrow.alpha = vRatio
-            if (vRatio < 0.50) {
-                MyColorUtils.clearLightStatusBar(mView)
-            } else {
-                MyColorUtils.setLightStatusBar(mView)
-            }
-        }
-    }
 }

@@ -15,7 +15,7 @@
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottom_app_bar"
-        android:backgroundTint="@color/colorPrimaryLight"
+        android:backgroundTint="@color/colorPrimary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:contentInsetStart="0dp"
@@ -34,6 +34,7 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_shot"
+        android:backgroundTint="@color/colorAccent"
         app:fabSize="normal"
         app:layout_anchor="@id/bottom_app_bar"
         app:useCompatPadding="true"

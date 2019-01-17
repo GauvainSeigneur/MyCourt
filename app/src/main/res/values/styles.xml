@@ -9,6 +9,7 @@
         <item name="android:navigationBarColor">@color/colorPrimaryLight</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:colorBackground">@color/colorBackground</item>
+        <!--<item name="android:windowBackground">@drawable/background_gradient_primary</item>-->
         <item name="android:colorEdgeEffect">@color/colorAccent</item>
         <!-- transition and overlay-->
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
@@ -20,6 +21,23 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:fontFamily">@font/raleway_medium</item>
         <item name="android:textColorPrimary">@color/colorWhite</item>
+        <!--Material Theme new variables-->
+        <!-- SEE : https://material.io/develop/android/theming/color/ -->
+        <item name="colorOnSurface">@color/colorPrimaryLight</item>
+        <item name="colorSecondary">@color/colorAccent</item>
+        <item name="colorOnSecondary">@color/colorWhite</item>
+        <item name="colorOnBackground">@color/colorPrimaryLight</item>
+        <!--<item name="chipStyle">@style/ChipStyle</item>-->
+    </style>
+
+    <style name="ChipStyle" parent="Base.Widget.MaterialComponents.Chip">
+        <!-- <item name="chipBackgroundColor">@color/colorPrimaryLight</item>-->
+        <item name="chipSurfaceColor">@color/colorPrimaryLight</item>
+    </style>
+
+    <style name="chipTextAppearance" parent="TextAppearance.MaterialComponents.Chip">
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:fontFamily">@font/raleway_medium</item>
     </style>
 
     <!-- Widgets-->
@@ -47,6 +65,28 @@
         <item name="android:fontFamily">@font/raleway_bold</item>
         <item name="android:textColor">@color/colorHeadline</item>
     </style>-->
+
+    <!--Activity Theming-->
+    <style name="MyCourt.MainActivityTheme">
+        <!--<item name="android:windowLightStatusBar" tools:targetApi="23">true</item>-->
+        <!--<item name="android:windowExitTransition">@transition/main_exit</item>
+        <item name="android:windowReenterTransition">@transition/main_re_enter</item>-->
+    </style>
+
+    <style name="MyCourt.EditActivityTheme">
+        <item name="android:colorBackground">@color/colorBackgroundEdit</item>
+    </style>
+
+    <style name="MyCourt.DetailShotActivityTheme">
+        <item name="android:windowSharedElementsUseOverlay">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="MyCourt.SplashTheme">
+        <item name="android:windowBackground">@drawable/background_gradient_primary</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
 
     <style name="Widget.MyCourt.BottomNavigationTheme" parent="Widget.Design.BottomNavigationView">
         <item name="android:background">@android:color/transparent</item>
@@ -80,27 +120,6 @@
     <style name="Widget.MyCourt.HelperTextStyle" parent="TextAppearance.Design.HelperText">
         <item name="android:textColor">@color/colorDraftHint</item>
         <item name="android:layout_marginTop">@dimen/padding_8</item>
-    </style>
-
-    <!--Activity Theming-->
-    <style name="MyCourt.MainActivityTheme">
-        <!--<item name="android:windowLightStatusBar" tools:targetApi="23">true</item>-->
-        <!--<item name="android:windowExitTransition">@transition/main_exit</item>
-        <item name="android:windowReenterTransition">@transition/main_re_enter</item>-->
-    </style>
-
-    <style name="MyCourt.EditActivityTheme">
-        <item name="android:colorBackground">@color/colorBackgroundEdit</item>
-    </style>
-
-    <style name="MyCourt.DetailShotActivityTheme">
-        <item name="android:windowSharedElementsUseOverlay">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-    </style>
-
-    <style name="MyCourt.SplashTheme">
-        <item name="android:windowBackground">@drawable/splash_background</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
     <!--Main title for shots and user name -->
@@ -164,14 +183,5 @@
         <item name="colorControlNormal">@color/colorWhite</item>
         <item name="colorControlActivated">@color/colorWhite</item>
     </style>
-
-    <style name="tagTextStyle" parent="TextAppearance.MaterialComponents.Chip">
-       <!-- <item name="android:textSize">14sp</item>-->
-        <item name="android:textColor">#ffffff</item>
-        <item name="android:fontFamily">@font/raleway_medium</item>
-    </style>
-
-
-
 
 </resources>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--Dark theme -->
-    <color name="colorPrimaryLight">#292B33</color> <!--43464F-->
-    <color name="colorPrimary">#1E1E24</color> <!--2B2C36-->
-    <color name="colorPrimaryDark">#1E1E24</color> <!--202028-->
+    <!--<color name="colorPrimaryLight">#292B33</color>
+    <color name="colorPrimary">#1E1E24</color>
+    <color name="colorPrimaryDark">#1E1E24</color>
     <color name="colorStatusBar">@color/colorPrimary</color>
     <color name="colorAccent">#F9832B</color>
     <color name="colorBackground">@color/colorPrimary</color>
@@ -11,7 +11,22 @@
     <color name="colorSurface">@color/colorPrimaryLight</color>
     <color name="colorBackgroundEdit">@color/colorPrimary</color>
     <color name= "colorSelectedForeground">#80F9832B</color>
+    <color name="scrim">#99323232</color>-->
+
+    <color name="colorPrimaryLight">#4f4f57</color>
+    <color name="colorPrimary">#292a33</color>
+    <color name="colorPrimaryDark">#202027</color>
+    <color name="colorStatusBar">@color/colorPrimary</color>
+    <color name="colorAccent">#ff4676</color>
+    <color name="colorBackground">@color/colorPrimary</color>
+    <color name="colorError">#FF6859</color>
+    <color name="colorSurface">@color/colorPrimaryLight</color>
+    <color name="colorBackgroundEdit">@color/colorPrimary</color>
+    <color name= "colorSelectedForeground">#80ff4676</color>
     <color name="scrim">#99323232</color>
+    <color name="color_background_gradient_dark">@color/colorPrimary</color>
+    <color name="color_background_gradient_light">#32333E</color>
+
     <!-- Text -->
     <color name="colorHeadline">#FFFFFFFF</color><!-- 100% opacity-->
     <color name="colorSubHead">#CCFFFFFF</color><!-- 80% opacity-->
@@ -21,7 +36,6 @@
     <color name="colorDraftHint">#66FFFFFF</color><!-- 40% opacity-->
     <color name="colorShotDate">#A6FFFFFF</color><!-- 55% opacity-->
     <color name="colorDraftContent">#E6FFFFFF</color><!-- 65% opacity-->
-
 
     <color name="delete_chip_icon_bg">#8C222222</color>
     <color name="color_title_primary">#F9F9F9</color>

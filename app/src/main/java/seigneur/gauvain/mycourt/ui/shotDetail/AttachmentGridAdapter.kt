@@ -5,25 +5,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import seigneur.gauvain.mycourt.data.model.Attachment
-import androidx.core.content.ContextCompat.getSystemService
 import android.view.LayoutInflater
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.widget.GridLayout
 import android.widget.ImageView
-import androidx.cardview.widget.CardView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.shot_detail_attachements.view.*
 import seigneur.gauvain.mycourt.R
 import timber.log.Timber
-import android.widget.GridView
 
-
-
-
-//https://stackoverflow.com/questions/35428106/android-custom-grid-view-adapter-with-image-and-text-error
-//https://developer.android.com/guide/topics/ui/layout/gridview
 class AttachmentGridAdapter(context: Context, attachments: List<Attachment>)  :BaseAdapter() {
 
     private val mAttachment=attachments

@@ -19,6 +19,26 @@
             style="@style/TextAppearance.Headline"
             android:padding="@dimen/padding_16" />
 
+        <seigneur.gauvain.mycourt.ui.widget.BaselineGridTextView
+            android:id="@+id/shot_description"
+            style="@style/TextAppearance.Body.Shot.Description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:paddingStart="@dimen/padding_16"
+            android:paddingTop="@dimen/padding_8"
+            android:paddingEnd="@dimen/padding_16"
+            android:paddingBottom="@dimen/padding_8"/>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/tagGroup"
+            app:chipSpacing="@dimen/padding_8"
+            android:layout_width="match_parent"
+            android:layout_margin="@dimen/padding_16"
+            android:layout_height="wrap_content"/>
+
+        <include layout="@layout/detail_attachments" />
+
         <View
             android:layout_marginStart="@dimen/padding_16"
             android:layout_marginTop="@dimen/padding_8"
@@ -28,57 +48,23 @@
             android:background="@color/colorPrimaryLight"/>
 
         <TextView
-            android:id="@+id/shot_update_date"
-            android:paddingEnd="@dimen/padding_16"
-            android:paddingBottom="@dimen/padding_8"
-            android:paddingTop="@dimen/padding_8"
-            android:paddingStart="@dimen/padding_16"
-            style="@style/TextAppearance.Body.Shot.Date"
-            android:gravity="right"
+            android:id="@+id/shot_detail_other_info_title"
+            style="@style/TextAppearance.TitlePrimary"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <GridView
-            android:id="@+id/attachments"
-            android:layout_margin="@dimen/padding_16"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:numColumns="5"
-            android:horizontalSpacing="@dimen/padding_8"
-            android:layout_height="56dp"/>
-
-        <seigneur.gauvain.mycourt.ui.widget.BaselineGridTextView
-            android:id="@+id/shot_description"
-            style="@style/TextAppearance.Body.Shot.Description"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:autoLink="web"
-            android:padding="@dimen/padding_16"/>
+            android:paddingTop="@dimen/padding_8"
+            android:paddingLeft="@dimen/padding_16"
+            android:paddingRight="@dimen/padding_16"
+            android:text="@string/title_shot_other_info"/>
 
-        <View
-            android:layout_marginStart="@dimen/padding_16"
-            android:layout_marginTop="@dimen/padding_8"
-            android:layout_marginBottom="@dimen/padding_8"
-            android:layout_width="wrap_content"
-            android:layout_height="1dp"
-            android:background="@color/colorPrimaryLight"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/shot_tags_list"
-            android:visibility="gone"
-            android:padding="@dimen/padding_8"
-            android:clipToPadding="false"
+        <TextView
+            android:id="@+id/shot_update_date"
+            style="@style/TextAppearance.Body.Shot.Date"
+            android:padding="@dimen/padding_16"
+            android:gravity="end"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/tagGroup"
-            app:chipSpacing="@dimen/padding_8"
-            android:layout_width="match_parent"
-            android:layout_margin="@dimen/padding_16"
             android:layout_height="wrap_content"/>
 
     </LinearLayout>
-
 
 </androidx.core.widget.NestedScrollView>

@@ -26,7 +26,7 @@ class ShotDraftsListAdapter(private val context: Context,
     val selectedIds: MutableList<Long> = ArrayList<Long>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ShotDraftViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item_post, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item_draft, parent, false)
         return ShotDraftViewHolder(view, mCallback)
     }
 

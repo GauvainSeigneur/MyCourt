@@ -61,8 +61,6 @@ class SplashActivity : BaseActivity() {
         //Single are used to manage user click and single events messages
         subscribeToEvents(mSplashViewModel)
         ButterKnife.bind(this)
-
-
         mCourt.init()
         mCourt.setMinimumMovedPixelsToUpdate(mCourt.DEFAULT_MIN_MOVED_PIXELS * 3)
         mCourt.setMovementMultiplier(mCourt.DEFAULT_MOVEMENT_MULTIPLIER * 2f)
