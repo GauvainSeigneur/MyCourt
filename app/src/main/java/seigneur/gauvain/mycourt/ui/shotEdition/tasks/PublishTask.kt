@@ -50,7 +50,7 @@ class PublishTask(
     //2 - with the id perform attachment operation
     fun postShot(draft: Draft,
                  context: Context) { //todo - set it in Draft
-        val body = HttpUtils.createFilePart(
+        val body = HttpUtils.createShotFilPart(
                 context,
                 draft.croppedImgDimen!!,
                 Uri.parse(draft.imageUri),
@@ -143,12 +143,12 @@ class PublishTask(
             context: Context,
             uris:List<Attachment>) {
         Timber.d("postAttachments called")
-        /*mCompositeDisposable.add(
+        mCompositeDisposable.add(
                 Observable.just(uris) //we create an Observable that emits a single array
                         .flatMapIterable { it} //map the list to an Observable that emits every item as an observable
                         .filter {it -> it.id==-1L } //send only item in the list which ids is -1L
                         .flatMap {it -> //perform following operation on every item
-                            val body = HttpUtils.createFilePart(
+                            val body = HttpUtils.createAttachmentFilePart(
                                     context,
                                     Uri.parse(it.uri),
                                     it.imageFormat,
@@ -167,7 +167,7 @@ class PublishTask(
                                 {t -> onPostFailed(t)},
                                 {Timber.d("complete")}
                         )
-        )*/
+        )
     }
     /*
     *************************************************************************

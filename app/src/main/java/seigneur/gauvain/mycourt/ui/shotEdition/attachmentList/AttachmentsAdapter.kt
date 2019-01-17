@@ -1,15 +1,8 @@
 package seigneur.gauvain.mycourt.ui.shotEdition.attachmentList
 
-import androidx.paging.PagedListAdapter
-import androidx.recyclerview.widget.DiffUtil
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import seigneur.gauvain.mycourt.data.model.Attachment
-import seigneur.gauvain.mycourt.data.model.Draft
-
-
-import seigneur.gauvain.mycourt.data.model.Shot
-import seigneur.gauvain.mycourt.ui.shots.list.data.NetworkState
 
 class AttachmentsAdapter(
         private val data: MutableList<Attachment>,

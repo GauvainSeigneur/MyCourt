@@ -24,9 +24,8 @@ import android.view.ViewOutlineProvider
 import android.view.Window
 import android.view.animation.AlphaAnimation
 import android.view.animation.DecelerateInterpolator
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
+import androidx.recyclerview.widget.GridLayoutManager
 
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -43,11 +42,16 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.Optional
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import dagger.android.AndroidInjection
+import kotlinx.android.synthetic.main.list_item_add.view.*
 import seigneur.gauvain.mycourt.R
+import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.ui.base.BaseActivity
 import seigneur.gauvain.mycourt.ui.shotEdition.EditShotActivity
+import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.AttachmentsAdapter
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
 import seigneur.gauvain.mycourt.ui.widget.ParallaxImageView
 import seigneur.gauvain.mycourt.utils.image.ImageUtils
@@ -55,6 +59,8 @@ import seigneur.gauvain.mycourt.utils.MyColorUtils
 import seigneur.gauvain.mycourt.utils.MyTextUtils
 import seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ShotDetailActivity : BaseActivity() {
 
@@ -109,8 +115,21 @@ class ShotDetailActivity : BaseActivity() {
     @BindView(R.id.fab)
     lateinit var fab: FloatingActionButton
 
-    @BindView(R.id.shot_tags_list)
-    lateinit var shotTags: androidx.recyclerview.widget.RecyclerView
+    @BindView(R.id.attachments)
+    lateinit var mAttachments: GridView
+
+    lateinit var mGridAdapter:AttachmentGridAdapter
+
+    /*lateinit var shotTags: RecyclerView
+    private var mTagListAdapter: TagListAdapter? = null*/
+
+    @BindView(R.id.tagGroup)
+    lateinit var mTagGrpoup: ChipGroup
+
+    //Attachments
+    /*@BindView(R.id.rv_attachment)
+    lateinit var mRvAttachments: RecyclerView
+    lateinit var mGridLayoutManager: GridLayoutManager*/
 
     private var statusbarheight: Int = 0
     private var isLightStatusBar = false
@@ -126,14 +145,13 @@ class ShotDetailActivity : BaseActivity() {
         mWindow.decorView
     }
 
-    private var mTagListAdapter: TagListAdapter? = null
 
     var appBarOffsetListener: AppBarLayout.OnOffsetChangedListener = AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
         val vTotalScrollRange = appBarLayout.totalScrollRange
         val vRatio = (vTotalScrollRange.toFloat() + verticalOffset) / vTotalScrollRange
         val offsetAlpha = appBarLayout.y / appBarLayout.totalScrollRange
         val imageIntoolbarPaddingIng = resources.getDimension(R.dimen.shot_image_toolbar_padding)
-       // manageImageAspectOldVersion(verticalOffset, vRatio, imageIntoolbarPaddingIng)
+        // manageImageAspectOldVersion(verticalOffset, vRatio, imageIntoolbarPaddingIng)
         manageImageAspectNewStyle(vRatio)
     }
 
@@ -226,8 +244,21 @@ class ShotDetailActivity : BaseActivity() {
     private fun setUpShotInfo(shot: Shot?) {
         shotTitle.text = shot!!.title
         shotDescription.text = shotDescription(shot)
-        shotUpdate.text = "created at:xx xx xx"
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy 'at' HH:mm:ss")
+        val publishDate = dateFormat.format( shot.publishDate)
+        shotUpdate.text = "Published: "+publishDate
         setUpTagList(shot)
+        //attachments
+        shot.attachment?.let {
+            if (shot.attachment!!.isNotEmpty()) {
+                mAttachments.visibility= View.VISIBLE
+                mGridAdapter = AttachmentGridAdapter(this, shot.attachment!!)
+                mAttachments.adapter =mGridAdapter
+            }
+
+        }
+
+
     }
 
     private fun showEditionResult(result: Int) {
@@ -333,14 +364,29 @@ class ShotDetailActivity : BaseActivity() {
 
 
     private fun setUpTagList(shot: Shot) {
+        //https://stackoverflow.com/questions/50494502/how-can-i-add-the-new-android-chips-dynamically-in-android
         if (shot.tagList != null && shot.tagList!!.size > 0) {
-            val layoutManager = FlexboxLayoutManager(this)
-            layoutManager.flexDirection = FlexDirection.ROW
-            layoutManager.justifyContent = JustifyContent.FLEX_START
-            shotTags.layoutManager = layoutManager
-            mTagListAdapter = TagListAdapter(this, shot.tagList!!)
-            shotTags.adapter = mTagListAdapter
+            for (i in shot.tagList!!) {
+                val chip = Chip(mTagGrpoup.context)
+                chip.text=i
+                // necessary to get single selection working
+                //chip.isClickable = true
+                //chip.isCheckable = true
+                chip.setTextAppearance(R.style.tagTextStyle)
+                chip.setChipBackgroundColorResource(R.color.colorPrimaryLight)
+                mTagGrpoup.addView(chip)
+            }
+
         }
+
+        /* if (shot.tagList != null && shot.tagList!!.size > 0) {
+             val layoutManager = FlexboxLayoutManager(this)
+             layoutManager.flexDirection = FlexDirection.ROW
+             layoutManager.justifyContent = JustifyContent.FLEX_START
+             shotTags.layoutManager = layoutManager
+             mTagListAdapter = TagListAdapter(this, shot.tagList!!)
+             shotTags.adapter = mTagListAdapter
+         }*/
     }
 
     private fun initMathDataForImageAspectNewStyle() {

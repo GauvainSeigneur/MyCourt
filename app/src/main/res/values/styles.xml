@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" xmlns:app="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Base application theme-->
-    <style name="MyCourt" parent="Theme.AppCompat.NoActionBar">
+    <style name="MyCourt" parent="Theme.MaterialComponents.Light"> <!--<style name="MyCourt" parent="Theme.AppCompat.NoActionBar"-->
         <!-- Colors -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -152,7 +152,7 @@
     </style>
 
     <style name="TextAppearance.Body.Shot.Date" parent="TextAppearance.Body">
-        <item name="android:textColor">@color/colorSubHead</item>
+        <item name="android:textColor">@color/colorShotDate</item>
     </style>
 
     <style name="TextAppearance.Body.Shot.Description" parent="TextAppearance.Body">
@@ -163,6 +163,12 @@
     <style name="TextInputLayout.DraftTheme" parent="Widget.Design.TextInputLayout">
         <item name="colorControlNormal">@color/colorWhite</item>
         <item name="colorControlActivated">@color/colorWhite</item>
+    </style>
+
+    <style name="tagTextStyle" parent="TextAppearance.MaterialComponents.Chip">
+       <!-- <item name="android:textSize">14sp</item>-->
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:fontFamily">@font/raleway_medium</item>
     </style>
 
 

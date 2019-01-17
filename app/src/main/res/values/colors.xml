@@ -17,8 +17,9 @@
     <color name="colorSubHead">#CCFFFFFF</color><!-- 80% opacity-->
     <color name="colorPrimaryTitle">#E6FFFFFF</color><!-- 90% opacity-->
     <color name="colorSecondaryTitle">#BFFFFFFF</color><!-- 75% opacity-->
-    <color name="colorTextBody">#A6FFFFFF</color><!-- 65% opacity-->
+    <color name="colorTextBody">#E6FFFFFF</color><!-- 65% opacity-->
     <color name="colorDraftHint">#66FFFFFF</color><!-- 40% opacity-->
+    <color name="colorShotDate">#A6FFFFFF</color><!-- 55% opacity-->
     <color name="colorDraftContent">#E6FFFFFF</color><!-- 65% opacity-->
 
 

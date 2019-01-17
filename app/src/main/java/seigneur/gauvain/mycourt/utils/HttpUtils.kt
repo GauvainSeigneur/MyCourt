@@ -24,7 +24,27 @@ class HttpUtils {
          * to pass parameters along with File request. PartMap is a Map of "Key" and RequestBody.
          * See : https://stackoverflow.com/a/40873297
          */
-        fun createFilePart(context: Context,
+        fun createAttachmentFilePart(context: Context,
+                           fileUri: Uri?,
+                           imageFormat: String?,
+                           partName: String): MultipartBody.Part {
+            //create a file from URI
+            val f =  createFileFromuri(context, fileUri)
+            // create RequestBody instance from file
+            val requestFile = RequestBody.create(MediaType.parse(imageFormat!!), f)
+            Timber.d("requestFile $requestFile")
+            // MultipartBody.Part is used to send also the actual file name
+            return MultipartBody.Part.createFormData(partName, f.name, requestFile)
+        }
+
+
+        private fun createFileFromuri(context: Context, fileUri: Uri?):File {
+            val uriOfFile = FileUtils.getFilePathFromContentUri(context, fileUri)
+            Timber.d("uriOfFile $uriOfFile")
+            return File(uriOfFile.toString())
+        }
+
+        fun createShotFilPart(context: Context,
                            originalImgDimen: IntArray,
                            fileUri: Uri?,
                            imageFormat: String?,
@@ -72,13 +92,6 @@ class HttpUtils {
             //recycler it after you don't need it
             bitmap.recycle()
             return f
-        }
-
-        //old version
-        private fun createFileFromuri(context: Context, fileUri: Uri?):File {
-            val uriOfFile = FileUtils.getFilePathFromContentUri(context, fileUri)
-            Timber.d("uriOfFile $uriOfFile")
-            return File(uriOfFile.toString())
         }
     }
 

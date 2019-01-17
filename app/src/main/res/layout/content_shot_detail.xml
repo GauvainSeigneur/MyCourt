@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".ui.shotDetail.view.ShotDetailActivity"
     tools:showIn="@layout/activity_shot_detail">
 
     <LinearLayout
@@ -39,6 +38,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
+        <GridView
+            android:id="@+id/attachments"
+            android:layout_margin="@dimen/padding_16"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:numColumns="5"
+            android:horizontalSpacing="@dimen/padding_8"
+            android:layout_height="56dp"/>
+
         <seigneur.gauvain.mycourt.ui.widget.BaselineGridTextView
             android:id="@+id/shot_description"
             style="@style/TextAppearance.Body.Shot.Description"
@@ -47,12 +55,28 @@
             android:autoLink="web"
             android:padding="@dimen/padding_16"/>
 
+        <View
+            android:layout_marginStart="@dimen/padding_16"
+            android:layout_marginTop="@dimen/padding_8"
+            android:layout_marginBottom="@dimen/padding_8"
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:background="@color/colorPrimaryLight"/>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/shot_tags_list"
+            android:visibility="gone"
             android:padding="@dimen/padding_8"
             android:clipToPadding="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/tagGroup"
+            app:chipSpacing="@dimen/padding_8"
+            android:layout_width="match_parent"
+            android:layout_margin="@dimen/padding_16"
+            android:layout_height="wrap_content"/>
 
     </LinearLayout>
 

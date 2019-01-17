@@ -82,8 +82,8 @@ object RoomConverter {
     @TypeConverter
     @JvmStatic
     fun attachmentjsonToList(value: String): List<Attachment>? {
-        val objects = Gson().fromJson(value, Array<Attachment>::class.java) as Array<Attachment>
-        val list = objects.toList()
+        val objects = Gson().fromJson(value, Array<Attachment>::class.java) as Array<Attachment>?
+        val list = objects?.toList()
         return list
     }
 
