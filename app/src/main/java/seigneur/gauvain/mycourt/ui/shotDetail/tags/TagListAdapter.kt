@@ -1,9 +1,8 @@
-package seigneur.gauvain.mycourt.ui.shotDetail
+package seigneur.gauvain.mycourt.ui.shotDetail.tags
 
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 
 import seigneur.gauvain.mycourt.R
@@ -11,7 +10,7 @@ import seigneur.gauvain.mycourt.R
 /**
  * RecyclerView Adapter for Shot's tags
  */
-class TagListAdapter(private val context: Context, private val tags: List<String>) : androidx.recyclerview.widget.RecyclerView.Adapter<TagViewHolder>() {
+class TagListAdapter(private val context: Context, private val tags: List<String>) : RecyclerView.Adapter<TagViewHolder>() {
     //var tagViewHolder: TagViewHolder? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TagViewHolder {

@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
@@ -14,14 +13,14 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import androidx.appcompat.widget.Toolbar
 import android.text.Html
-import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.View
-import android.view.ViewOutlineProvider
 import android.view.Window
 import android.view.animation.AlphaAnimation
 import android.view.animation.DecelerateInterpolator
 import android.widget.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -38,12 +37,14 @@ import dagger.android.AndroidInjection
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.ui.base.BaseActivity
+import seigneur.gauvain.mycourt.ui.shotDetail.attachments.AttachmentGridAdapter
+import seigneur.gauvain.mycourt.ui.shotDetail.attachments.AttachmentListAdapter
 import seigneur.gauvain.mycourt.ui.shotEdition.EditShotActivity
+import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.AttachmentsAdapter
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
 import seigneur.gauvain.mycourt.utils.image.ImageUtils
 import seigneur.gauvain.mycourt.utils.MyColorUtils
 import seigneur.gauvain.mycourt.utils.MyTextUtils
-import seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp
 import timber.log.Timber
 import java.text.SimpleDateFormat
 
@@ -86,10 +87,18 @@ class ShotDetailActivity : BaseActivity() {
     @BindView(R.id.detail_attachment_layout)
     lateinit var mAttachmentLayout :LinearLayout
 
-    @BindView(R.id.attachments)
+    @BindView(R.id.attachment_preview_title)
+    lateinit var mattachmentTitle :TextView
+
+    /*@BindView(R.id.attachments)
     lateinit var mAttachments: GridView
 
-    lateinit var mGridAdapter:AttachmentGridAdapter
+    lateinit var mGridAdapter: AttachmentGridAdapter*/
+
+    @BindView(R.id.rv_attachment_preview)
+    lateinit var mAttachmentList: RecyclerView
+
+    lateinit var mAttachmentListAdapter: AttachmentListAdapter
 
     @BindView(R.id.shot_update_date)
     lateinit var shotUpdate: TextView
@@ -313,8 +322,16 @@ class ShotDetailActivity : BaseActivity() {
         shot?.attachment?.let {
             if (shot.attachment!!.isNotEmpty()) {
                 mAttachmentLayout.visibility = View.VISIBLE
-                mGridAdapter = AttachmentGridAdapter(this, shot.attachment!!)
-                mAttachments.adapter =mGridAdapter
+                val count = shot.attachment!!.size
+                val attachmentTitle = resources.getQuantityString(R.plurals.title_attachment, count, count)
+                mattachmentTitle.text =  attachmentTitle
+
+                //mGridAdapter = AttachmentGridAdapter(this, shot.attachment!!)
+                //mAttachments.adapter =mGridAdapter
+                val layoutManager =LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+                mAttachmentListAdapter = AttachmentListAdapter(this, shot.attachment!!)
+                mAttachmentList.layoutManager = layoutManager
+                mAttachmentList.adapter = mAttachmentListAdapter
             }
 
         }

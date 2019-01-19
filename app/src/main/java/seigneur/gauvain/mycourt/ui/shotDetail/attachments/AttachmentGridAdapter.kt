@@ -1,4 +1,4 @@
-package seigneur.gauvain.mycourt.ui.shotDetail
+package seigneur.gauvain.mycourt.ui.shotDetail.attachments
 
 import android.content.Context
 import android.view.View

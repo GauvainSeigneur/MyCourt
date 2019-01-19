@@ -17,10 +17,7 @@ import android.text.Html
 import android.util.DisplayMetrics
 import android.view.Display
 import android.view.View
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -34,6 +31,9 @@ import java.util.ArrayList
 import javax.inject.Inject
 
 import butterknife.BindView
+import com.google.android.material.R.attr.cornerFamily
+import com.google.android.material.R.attr.cornerSize
+import com.google.android.material.shape.*
 import dagger.android.support.AndroidSupportInjection
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.User
@@ -53,6 +53,9 @@ class AboutFragment : BaseFragment() {
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
+    @BindView(R.id.button)
+    lateinit var mButton : Button
+
     private val mAboutViewModel: AboutViewModel by lazy {
          ViewModelProviders.of(this, viewModelFactory).get(AboutViewModel::class.java)
     }
@@ -63,6 +66,21 @@ class AboutFragment : BaseFragment() {
     ************************************************************************************/
     override fun onCreateView(inRootView: View, inSavedInstanceState: Bundle?) {
         mAboutViewModel.init()
+
+        //from : https://developers.googleblog.com/2018/12/building-shape-system-for-material.html#gpluscomments
+        /*val bg = mButton.background as MaterialShapeDrawable?
+        bg?.let {
+            it.shapeAppearanceModel.apply {
+                CutCornerTreatment(15f)
+            }
+        }*/
+
+        val shapePathModel = ShapeAppearanceModel()
+        shapePathModel.topLeftCorner = RoundedCornerTreatment(100f)
+        shapePathModel.bottomRightCorner= RoundedCornerTreatment(100f/*radius corner in dp*/)
+        shapePathModel.topRightCorner = CutCornerTreatment(100f)
+        val leftRoundedMaterialShape = MaterialShapeDrawable(shapePathModel)
+        mButton.background=leftRoundedMaterialShape
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

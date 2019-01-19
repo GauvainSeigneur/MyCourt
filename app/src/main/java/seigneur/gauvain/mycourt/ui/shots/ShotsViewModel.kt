@@ -2,6 +2,7 @@ package seigneur.gauvain.mycourt.ui.shots
 
 import androidx.arch.core.util.Function
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.paging.LivePagedListBuilder
@@ -49,17 +50,16 @@ constructor() : ViewModel() {
 
     val shotClickEvent = SingleLiveEvent<Int>()
 
-   /* val networkState: LiveData<NetworkState>
-        get() = Transformations.switchMap(shotDataSourceFactory.usersDataSourceLiveData,
-          Function {  }<ShotsDataSource, LiveData<NetworkState>> { it.getNetworkState() })*/
-
     val networkState: LiveData<NetworkState>
         get() =  Transformations.switchMap(shotDataSourceFactory.usersDataSourceLiveData)
         { it.networkState }
 
     val refreshState: LiveData<NetworkState>
-        get() = Transformations.switchMap(shotDataSourceFactory.usersDataSourceLiveData,
-                Function<ShotsDataSource, LiveData<NetworkState>> { it.initialLoad })
+        get() = Transformations.switchMap(shotDataSourceFactory.usersDataSourceLiveData) {
+            Timber.d("refresh called ")
+            it.initialLoad
+        }
+
 
     fun init() {
         if (config == null && shotList == null) {
@@ -68,7 +68,7 @@ constructor() : ViewModel() {
                     .setInitialLoadSizeHint(pageSize)
                     .setEnablePlaceholders(false)
                     .build()
-            shotList = LivePagedListBuilder(shotDataSourceFactory!!, config!!).build()
+            shotList = LivePagedListBuilder(shotDataSourceFactory, config!!).build()
         }
 
     }

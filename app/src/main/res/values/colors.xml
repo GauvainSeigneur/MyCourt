@@ -1,23 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--Dark theme -->
-    <!--<color name="colorPrimaryLight">#292B33</color>
-    <color name="colorPrimary">#1E1E24</color>
-    <color name="colorPrimaryDark">#1E1E24</color>
-    <color name="colorStatusBar">@color/colorPrimary</color>
-    <color name="colorAccent">#F9832B</color>
-    <color name="colorBackground">@color/colorPrimary</color>
-    <color name="colorError">#FF6859</color>
-    <color name="colorSurface">@color/colorPrimaryLight</color>
-    <color name="colorBackgroundEdit">@color/colorPrimary</color>
-    <color name= "colorSelectedForeground">#80F9832B</color>
-    <color name="scrim">#99323232</color>-->
-
+    <color name="colorAccent">#ff4676</color><!--OLD -->
     <color name="colorPrimaryLight">#4f4f57</color>
     <color name="colorPrimary">#292a33</color>
-    <color name="colorPrimaryDark">#202027</color>
+    <color name="colorPrimaryVariant">#202027</color>
+    <color name="colorPrimaryDark">#202027</color> <!--OLD ?? -->
+    <color name="colorSecondary">#ff4676</color>
+    <color name="colorSecondaryVariant">#ff2d63</color>
     <color name="colorStatusBar">@color/colorPrimary</color>
-    <color name="colorAccent">#ff4676</color>
+
     <color name="colorBackground">@color/colorPrimary</color>
     <color name="colorError">#FF6859</color>
     <color name="colorSurface">@color/colorPrimaryLight</color>
@@ -54,6 +46,5 @@
     <color name="colorFacebook">#3B5998</color>
     <color name="colorGithub">#e36209 </color>
     <color name="colorTwitter">#00aced</color>
-
 
 </resources>

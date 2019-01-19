@@ -45,7 +45,7 @@ import timber.log.Timber
 class ShotsFragment : BaseFragment(), ShotItemCallback {
 
     @BindView(R.id.usersSwipeRefreshLayout)
-    lateinit var usersSwipeRefreshLayout:SwipeRefreshLayout
+    lateinit var mSwipeRefreshLayout:SwipeRefreshLayout
 
     @BindView(R.id.rvShots)
     lateinit var mRvShots: RecyclerView
@@ -122,9 +122,15 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
 
         }
 
-        shotsViewModel.shotList?.observe(this, Observer<PagedList<Shot>> {shotListAdapter.submitList(it)})
-        shotsViewModel.networkState.observe(this, Observer<NetworkState> { shotListAdapter.setNetworkState(it!!) })
+        shotsViewModel.shotList?.observe(
+                this, Observer<PagedList<Shot>> {
+            shotListAdapter.submitList(it)
 
+        })
+
+        shotsViewModel.networkState.observe(this, Observer<NetworkState> {
+            shotListAdapter.setNetworkState(it!!)
+            })
     }
 
     /**
@@ -133,19 +139,29 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
     private fun initSwipeToRefresh() {
         shotsViewModel.refreshState.observe(this,
                 Observer<NetworkState> { networkState ->
-                if (networkState != null) {
-                    if (shotListAdapter.currentList != null) {
-                        if (shotListAdapter.currentList!!.size > 0) {
-                            usersSwipeRefreshLayout.isRefreshing = networkState.status == NetworkState.LOADING.status
+                    if (networkState != null) {
+                        if (shotListAdapter.currentList != null) {
+                            if (shotListAdapter.currentList!!.size > 0) {
+                                mSwipeRefreshLayout.isRefreshing = networkState.status == NetworkState.LOADING.status
+
+                                setInitialLoadingState(networkState)
+                            } else {
+                                setInitialLoadingState(networkState)
+                                if (mSwipeRefreshLayout.isRefreshing) {
+                                    mSwipeRefreshLayout.isRefreshing=false
+                                }
+                            }
                         } else {
                             setInitialLoadingState(networkState)
+                            if (mSwipeRefreshLayout.isRefreshing) {
+                                mSwipeRefreshLayout.isRefreshing=false
+                            }
                         }
-                } else {
-                    setInitialLoadingState(networkState)
-                }
-            }
-        })
-        usersSwipeRefreshLayout.setOnRefreshListener { shotsViewModel.refresh() }
+                    }
+                })
+        mSwipeRefreshLayout.setOnRefreshListener {
+            shotsViewModel.refresh()
+        }
     }
 
     private fun subscribeToSingleEvent(shotsViewModel: ShotsViewModel) {
@@ -157,7 +173,7 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
                     val i = Intent(activity, ShotDetailActivity::class.java)
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                         options = ActivityOptions.makeSceneTransitionAnimation(activity as Activity?,
-                                mGridLayoutManager!!.findViewByPosition(position!!),
+                                mGridLayoutManager.findViewByPosition(position!!),
                                 activity!!.getString(R.string.shot_transition_name))
                         context!!.startActivity(i, options!!.toBundle())
                     }
@@ -173,15 +189,15 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
      */
     private fun setInitialLoadingState(networkState: NetworkState) {
         //error message
-        errorMessageTextView.visibility = if (networkState.message != null) View.VISIBLE else View.GONE
-        if (networkState.message != null) {
-            errorMessageTextView.text = networkState.message
-        }
-
+        errorMessageTextView.visibility = if (!networkState.message.isEmpty()) View.VISIBLE else View.GONE
+        errorMessageTextView.text = networkState.message
+        //Visibility according to state
         retryLoadingButton.visibility = if (networkState.status == Status.FAILED) View.VISIBLE else View.GONE
         loadingProgressBar.visibility = if (networkState.status == Status.RUNNING) View.VISIBLE else View.GONE
         globalNetworkState.visibility = if (networkState.status == Status.SUCCESS) View.GONE else View.VISIBLE
-        usersSwipeRefreshLayout.isEnabled = networkState.status == Status.SUCCESS
+        //set default state
+        mSwipeRefreshLayout.isEnabled = networkState.status == Status.SUCCESS
+
     }
 
     @Optional
@@ -195,11 +211,8 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
     }
 
     override fun onShotClicked(position: Int) {
-        //usersViewModel.retry()
         val shotItem = shotListAdapter.getShotClicked(position)
         shotsViewModel.onShotClicked(shotItem!!, position)
-        //Toast.makeText(getContext(), ""+shotItem.title, Toast.LENGTH_SHORT).show();
-        //mShotsPresenter.onShotClicked(shotItem, position);
     }
 
 

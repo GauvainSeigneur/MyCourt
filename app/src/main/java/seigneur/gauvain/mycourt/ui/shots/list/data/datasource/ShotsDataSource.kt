@@ -54,7 +54,8 @@ class ShotsDataSource
      * We are fetching the first page data from the api
      * and passing it via the callback method to the UI.
      */
-    override fun loadInitial(params: PageKeyedDataSource.LoadInitialParams<Long>, callback: PageKeyedDataSource.LoadInitialCallback<Long, Shot>) {
+    override fun loadInitial(params: PageKeyedDataSource.LoadInitialParams<Long>,
+                             callback: PageKeyedDataSource.LoadInitialCallback<Long, Shot>) {
         Timber.d("loadInitial called")
         // update network states.
         // we also provide an initial load state to the listeners so that the UI can know when the

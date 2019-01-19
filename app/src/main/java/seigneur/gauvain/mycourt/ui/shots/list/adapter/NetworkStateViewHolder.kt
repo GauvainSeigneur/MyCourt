@@ -18,7 +18,7 @@ import seigneur.gauvain.mycourt.ui.shots.list.data.Status
 
 class NetworkStateViewHolder(
         itemView: View,
-        shotItemCallback: ShotItemCallback) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
+        shotItemCallback: ShotItemCallback) : RecyclerView.ViewHolder(itemView) {
 
     @BindView(R.id.errorMessageTextView)
     lateinit var errorMessageTextView: TextView

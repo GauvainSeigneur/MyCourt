@@ -10,7 +10,8 @@ data class Attachment(
         var shotId:String?="",
         @SerializedName("url")
         var uri: String,
-        var imageFormat: String?="",
+        @SerializedName("content_type")
+        var contentType: String?="",
         var fileName: String?="") {
 
 

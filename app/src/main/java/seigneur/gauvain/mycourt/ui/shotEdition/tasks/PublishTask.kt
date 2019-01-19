@@ -151,7 +151,7 @@ class PublishTask(
                             val body = HttpUtils.createAttachmentFilePart(
                                     context,
                                     Uri.parse(it.uri),
-                                    it.imageFormat,
+                                    it.contentType,
                                     "file")
                             mShotRepository.addAttachment(
                                     shotId,

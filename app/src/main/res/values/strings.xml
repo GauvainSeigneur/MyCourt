@@ -27,8 +27,12 @@
 
     <!--Shot detail -->
     <string name="title_shot_other_info">Other info</string>
-
-    <string name="title_attachment">Attachment</string>
+    <!--<string name="title_attachment">Attachment</string>-->
+    <plurals name="title_attachment">
+        <item quantity="zero">Attachment</item>
+        <item quantity="one">%d Attachment</item>
+        <item quantity="other">%d Attachments</item>
+    </plurals>
 
 
     <!-- todo : to reorganize -->

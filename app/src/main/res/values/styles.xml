@@ -9,8 +9,15 @@
         <item name="android:navigationBarColor">@color/colorPrimaryLight</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:colorBackground">@color/colorBackground</item>
-        <!--<item name="android:windowBackground">@drawable/background_gradient_primary</item>-->
         <item name="android:colorEdgeEffect">@color/colorAccent</item>
+        <!--Material Theme color new variables-->
+        <!-- SEE : https://material.io/develop/android/theming/color/ -->
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
+        <item name="colorOnSecondary">@color/colorWhite</item>
+        <item name="colorOnSurface">@color/colorPrimaryLight</item>
+        <item name="colorOnBackground">@color/colorPrimaryLight</item>
         <!-- transition and overlay-->
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
         <item name="android:windowAllowReturnTransitionOverlap">true</item>
@@ -21,23 +28,7 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:fontFamily">@font/raleway_medium</item>
         <item name="android:textColorPrimary">@color/colorWhite</item>
-        <!--Material Theme new variables-->
-        <!-- SEE : https://material.io/develop/android/theming/color/ -->
-        <item name="colorOnSurface">@color/colorPrimaryLight</item>
-        <item name="colorSecondary">@color/colorAccent</item>
-        <item name="colorOnSecondary">@color/colorWhite</item>
-        <item name="colorOnBackground">@color/colorPrimaryLight</item>
         <!--<item name="chipStyle">@style/ChipStyle</item>-->
-    </style>
-
-    <style name="ChipStyle" parent="Base.Widget.MaterialComponents.Chip">
-        <!-- <item name="chipBackgroundColor">@color/colorPrimaryLight</item>-->
-        <item name="chipSurfaceColor">@color/colorPrimaryLight</item>
-    </style>
-
-    <style name="chipTextAppearance" parent="TextAppearance.MaterialComponents.Chip">
-        <item name="android:textColor">@color/colorWhite</item>
-        <item name="android:fontFamily">@font/raleway_medium</item>
     </style>
 
     <!-- Widgets-->
@@ -50,21 +41,6 @@
         <item name="android:fontFamily">@font/raleway_bold</item>
         <item name="android:textColor">@color/colorHeadline</item>
     </style>
-
-    <!-- New toolbar style using Material to theme dark elements in light themed screens.
-         Extend the material dark Action Bar overlay as this contains text styling.
-          finalize to use it instead MyCourt.PopupOverlay/MyCourt.ToolbarTheme/MyCourt.AppBarOverlay
-          -->
-    <!--<style name="MyCourtDarkOverlay" parent="@android:style/ThemeOverlay.Material.Dark"/>
-    <style name="Widget.MyCourt.Toolbar" parent="@android:style/Widget.Material.Toolbar">
-        <item name="android:titleTextAppearance">@style/TextAppearance.ToolbarTitle</item>
-        <item name="android:background">?android:colorPrimary</item>
-        <item name="android:theme">@style/MyCourtDarkOverlay</item>
-    </style>
-    <style name="TextAppearance.ToolbarTitle" parent="@android:style/TextAppearance.Material.Widget.Toolbar.Title">
-        <item name="android:fontFamily">@font/raleway_bold</item>
-        <item name="android:textColor">@color/colorHeadline</item>
-    </style>-->
 
     <!--Activity Theming-->
     <style name="MyCourt.MainActivityTheme">
@@ -182,6 +158,16 @@
     <style name="TextInputLayout.DraftTheme" parent="Widget.Design.TextInputLayout">
         <item name="colorControlNormal">@color/colorWhite</item>
         <item name="colorControlActivated">@color/colorWhite</item>
+    </style>
+
+    <style name="ChipStyle" parent="Base.Widget.MaterialComponents.Chip">
+        <!-- <item name="chipBackgroundColor">@color/colorPrimaryLight</item>-->
+        <item name="chipSurfaceColor">@color/colorPrimaryLight</item>
+    </style>
+
+    <style name="chipTextAppearance" parent="TextAppearance.MaterialComponents.Chip">
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:fontFamily">@font/raleway_medium</item>
     </style>
 
 </resources>

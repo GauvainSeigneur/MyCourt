@@ -63,6 +63,8 @@ class ShotListAdapter(private val shotItemCallback: ShotItemCallback)
      * @param newNetworkState the new network state
      */
     fun setNetworkState(newNetworkState: NetworkState) {
+        //todo - issue with refresh action: after rferesh the recyclerview focus at the bottom
+        //to fix this : check if tis is initial load or not
         if (currentList != null) {
             if (currentList!!.size != 0) {
                 val previousState = this.networkState
@@ -71,7 +73,7 @@ class ShotListAdapter(private val shotItemCallback: ShotItemCallback)
                 val hasExtraRow = hasExtraRow()
                 if (hadExtraRow != hasExtraRow) {
                     if (hadExtraRow) {
-                        notifyItemRemoved(super.getItemCount())
+                       notifyItemRemoved(super.getItemCount())
                     } else {
                         notifyItemInserted(super.getItemCount())
                     }

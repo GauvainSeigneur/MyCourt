@@ -16,16 +16,23 @@
         android:background="@color/colorPrimaryLight"/>
 
     <TextView
+        android:id="@+id/attachment_preview_title"
         style="@style/TextAppearance.TitlePrimary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/padding_8"
         android:paddingLeft="@dimen/padding_16"
-        android:paddingRight="@dimen/padding_16"
-        android:text="@string/title_attachment"/>
+        android:paddingRight="@dimen/padding_16"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_attachment_preview"
+        android:padding="@dimen/padding_8"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <GridView
         android:id="@+id/attachments"
+        android:visibility="gone"
         android:layout_margin="@dimen/padding_16"
         android:layout_width="match_parent"
         android:numColumns="5"
