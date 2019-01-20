@@ -33,7 +33,7 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingBottom="56dp">
+            android:paddingBottom="72dp">
 
             <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
                 android:id="@+id/cropped_img_preview"
@@ -51,10 +51,10 @@
                 android:paddingEnd="@dimen/padding_12"
                 android:layout_height="56dp"/>
 
+            <!-- android:layout_marginTop="@dimen/padding_16" -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/shot_title_input"
                 style="@style/Widget.MyCourt.TextInputLayoutStyle"
-                android:layout_marginTop="@dimen/padding_16"
                 android:layout_marginEnd="@dimen/padding_16"
                 android:layout_marginStart="@dimen/padding_16"
                 android:hint="Title"
@@ -119,51 +119,44 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/bs_publish"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="@string/bottom_sheet_behavior"
         app:behavior_hideable="true"
-        app:behavior_peekHeight="56dp">
+        app:behavior_peekHeight="72dp"
+        android:weightSum="1">
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:baselineAligned="false"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:weightSum="1">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_publish"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_marginStart="@dimen/padding_16"
+            android:layout_marginTop="@dimen/padding_8"
+            android:layout_marginEnd="@dimen/padding_8"
+            android:layout_marginBottom="@dimen/padding_8"
+            android:fontFamily="@font/raleway_bold"
+            android:layout_height="56dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/colorSecondary"
+            android:text="@string/publish"/>
 
-            <FrameLayout
-                android:id="@+id/btn_publish"
-                android:clickable="true"
-                android:focusable="true"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@color/colorAccent"
-                android:layout_height="match_parent">
 
-            </FrameLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_store"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="@dimen/padding_8"
+            android:layout_marginTop="@dimen/padding_8"
+            android:layout_marginEnd="@dimen/padding_16"
+            android:layout_marginBottom="@dimen/padding_8"
+            android:backgroundTint="@color/colorSecondaryVariant"
+            app:icon="@drawable/ic_save_black_24dp"/>
 
-            <FrameLayout
-                android:id="@+id/btn_store"
-                android:clickable="true"
-                android:focusable="true"
-                android:layout_width="wrap_content"
-                android:background="@color/colorPrimaryDark"
-                android:layout_height="match_parent">
-                
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:padding="@dimen/padding_8"
-                    android:tint="@color/colorAccent"
-                    android:src="@drawable/ic_save_black_24dp"/>
 
-            </FrameLayout>
-
-        </LinearLayout>
-
-    </FrameLayout>
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

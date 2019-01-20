@@ -29,11 +29,11 @@ import android.text.Editable
 import android.text.Html
 import android.text.TextWatcher
 import android.view.View
-import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.Toast
+import android.view.ViewGroup
+import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.ViewCompat
 import androidx.core.view.ViewCompat.canScrollVertically
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.GridLayoutManager
@@ -57,6 +57,7 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.Optional
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.google.android.material.snackbar.Snackbar
 import dagger.android.AndroidInjection
 import droidninja.filepicker.FilePickerBuilder
 import droidninja.filepicker.FilePickerConst
@@ -90,7 +91,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     lateinit var mToolbar: Toolbar
 
     @BindView(R.id.main)
-    lateinit var layoutMain: androidx.coordinatorlayout.widget.CoordinatorLayout
+    lateinit var layoutMain: CoordinatorLayout
 
     @BindView(R.id.shot_title_edt)
     lateinit var mShotTitleEditor: TextInputEditText
@@ -108,13 +109,13 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     lateinit var mNestedScrollView: NestedScrollView
 
     @BindView(R.id.bs_publish)
-    lateinit var mBSPublish: FrameLayout
+    lateinit var mBSPublish: LinearLayout
 
     @BindView(R.id.btn_store)
-    lateinit var storeBtn: FrameLayout
+    lateinit var storeBtn: Button
 
     @BindView(R.id.btn_publish)
-    lateinit var publishBtn : FrameLayout
+    lateinit var publishBtn : Button
 
     private lateinit var mBottomSheetBehaviour : BottomSheetBehavior<View>
 
@@ -256,7 +257,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
             updateAttachmentList(it)
         })
 
-        viewModel.isReadyToPubish.observe(this,  Observer<Boolean?> {
+        viewModel.isReadyToPublish.observe(this,  Observer<Boolean?> {
             Timber.d("is ready to publish: $it")
             activePublishBottomSheet(it)
         })
@@ -298,9 +299,17 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
         viewModel.onPublishSucceed.observe(this,
                 Observer {
-                    Toast.makeText(mApplication, "Publis suceed", Toast.LENGTH_SHORT)
+                    Toast.makeText(mApplication, "Publish suceed", Toast.LENGTH_SHORT)
                     finishAfterTransition()
                 })
+
+        viewModel.notifyUserNotReadyCmd.observe(this, Observer {
+            val snack = Snackbar.make(findViewById(R.id.main),
+                "Oops, please set a title and image", Toast.LENGTH_SHORT)
+            SnackbarHelper.configSnackbar(this, snack)
+            snack.show()
+
+        })
     }
 
     /*
@@ -504,8 +513,8 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
             mRvAttachments.adapter = mAttachmentsAdapter
             (mRvAttachments.layoutManager as UnScrollableLayoutManager).disableScrolling() //disable scroll
         }
-
     }
+
 
     /*
     *********************************************************************************************
@@ -528,7 +537,6 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {  manageTagEdition(s)}
         override fun afterTextChanged(s: Editable) {}
     }
-
 
     private fun manageTagEdition(s: CharSequence) {
         val tagString = s.toString()

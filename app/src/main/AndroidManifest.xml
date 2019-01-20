@@ -46,7 +46,9 @@
         <activity
             android:name=".ui.shotDetail.ShotDetailActivity"
             android:theme="@style/MyCourt.DetailShotActivityTheme"/>
-        <activity android:name=".ui.shotEdition.EditShotActivity"
+        <activity
+            android:name=".ui.shotEdition.EditShotActivity"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/MyCourt.EditActivityTheme"/>
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"

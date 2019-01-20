@@ -130,7 +130,6 @@ class EditUtils {
             return tempList
         }
 
-
         //return true if the cropped image has changed (manually by the user),
         //either return false
         fun itHasNewImageToSave(draft:Draft?, newCroppedImageUri:Uri?):Boolean {
@@ -140,6 +139,19 @@ class EditUtils {
                 return false
             }
 
+        }
+
+        fun isReadyToPublish(draft: Draft?):Boolean? {
+            val isReady:Boolean
+            if (draft?.shot?.title.isNullOrEmpty()) {
+                isReady = false
+            } else if (draft?.typeOfDraft==Constants.EDIT_MODE_NEW_SHOT &&
+                    draft.imageUri!=null && draft.imageUri.toString().isNotEmpty()) {
+                isReady = false
+            } else {
+                isReady =true
+            }
+            return isReady
         }
     }
 

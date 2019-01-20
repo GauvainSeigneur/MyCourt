@@ -98,8 +98,9 @@ constructor() : ViewModel(),
     private val mAttachmentList= MutableLiveData<ArrayList<Attachment>>() //UI list
     private val mTempAttachmentsToDelete = ArrayList<Attachment>()//Non UI list to keep reference of attachment that they needs to be deleted
     //data associated to publication
-    val isReadyToPubish = MutableLiveData<Boolean>()
+    val isReadyToPublish = MutableLiveData<Boolean>()
     val onPublishSucceed = SingleLiveEvent<Void>()
+    val notifyUserNotReadyCmd = SingleLiveEvent<Void>()
 
     /*
     *********************************************************************************************
@@ -129,7 +130,6 @@ constructor() : ViewModel(),
 
     fun onImageCropped(uri: Uri?) {
         croppedImageUri.value = uri
-        checkIfIsReadyToPublish(mTitle.value, croppedImageUri.value)
     }
 
     fun onPickCropError(errorCode: Int) {
@@ -138,7 +138,6 @@ constructor() : ViewModel(),
 
     fun onTitleChanged(title: String?) {
         mTitle.value = title
-        checkIfIsReadyToPublish(mTitle.value, croppedImageUri.value)
     }
 
     fun onDescriptionChanged(desc: String) {
@@ -306,15 +305,26 @@ constructor() : ViewModel(),
     * API operation : Publish, update, etc.
     *********************************************************************************************/
     private fun createOrUpdateShot() {
+        //first change draft info
         changeDraftInfo()
-        if (mTempDraft!!.typeOfDraft == Constants.EDIT_MODE_UPDATE_SHOT) {
-            mPublishTask.updateShot(
-                    mTempDraft!!,
-                    false)
-        } else
-            mPublishTask.postShot(
-                    mTempDraft!!,
-                    mApplication)
+        //second check again if is ready to publish
+        checkIfIsReadyToPublish()
+        //if is ready - publish or update draft, else  notify user
+        if (isReadyToPublish.value==true) {
+            if (mTempDraft!!.typeOfDraft == Constants.EDIT_MODE_UPDATE_SHOT) {
+                mPublishTask.updateShot(
+                        mTempDraft!!,
+                        false)
+            } else
+                mPublishTask.postShot(
+                        mTempDraft!!,
+                        mApplication)
+        } else {
+            Timber.d("not ready")
+            notifyUserNotReadyCmd.call()
+        }
+
+
      }
 
     override fun onPublishSuccess() {
@@ -329,22 +339,11 @@ constructor() : ViewModel(),
      * @param imageUri - link of the image to be published
      * TODO - remange it // set it in EditUtils
      */
-    private fun checkIfIsReadyToPublish(title:String?, imageUri:Uri?) :Boolean {
-        var isReady: Boolean?=false
-        if (title!=null  && title.isNotEmpty() && imageUri!=null && imageUri.toString().isNotEmpty()) {
-            isReady = true
-        }
-        onReadyToPublishOrNot(isReady)
-        return isReady!!
+    private fun checkIfIsReadyToPublish() {
+        Timber.d("lolol "+ EditUtils.isReadyToPublish(mTempDraft))
+        isReadyToPublish.value =  EditUtils.isReadyToPublish(mTempDraft)
     }
 
-    /**
-     * Change value of "ready to publish"
-     * @param readyOrNot - by default is false
-     */
-    private fun onReadyToPublishOrNot(readyOrNot: Boolean?=false) {
-        isReadyToPubish.value=readyOrNot
-    }
     private fun programDeletePOST(position:Int) {
         //if attachment id is different than -1L, is an published on, so we have to perform
         //DELETE POST if user delete it from UI
