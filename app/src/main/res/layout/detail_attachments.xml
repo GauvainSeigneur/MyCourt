@@ -26,7 +26,10 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_attachment_preview"
-        android:padding="@dimen/padding_8"
+        android:paddingStart="@dimen/padding_8"
+        android:paddingTop="@dimen/padding_8"
+        android:paddingEnd="0dp"
+        android:paddingBottom="@dimen/padding_8"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
