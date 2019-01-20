@@ -43,6 +43,6 @@
         android:tint="#FFFFFF"
         android:outlineAmbientShadowColor="@color/colorAccent"
         android:outlineSpotShadowColor="@color/colorAccent"
-        android:src="@drawable/ic_add_black_24dp"/>
+        android:src="@drawable/ic_dribbble_upload_icon_24dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

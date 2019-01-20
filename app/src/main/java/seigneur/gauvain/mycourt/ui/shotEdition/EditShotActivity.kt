@@ -467,7 +467,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
             v, scrollX, scrollY, oldScrollX, oldScrollY ->
             if (scrollY > oldScrollY) {
                 Timber.i("Scroll DOWN")
-                mBottomSheetBehaviour.state = BottomSheetBehavior.STATE_HIDDEN
+                mBottomSheetBehaviour.state = BottomSheetBehavior.STATE_COLLAPSED
             }
             if (scrollY < oldScrollY) {
                 Timber.i( "Scroll UP")
@@ -476,7 +476,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
             if (scrollY == 0) {
                 Timber.i("TOP SCROLL")
-                mBottomSheetBehaviour.state = BottomSheetBehavior.STATE_COLLAPSED
+                mBottomSheetBehaviour.state = BottomSheetBehavior.STATE_HIDDEN
             }
 
             if (scrollY == v.getChildAt(0).measuredHeight - v.measuredHeight) {
@@ -487,15 +487,14 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     }
 
     private fun activePublishBottomSheet(activate:Boolean?) {
-        if (activate==true) {
+        /*if (activate==true) {
             publishBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorAccent))
             storeBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimaryDark))
             mBSPublish.foreground = ColorDrawable(ContextCompat.getColor(this, android.R.color.transparent))
         } else {
             publishBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimaryLight))
             storeBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimaryLight))
-           //mBSPublish.foreground = ColorDrawable(ContextCompat.getColor(this, R.color.colorError))
-        }
+        }*/
     }
 
     private fun initAttachmentList() {

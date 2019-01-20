@@ -112,19 +112,11 @@
             android:layout_height="?attr/actionBarSize">
 
             <ImageView
-                android:id="@+id/white_back_arrow"
+                android:id="@+id/back_arrow"
                 android:layout_gravity="center"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:tint="@android:color/white"
-                android:src="@drawable/ic_arrow_back_black_24dp"/>
-
-            <ImageView
-                android:visibility="gone"
-                android:id="@+id/black_back_arrow"
-                android:layout_gravity="center"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
                 android:src="@drawable/ic_arrow_back_black_24dp"/>
 
         </FrameLayout>

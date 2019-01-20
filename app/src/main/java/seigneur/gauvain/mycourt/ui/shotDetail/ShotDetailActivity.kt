@@ -4,6 +4,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -19,6 +20,8 @@ import android.view.Window
 import android.view.animation.AlphaAnimation
 import android.view.animation.DecelerateInterpolator
 import android.widget.*
+import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -66,6 +69,9 @@ class ShotDetailActivity : BaseActivity() {
     @BindView(R.id.toolbar)
     lateinit var mToolbar: Toolbar
 
+    @BindView(R.id.back_arrow)
+    lateinit var backArrow: ImageView
+
     @BindView(R.id.dummy_fourthree_view)
     lateinit var emptyFourthreeView: FourThreeImageView
 
@@ -102,9 +108,6 @@ class ShotDetailActivity : BaseActivity() {
 
     @BindView(R.id.shot_update_date)
     lateinit var shotUpdate: TextView
-
-    @BindView(R.id.white_back_arrow)
-    lateinit var backArrow: ImageView
 
     @BindView(R.id.fab)
     lateinit var fab: FloatingActionButton
@@ -157,6 +160,12 @@ class ShotDetailActivity : BaseActivity() {
     @OnClick(R.id.fab)
     fun goToEdition() {
         mShotDetailViewModel.onEditClicked()
+    }
+
+    @Optional
+    @OnClick(R.id.back_arrow)
+    fun goToPrev() {
+        finishAfterTransition()
     }
 
     /*
@@ -269,6 +278,10 @@ class ShotDetailActivity : BaseActivity() {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             MyColorUtils.setLightStatusBar(mView)
                         }
+                       // backArrow.tint
+                        val darkerGrey = ContextCompat.getColor(this, R.color.colorPrimaryLight)
+                        ImageViewCompat.setImageTintList(backArrow,
+                                ColorStateList.valueOf(darkerGrey))
                     } else {
                     }
                 }
