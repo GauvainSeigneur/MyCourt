@@ -9,17 +9,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Response
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Multipart
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Part
-import retrofit2.http.PartMap
-import retrofit2.http.Path
-import retrofit2.http.Query
+import retrofit2.http.*
 import seigneur.gauvain.mycourt.data.model.Project
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.data.model.User
@@ -30,12 +20,20 @@ import seigneur.gauvain.mycourt.utils.Constants.RESPONSE_CACHE_DELAY
  */
 interface DribbbleService {
 
+    /*
+    *********************************************************************************************
+    * USER
+    *********************************************************************************************/
     @get:GET("user/projects")
     val userProjects: Flowable<List<Project>>
 
     @get:GET("user")
     val user: Single<User>
 
+    /*
+    *********************************************************************************************
+    * SHOT
+    *********************************************************************************************/
     @GET("user/shots")
     fun getShotAPI(
             @Header(RESPONSE_CACHE_DELAY) responseCacheDelay: Int,
@@ -65,6 +63,10 @@ interface DribbbleService {
             @Part("tags[]") tags: List<String>?
     ): Observable<Response<Void>>
 
+    /*
+    *********************************************************************************************
+    * ATTACHMENT
+    *********************************************************************************************/
     @Multipart
     @POST("shots/{id}/attachments")
     fun addAttachment(
@@ -73,7 +75,16 @@ interface DribbbleService {
             @Part file: MultipartBody.Part
     ): Observable<Response<Void>>
 
+    @DELETE("shots/{shot}/attachments/{id}")
+    fun deleteAttachment(
+            @Path(value = "shot", encoded = true) shot: String,
+            @Path(value = "id", encoded = true) id: Long
+    ): Observable<Response<Void>>
 
+    /*
+    *********************************************************************************************
+    * PROJECT
+    *********************************************************************************************/
     @POST("shots")
     @FormUrlEncoded
     fun postProject(

@@ -45,11 +45,10 @@ class PublishTask(
     *************************************************************************
     * NETWORK OPERATION - POST SHOT ON DRIBBBLE
     *************************************************************************/
-    //todo - if attachments, on success do it :
     //1 - load the shot ! check that the name is the same as the one published, or get the id from the response!
     //2 - with the id perform attachment operation
     fun postShot(draft: Draft,
-                 context: Context) { //todo - set it in Draft
+                 context: Context) {
         val body = HttpUtils.createShotFilPart(
                 context,
                 draft.croppedImgDimen!!,
@@ -67,15 +66,12 @@ class PublishTask(
                         draft.shot.tagList)
                         .doOnError { t ->
                             if (t is IOException) {
-                                Timber.tag("jul").d("UnknownHostException, dafuck what happened???")
+                                Timber.d("UnknownHostException: $t")
                             }
                             handleNetworkOperationError(t, 100)
                         }
                         .subscribe(
-                                { response -> onPostSucceed(response, draft,
-                                        draft.hasAttachment(),
-                                        context,
-                                        draft.shot.attachment) },
+                                { response -> onPostSucceed(response, draft, context) },
                                 {t -> onPostFailed(t)}
                         )
         )
@@ -88,30 +84,22 @@ class PublishTask(
      */
     private fun onPostSucceed(response: Response<Void>,
                               draft: Draft,
-                              hasAttachements: Boolean?,
-                              context: Context,
-                              attachments: List<Attachment>?) {
+                              context: Context) {
         when (response.code()) {
             Constants.ACCEPTED -> {
                 val headers = response.headers()
-                //todo - use location get shot id and send attachment after with RX
                 val location = headers.get("location")
                 location?.let { Timber.d("post succeed. location: $location") }
-                if (hasAttachements==true) {
+                if (draft.hasAttachmentToPublish()) {
                     val shotId:String //todo - this variable must be defined into Firebase for fast update
-                    //val location="https://api.dribbble.com/v2/shots/471756-ShotTitle"
                     val locationTrunkAfter= location!!.substringAfterLast("/",location )
                     shotId=locationTrunkAfter.substringBefore("-",locationTrunkAfter)
-                    Timber.d("testTrunk: $locationTrunkAfter")
                     Timber.d("shotid: $shotId")
-                    postAttachments( shotId, context, attachments!!)
-                    //getPublishedShotAndPublishAttachment()
+                    postAttachments( shotId, context, draft)
                 } else {
                     //stop process and confirm to user that the post has been successfully published
                     onPublishOrUpdateSucceed(draft)
                 }
-
-
             }
             else -> Timber.d("post not succeed: " + response.code())
         }
@@ -127,54 +115,12 @@ class PublishTask(
 
     /*
     *************************************************************************
-    * NETWORK OPERATION - get a shot after a publishing
-    *
-    * Dribbbles API doesn't allow to publish a shot with attachments.
-    * We can only provide attachments to an existing shot
-    * Also, we can send only one attachment per POST.
-    * So for first publication with attachment, we must concat it in two request
-    *************************************************************************/
-
-    /**
-     * Post one or several attachments to an existing shot
-     */
-    fun postAttachments(
-            shotId:String,
-            context: Context,
-            uris:List<Attachment>) {
-        Timber.d("postAttachments called")
-        mCompositeDisposable.add(
-                Observable.just(uris) //we create an Observable that emits a single array
-                        .flatMapIterable { it} //map the list to an Observable that emits every item as an observable
-                        .filter {it -> it.id==-1L } //send only item in the list which ids is -1L
-                        .flatMap {it -> //perform following operation on every item
-                            val body = HttpUtils.createAttachmentFilePart(
-                                    context,
-                                    Uri.parse(it.uri),
-                                    it.contentType,
-                                    "file")
-                            mShotRepository.addAttachment(
-                                    shotId,
-                                    body)
-                                    .doOnNext{
-                                        response -> Timber.d(response.message())
-                                    }
-                        }
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                { response -> Timber.d(response.message())},
-                                {t -> onPostFailed(t)},
-                                {Timber.d("complete")}
-                        )
-        )
-    }
-    /*
-    *************************************************************************
     * NETWORK OPERATION - UPDATE SHOT ON DRIBBBLE
     *************************************************************************/
     fun updateShot(
             draft: Draft,
+            attachmentTodelete:List<Attachment>,
+            context: Context,
             profile: Boolean) {
         mCompositeDisposable.add(
                 mShotRepository.updateShot(
@@ -184,7 +130,10 @@ class PublishTask(
                         draft.shot.tagList!!,
                         profile)
                         .subscribe(
-                                { shot ->  onUpdateShotSuccess(shot, draft) },
+                                { shot ->
+                                    //postOrDeleteAttachment(draft, context, draft.shot.id!!)
+                                    onUpdateShotSuccess(shot, draft, context, attachmentTodelete)
+                                },
                                 { this.onUpdateShotError(it)}
                         )
         )
@@ -194,10 +143,23 @@ class PublishTask(
      * Shot update succeed
      * @param shot - shot updated
      */
-    private fun onUpdateShotSuccess(shot: Shot,draft: Draft) {
-        //todo must finish with a code to send to Main Activity to delete the draft
+    private fun onUpdateShotSuccess(shot: Shot,
+                                    draft: Draft,
+                                    context: Context,
+                                    attachmentTodelete: List<Attachment>) {
         Timber.d("success: " + shot.title!!)
-        onPublishOrUpdateSucceed(draft)
+        if (!draft.hasAttachmentToPublish() && !attachmentTodelete.isNullOrEmpty()) {
+                Timber.d("update ope: delete attachment")
+               deleteAttachments(draft, attachmentTodelete)
+        } else if (draft.hasAttachmentToPublish() && attachmentTodelete.isNullOrEmpty()) {
+            Timber.d("update ope: post attachment")
+            postAttachments(shot.id!!, context, draft)
+        } else if (draft.hasAttachmentToPublish() && !attachmentTodelete.isNullOrEmpty()) {
+            postAndDeleteAttachment(draft, context, shot.id!!, attachmentTodelete)
+        } else {
+            onPublishOrUpdateSucceed(draft)
+        }
+
     }
 
     /**
@@ -207,20 +169,91 @@ class PublishTask(
     private fun onUpdateShotError(throwable: Throwable) {
         //todo - manage UI
     }
+    /*
+    *************************************************************************
+    * NETWORK OPERATION - get a shot after a publishing
+    *
+    * Dribbbles API doesn't allow to publish a shot with attachments.
+    * We can only provide attachments to an existing shot
+    * Also, we can send only one attachment per POST.
+    * So for first publication with attachment, we must concat it in two request
+    *************************************************************************/
+    private fun postAttachments(
+            shotId:String,
+            context: Context,
+            draft: Draft) {
+        mCompositeDisposable.add(
+                mShotRepository.postAttachment(context, draft, shotId)
+                        .subscribe(
+                                { onPosAttachmentSucceed(it, draft)},
+                                {t -> onPostFailed(t)},
+                                {onPublishOrUpdateSucceed(draft)}
+                        )
+        )
 
-    /**
-     * manage UI and DB items on Post/Updated Succeed
-     */
+    }
+
+    private fun onPosAttachmentSucceed(response: Response<Void>, draft: Draft) {
+        Timber.d("post attachment succeed:" +response.message())
+        onPublishOrUpdateSucceed(draft)
+    }
+
+    /*
+    *************************************************************************
+    * DELETE AN ATTACHMENT
+    *************************************************************************/
+    private fun deleteAttachments(draft: Draft, listAttachmentToDelete:List<Attachment>) {
+        mCompositeDisposable.add(mShotRepository.deleteAttachment(draft,listAttachmentToDelete)
+                .subscribe(
+                        { onDeleteAttachmentSucceed(it, draft)},
+                        {t -> onPostFailed(t)},
+                        {onPublishOrUpdateSucceed(draft)}
+                )
+        )
+    }
+
+    private fun onDeleteAttachmentSucceed(response: Response<Void>, draft: Draft) {
+        Timber.d("delete attchment succeed:" +response.message())
+        onPublishOrUpdateSucceed(draft)
+    }
+
+    private fun onDeleteAttachmentFailed(throwable: Throwable, draft: Draft) {
+
+    }
+
+    /*
+    *************************************************************************
+    * Concat post and delete attachment operation
+    * todo -finalize and manage error on first and second observale
+    * todo - here t replace post and delete attachment methods by only one
+    *************************************************************************/
+    private fun postAndDeleteAttachment(draft: Draft,
+                                       context: Context,
+                                       shotId:String,
+                                        listAttachmentToDelete: List<Attachment>) {
+        mCompositeDisposable.add(
+                mShotRepository.postAndDeleteAttachment(context,draft, shotId, listAttachmentToDelete)
+                        .subscribe(
+                                { response -> onPublishOrUpdateSucceed(draft) },
+                                {t -> onPostFailed(t)},
+                                { onPublishOrUpdateSucceed(draft)}
+                        )
+        )
+    }
+
+    /*
+    *************************************************************************
+    * GLOBAL METHOD FOR EVERY REQUEST AND POST
+    *************************************************************************/
     private fun onPublishOrUpdateSucceed(draft:Draft) {
         deleteDraftAfterPublish(draft)
         mPublishCallBack.onPublishSuccess()
     }
 
-
     /*
-     *************************************************************************
-     * DB OPERATION - DELETE DRAFT AFTER PUBLISH OR UPDATE
-     *************************************************************************/
+    *************************************************************************
+    * DB OPERATION - DELETE DRAFT AFTER PUBLISH OR UPDATE
+    *************************************************************************/
     private fun deleteDraftAfterPublish(draft:Draft) {
         mCompositeDisposable.add( mShotDraftRepository.deleteDraft(draft.draftID)
                 .subscribe(
@@ -228,7 +261,6 @@ class PublishTask(
                         this::onDeleteError
                 )
         )
-
 
     }
 

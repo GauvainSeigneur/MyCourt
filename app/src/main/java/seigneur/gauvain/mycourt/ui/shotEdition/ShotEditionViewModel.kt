@@ -312,8 +312,10 @@ constructor() : ViewModel(),
         //if is ready - publish or update draft, else  notify user
         if (isReadyToPublish.value==true) {
             if (mTempDraft!!.typeOfDraft == Constants.EDIT_MODE_UPDATE_SHOT) {
-                mPublishTask.updateShot(
+                mPublishTask. updateShot(
                         mTempDraft!!,
+                        mTempAttachmentsToDelete,
+                        mApplication,
                         false)
             } else
                 mPublishTask.postShot(

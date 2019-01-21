@@ -47,4 +47,5 @@ data class Draft(
         return hasAttachment() &&  shot.attachment!!.any { it -> it.id == -1L }
     }
 
+
 }

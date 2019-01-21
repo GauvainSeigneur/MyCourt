@@ -64,7 +64,7 @@ class ShotsDataSource
         initialLoad.postValue(NetworkState.LOADING)
         //get the initial shots from the api
         compositeDisposable.add(
-                mShotRepository.getShotsFromAPItest(0, 1, params.requestedLoadSize)
+                mShotRepository.getShots(0, 1, params.requestedLoadSize)
                         .subscribe(
                                 { shots ->
                                     // clear retry since last request succeeded
@@ -103,7 +103,7 @@ class ShotsDataSource
         Timber.d("loadAfter called")
         networkState.postValue(NetworkState.LOADING)
 
-        compositeDisposable.add(mShotRepository.getShotsFromAPItest(0, params.key, params.requestedLoadSize)
+        compositeDisposable.add(mShotRepository.getShots(0, params.key, params.requestedLoadSize)
                 .subscribe(
                         { shots ->
                             //long nextKey = (params.key == shots.body().getTotalResults()) ? null : params.key+1; //TODO - to reactivate
