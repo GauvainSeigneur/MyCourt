@@ -3,39 +3,24 @@ package seigneur.gauvain.mycourt.ui.shotEdition
 import android.Manifest
 import android.app.Activity
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.drawable.ColorDrawable
-import android.media.ExifInterface
 import android.net.Uri
-import android.os.Build
 import com.google.android.material.textfield.TextInputEditText
 import androidx.core.app.ActivityCompat
 import android.os.Bundle
-import android.provider.DocumentsContract
-import android.provider.MediaStore
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.core.widget.NestedScrollView
 import androidx.appcompat.widget.Toolbar
 import android.text.Editable
-import android.text.Html
 import android.text.TextWatcher
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
-import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.ViewCompat.canScrollVertically
-import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -60,8 +45,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.AndroidInjection
 import droidninja.filepicker.FilePickerBuilder
-import droidninja.filepicker.FilePickerConst
-import droidninja.filepicker.utils.FilePickerUtils
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.data.model.Draft
@@ -72,7 +55,6 @@ import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.UnScrollableLayout
 import seigneur.gauvain.mycourt.utils.image.ImagePicker
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
 import seigneur.gauvain.mycourt.utils.*
-import seigneur.gauvain.mycourt.utils.image.ImageUtils
 import timber.log.Timber
 
 class EditShotActivity : BaseActivity() , AttachmentItemCallback {
@@ -83,7 +65,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     @Inject
     lateinit var mApplication: Application
 
-    private val  mShotEditionViewModel: ShotEditionViewModel by lazy {
+    private val mShotEditionViewModel: ShotEditionViewModel by lazy {
         ViewModelProviders.of(this, viewModelFactory).get(ShotEditionViewModel::class.java)
     }
 
@@ -105,8 +87,8 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     @BindView(R.id.cropped_img_preview)
     lateinit var croppedImagePreview: FourThreeImageView
 
-    @BindView(R.id.scroll_view)
-    lateinit var mNestedScrollView: NestedScrollView
+    @BindView(R.id.edit_shot_container)
+    lateinit var mEditionContainer: NestedScrollView
 
     @BindView(R.id.bs_publish)
     lateinit var mBSPublish: LinearLayout
@@ -134,20 +116,20 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     *********************************************************************************************/
      override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_shot)
-        ButterKnife.bind(this)
         //provide Dependencies
         AndroidInjection.inject(this)
+        //Init ViewModel before inflate views to perform first request
+        mShotEditionViewModel.init()
+        setContentView(R.layout.activity_edit_shot)
+        ButterKnife.bind(this)
+        //Subscribe to ViewModel data and event only when View is inflated
+        subscribeToLiveData(mShotEditionViewModel)
+        subscribeToSingleEvent(mShotEditionViewModel)
         //set up listeners and behaviors
         setUpEditorListener()
         setUpBottomSheet()
         setUpScrollListener()
         initAttachmentList()
-        //Init ViewModel
-        mShotEditionViewModel.init()
-        //Subscribe to ViewModel data and event
-        subscribeToLiveData(mShotEditionViewModel)
-        subscribeToSingleEvent(mShotEditionViewModel)
     }
 
     /**
@@ -169,49 +151,18 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == Constants.PICK_IMAGE_REQUEST) {
-                if (data != null) {
-                    val shotIMG = ArrayList<String>()
-                    shotIMG.addAll(data.getStringArrayListExtra(FilePickerConst.KEY_SELECTED_MEDIA))
-                    mShotEditionViewModel.mPickedFileUri = Uri.parse(shotIMG[0])
-                    val shotFileName = FileUtils.getFileName(Uri.parse(shotIMG[0]))
-                    val shotFileNameWithoutExtension = shotFileName.substringBefore(".",shotFileName)
-                    mShotEditionViewModel.mPickedFileName = shotFileNameWithoutExtension
-                    mShotEditionViewModel.mPickedFileMymeType = FileUtils.getMimeType((shotIMG[0]))
-                    mShotEditionViewModel.mPickedImageDimens = FileUtils.getImageFilePixelSize(Uri.parse(shotIMG[0]))
-                    //notify viewModel to call Ucrop command
-                    mShotEditionViewModel.onImagePicked()
-
-                    Timber.tag("image cropping").d("picked iamge  size :" + mShotEditionViewModel.mPickedImageDimens!![0] + " "+ mShotEditionViewModel.mPickedImageDimens!![1])
-                }
-            } else if (requestCode == UCrop.REQUEST_CROP) {
-                mShotEditionViewModel.onImageCropped(UCrop.getOutput(data!!)!!)
-                mShotEditionViewModel.mCroppedImgDimen =  FileUtils.getImageFilePixelSize(UCrop.getOutput(data!!)!!)
-                Timber.tag("image cropping").d("image cropped size :" + mShotEditionViewModel.mCroppedImgDimen!![0] + " "+ mShotEditionViewModel.mCroppedImgDimen!![1])
-            } else if (requestCode == Constants.PICK_ATTACHMENT_REQUEST) {
-                if (data != null) {
-                    val attachmentPaths=ArrayList<String>()
-                    attachmentPaths.addAll(data.getStringArrayListExtra(FilePickerConst.KEY_SELECTED_MEDIA))
-                    if (attachmentPaths.isNotEmpty()) {
-                        Timber.d("SELECTED MEDIA"+ attachmentPaths[0])
-                        val fileName = FileUtils.getFileName(Uri.parse(attachmentPaths[0]))
-                        val fileNameWithoutExtension = fileName.substringBefore(".",fileName)
-                        val attachment=Attachment(-1L,    //id to be -1 for new attachment
-                                "",
-                                attachmentPaths[0],
-                                FileUtils.getMimeType((attachmentPaths[0])),
-                                fileNameWithoutExtension)
-                        val f = File(attachmentPaths[0])
-                        mShotEditionViewModel.onAttachmentAdded(attachment)
-                    }
-                }
-
+            when (requestCode) {
+                Constants.PICK_IMAGE_REQUEST ->
+                    ImagePicker.onImagePicked(data, mShotEditionViewModel)
+                UCrop.REQUEST_CROP ->
+                    ImagePicker.onImageCropped(data, mShotEditionViewModel)
+                Constants.PICK_ATTACHMENT_REQUEST ->
+                    ImagePicker.onAttachmentPicked(data, mShotEditionViewModel)
+                else -> Timber.d("SELECTED MEDIA is null")
             }
-        } else {
-            Timber.d("SELECTED MEDIA is null")
         }
-
     }
+
     public override fun onDestroy() {
         super.onDestroy()
     }
@@ -238,15 +189,16 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     * EVENT WHICH VIEW WILL SUBSCRIBE
     *********************************************************************************************/
     private fun subscribeToLiveData(viewModel: ShotEditionViewModel) {
+        viewModel.getUserType.observe(this,  Observer<Int> {
+            manageEditionOptionVisibiliy(it)
+        })
 
         viewModel.getCroppedImageUri().observe(this, Observer<Uri> {
             this.displayShotImagePreview(it.toString())
             Timber.d("Uri change :$it")
         })
 
-        viewModel.title.observe(this, Observer<String> {
-            Timber.d("title change:$it")
-        })
+        viewModel.title.observe(this, Observer<String> { Timber.d("title change:$it") })
 
         viewModel.description.observe(this,  Observer<String> { Timber.d("desc change:$it") })
 
@@ -266,12 +218,13 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     private fun subscribeToSingleEvent(viewModel: ShotEditionViewModel) {
         viewModel.setUpUiCmd.observe(
                 this, Observer { it ->
-            setUpEditionUI(it)
-        }
-        )
+            manageUiFromDraftInfo(it)
+        })
 
         viewModel.mPickShotCmd.observe(this, Observer {
-            openImagePicker()
+            FilePickerBuilder.instance.setMaxCount(1)
+                    .setActivityTheme(R.style.LibAppTheme)
+                    .pickPhoto(this, Constants.PICK_IMAGE_REQUEST)
         })
 
         viewModel.mPickAttachmentCmd.observe(this, Observer {
@@ -329,7 +282,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
     /*
     *********************************************************************************************
-    * Private
+    * REQUEST PERMISSION TO READ AND WRITE ON EXTERNAL STORAGE
     *********************************************************************************************/
     private fun checkPermissionExtStorage() {
         if (ActivityCompat.checkSelfPermission(this,
@@ -347,17 +300,10 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
                 Constants.REQUEST_STORAGE_WRITE_ACCESS_PERMISSION)
     }
 
-    private fun notifyPostSaved() {
-        Toast.makeText(this, "ShotDraft saved in memory: ", Toast.LENGTH_SHORT).show()
-        finishAfterTransition()
-    }
-
-    private fun openImagePicker() {
-        FilePickerBuilder.instance.setMaxCount(1)
-                .setActivityTheme(R.style.LibAppTheme)
-                .pickPhoto(this, Constants.PICK_IMAGE_REQUEST)
-    }
-
+    /*
+    *********************************************************************************************
+    * PICKER RELATED METHODS
+    *********************************************************************************************/
     private fun openAttachmentPicker() {
         //Manage multiple selection later
         FilePickerBuilder.instance.setMaxCount(1)
@@ -382,20 +328,44 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         Toast.makeText(this@EditShotActivity, "Shot can't be changed in edition mode", Toast.LENGTH_SHORT).show()
     }
 
-    private fun openConfirmMenu() {}
 
-    private fun stopActivity() {
-        finish()
+    /*
+    *********************************************************************************************
+    * EDITION UI RELATED FUNCTIONS
+    *********************************************************************************************/
+    /**
+     * Manage editions options visibility in accordance to user type
+     */
+    private fun manageEditionOptionVisibiliy(userType:Int) {
+        when (userType) {
+            Constants.USER_PLAYER -> {
+                mEditionContainer.visibility=View.VISIBLE
+                mRvAttachments.visibility =View.GONE
+                mBSPublish.visibility=View.VISIBLE
+            }
+            Constants.USER_PRO -> {
+                mEditionContainer.visibility=View.VISIBLE
+                mRvAttachments.visibility =View.VISIBLE
+                mBSPublish.visibility=View.VISIBLE
+            }
+            else -> {
+                mEditionContainer.visibility=View.GONE
+                mBSPublish.visibility=View.GONE
+            }
+        }
+
     }
 
-    private fun setUpEditionUI(draft: Draft) {
+    /**
+     * Manage UI in accordance to draft information defined in sourceTask
+     */
+    private fun manageUiFromDraftInfo(draft: Draft) {
         //set toolbar title
         if (draft.typeOfDraft == Constants.EDIT_MODE_NEW_SHOT) {
             mToolbar.title = "Create a shot"
         } else {
             mToolbar.title = "Edit a shot"
         }
-
         //get title from draft object
         mShotTitleEditor.setText(draft.shot.title)
         //get description from draft objects
@@ -414,6 +384,11 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         }
     }
 
+    /**
+     * dispay Image shot preview
+     * from local url for new draft
+     * from http url from update
+     */
     private fun displayShotImagePreview(uriImageCropped: String?) {
         if (!uriImageCropped.isNullOrEmpty()) {
             Glide.with(mApplication)
@@ -443,13 +418,6 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         Toast.makeText(this, "please define a title", Toast.LENGTH_SHORT).show()
     }
 
-    private fun setUpEditorListener() {
-        //Listen EditText
-        mShotTitleEditor.addTextChangedListener(titleWatcher)
-        mTagEditor.addTextChangedListener(tagWatcher)
-        mShotDescriptionEditor.addTextChangedListener(descWatcher)
-    }
-
     private fun setUpBottomSheet() {
         mBottomSheetBehaviour = BottomSheetBehavior.from(mBSPublish)
         mBottomSheetBehaviour.state= BottomSheetBehavior.STATE_HIDDEN
@@ -461,18 +429,8 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         })
     }
 
-    private fun updateAttachmentList(newAttachmentList: ArrayList<Attachment>) {
-        Timber.d("updateAttachmentList called")
-        attachments.clear() //clear list
-        for (i in newAttachmentList.indices) {
-            //repopulate list
-            attachments.add(newAttachmentList[i])
-        }
-        mAttachmentsAdapter.updateRv()
-    }
-
     private fun setUpScrollListener() {
-        mNestedScrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener {
+        mEditionContainer.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener {
             v, scrollX, scrollY, oldScrollX, oldScrollY ->
             if (scrollY > oldScrollY) {
                 Timber.i("Scroll DOWN")
@@ -495,47 +453,33 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         })
     }
 
-    private fun activePublishBottomSheet(activate:Boolean?) {
-        /*if (activate==true) {
-            publishBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorAccent))
-            storeBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimaryDark))
-            mBSPublish.foreground = ColorDrawable(ContextCompat.getColor(this, android.R.color.transparent))
-        } else {
-            publishBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimaryLight))
-            storeBtn.background = ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimaryLight))
-        }*/
-    }
-
-    private fun initAttachmentList() {
-        if (mRvAttachments.layoutManager==null && mRvAttachments.adapter==null) {
-            mGridLayoutManager = UnScrollableLayoutManager(this, 5)
-            mRvAttachments.layoutManager =  mGridLayoutManager
-            mRvAttachments.adapter = mAttachmentsAdapter
-            (mRvAttachments.layoutManager as UnScrollableLayoutManager).disableScrolling() //disable scroll
-        }
-    }
-
+    private fun activePublishBottomSheet(activate:Boolean?) {}
 
     /*
     *********************************************************************************************
-    * TEXTWATCHER
+    * TEXT WATCHER AND EDITION LISTENER
     *********************************************************************************************/
-    private val titleWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) { mShotEditionViewModel.onTitleChanged(s.toString()) }
-        override fun afterTextChanged(s: Editable) {}
+    private fun setUpEditorListener() {
+        //Listen EditText
+        mShotTitleEditor.addTextChangedListener(getTextWatcher(mShotTitleEditor))
+        mTagEditor.addTextChangedListener(getTextWatcher(mTagEditor))
+        mShotDescriptionEditor.addTextChangedListener(getTextWatcher(mShotDescriptionEditor))
     }
 
-    private val descWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) { mShotEditionViewModel.onDescriptionChanged(s.toString()) }
-        override fun afterTextChanged(s: Editable) {}
-    }
+    private fun getTextWatcher(editText: TextInputEditText): TextWatcher {
+        return object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
+                when(editText) {
+                    mShotTitleEditor ->  mShotEditionViewModel.onTitleChanged(charSequence.toString())
+                    mTagEditor ->  manageTagEdition(charSequence)
+                    mShotDescriptionEditor -> mShotEditionViewModel.onDescriptionChanged(charSequence.toString())
+                    else -> Timber.d("no action")
+                }
 
-    private val tagWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {  manageTagEdition(s)}
-        override fun afterTextChanged(s: Editable) {}
+            }
+            override fun afterTextChanged(editable: Editable) {}
+        }
     }
 
     private fun manageTagEdition(s: CharSequence) {
@@ -548,4 +492,24 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
         }
     }
+
+    private fun initAttachmentList() {
+        if (mRvAttachments.layoutManager==null && mRvAttachments.adapter==null) {
+            mGridLayoutManager = UnScrollableLayoutManager(this, 5)
+            mRvAttachments.layoutManager =  mGridLayoutManager
+            mRvAttachments.adapter = mAttachmentsAdapter
+            (mRvAttachments.layoutManager as UnScrollableLayoutManager).disableScrolling() //disable scroll
+        }
+    }
+
+    private fun updateAttachmentList(newAttachmentList: ArrayList<Attachment>) {
+        Timber.d("updateAttachmentList called")
+        attachments.clear() //clear list
+        for (i in newAttachmentList.indices) {
+            //repopulate list
+            attachments.add(newAttachmentList[i])
+        }
+        mAttachmentsAdapter.updateRv()
+    }
+
 }

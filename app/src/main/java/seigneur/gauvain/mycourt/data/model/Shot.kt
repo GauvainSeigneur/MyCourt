@@ -13,7 +13,7 @@ data class Shot (
         @PrimaryKey
         @ColumnInfo(name = "id")
         var id: String?,
-        var title: String?="",
+        var title: String?,
         var description: String?,
         @SerializedName("tags")
         var tagList: ArrayList<String>?,

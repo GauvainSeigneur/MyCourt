@@ -14,7 +14,7 @@ abstract class EditShotActivityModule {
     /**
      *
      * @param mEditShotActivity
-     * @return impelemntation  of the activity
+     * @return implementation  of the activity
      */
     @Binds
     @PerActivity

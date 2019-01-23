@@ -12,15 +12,15 @@ import java.util.Date
 @Entity
 data class Draft(
         @PrimaryKey(autoGenerate = true)
-    var draftID: Long = 0, //Insert methods treat 0 as not-set while inserting the item, so Room will auto generated an ID
+        var draftID: Long = 0, //Insert methods treat 0 as not-set while inserting the item, so Room will auto generated an ID
         var typeOfDraft: Int = Int.MIN_VALUE, //NEW SHOT OR UPDATE
-        var imageUri: String? = "",//for viewing TODO - maybe delete ?
+        var imageUri: String?,
         var imageFormat: String? = "",
         var schedulingDate: Date?=null,//ONLY FOR UPDATE OF AN ALREADY PUBLISHED SHOT
         var croppedImgDimen:IntArray?=intArrayOf(400, 300), //minimal Dribble dimens by default
-    //Embed shot object
+        //Embed shot object
         @Embedded
-    var shot: Shot) {
+        var shot: Shot) {
 
     fun changeInfoFromEdit(
             inImageUri: String?,

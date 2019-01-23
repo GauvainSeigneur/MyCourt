@@ -160,7 +160,7 @@ constructor() : ViewModel() {
         compositeDisposable.add(
                 mUserRepository.getUserFromAPI(false)
                         .subscribe(
-                                this::saveUser,
+                                { goToHomeCommand.call()},      //this::saveUser,
                                 this::onError
                         )
         )

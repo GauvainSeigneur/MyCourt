@@ -16,9 +16,11 @@ import io.reactivex.disposables.CompositeDisposable
 import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.data.model.Shot
+import seigneur.gauvain.mycourt.data.model.User
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository
 import seigneur.gauvain.mycourt.data.repository.ShotRepository
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository
+import seigneur.gauvain.mycourt.data.repository.UserRepository
 import seigneur.gauvain.mycourt.ui.shotEdition.tasks.GetSourceTask
 import seigneur.gauvain.mycourt.ui.shotEdition.tasks.PublishTask
 import seigneur.gauvain.mycourt.ui.shotEdition.tasks.StoreDraftTask
@@ -48,6 +50,9 @@ constructor() : ViewModel(),
     lateinit var mTempDataRepository: TempDataRepository
 
     @Inject
+    lateinit var mUserRepository:UserRepository
+
+    @Inject
     lateinit var mApplication: Application
 
     //RX disposable
@@ -60,7 +65,7 @@ constructor() : ViewModel(),
     private val mStoreDrafTask: StoreDraftTask by lazy {
         StoreDraftTask(mCompositeDisposable, mShotDraftRepository, this) }
     private val mGetSourceTask: GetSourceTask by lazy {
-        GetSourceTask(mTempDataRepository, mCompositeDisposable, this) }
+        GetSourceTask(mTempDataRepository, mUserRepository, mCompositeDisposable, this) }
     private val mPublishTask: PublishTask by lazy {
         PublishTask(mCompositeDisposable, mShotRepository, mShotDraftRepository,
                 mNetworkErrorHandler, mConnectivityReceiver,this)
@@ -76,6 +81,8 @@ constructor() : ViewModel(),
     *********************************************************************************************
     * Initialize data
     *********************************************************************************************/
+    //user data
+    var mUserType= MutableLiveData<Int>()
     //read and Write persmission
     val mRequestPermCmd = SingleLiveEvent<Void>()
     val mCheckPerm = SingleLiveEvent<Void>()
@@ -108,7 +115,7 @@ constructor() : ViewModel(),
     *********************************************************************************************/
     fun init() {
         if (mTempDraft == null)
-            mGetSourceTask.getOriginOfEditRequest()
+            mGetSourceTask.init()
         //check permission to read and write on external storage
         mCheckPerm.call()
     }
@@ -199,10 +206,33 @@ constructor() : ViewModel(),
     fun getCroppedImageUri(): LiveData<Uri> {
         return croppedImageUri
     }
+
+    val getUserType: LiveData<Int>
+        get() =  mUserType
+
     /*
     *********************************************************************************************
-    * Create draft,  manage & Update its info
+    * Create draft,  manage & Update its info and edition related info
     *********************************************************************************************/
+    override fun onUserFound(user: User) {
+        if (user.isPro)
+            mUserType.value = Constants.USER_PRO
+        else if (!user.isPro && user.isAllowedToUpload) {
+            mUserType.value = Constants.USER_PLAYER
+        } else {
+            mUserType.value = Constants.USER_UNALLOWED_TO_UPLOAD
+        }
+    }
+
+    override fun onNoUserFound() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    //show waiter on Pro Option layout
+    override fun showWaiter(boolean: Boolean) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     //GetSourceTaskCallback
     override fun setUpTempDraft(draft: Draft) {
         mTempDraft = draft
@@ -259,8 +289,38 @@ constructor() : ViewModel(),
                 tags.value,
                 mAttachmentList.value,
                 mCroppedImgDimen)
+    }
+
+    /**
+     * The draft needs, at least, to have an image and a title to published and only a title
+     * to be updated
+     * Must be called in method which change title and image uri values changes
+     * @param title - title of the shot to be published/updated
+     * @param imageUri - link of the image to be published
+     */
+    private fun checkIfIsReadyToPublish() {
+        isReadyToPublish.value =  EditUtils.isReadyToPublish(mTempDraft!!)
+    }
+
+    private fun programDeletePOST(position:Int) {
+        //if attachment id is different than -1L, is an published on, so we have to perform
+        //DELETE POST if user delete it from UI
+        mAttachmentList.value?.let {
+            if (mAttachmentList.value!![position].id != -1L) {
+                //create temporary attachment object
+                val tempAttachmentToDelete = mAttachmentList.value!![position]
+                //inject to it the current shot id to perform Delete POST on Dribbble
+                mTempDraft?.shot?.id?.let {
+                    tempAttachmentToDelete.shotId = mTempDraft!!.shot.id
+                }
+                //finally add to delete list
+                mTempAttachmentsToDelete.add(tempAttachmentToDelete)
+                Timber.d("mTempAttachmentsToDelete " + mTempAttachmentsToDelete.size)
+            }
+        }
 
     }
+
     /*
     *********************************************************************************************
     * Store Draft operation and callback
@@ -310,7 +370,8 @@ constructor() : ViewModel(),
         //second check again if is ready to publish
         checkIfIsReadyToPublish()
         //if is ready - publish or update draft, else  notify user
-        if (isReadyToPublish.value==true) {
+       if (isReadyToPublish.value==true) {
+           Timber.d("temp draft image : ready")
             if (mTempDraft!!.typeOfDraft == Constants.EDIT_MODE_UPDATE_SHOT) {
                 mPublishTask. updateShot(
                         mTempDraft!!,
@@ -325,44 +386,14 @@ constructor() : ViewModel(),
             Timber.d("not ready")
             notifyUserNotReadyCmd.call()
         }
+    }
 
-
-     }
-
-    override fun onPublishSuccess() {
+    override fun onPublishSucceed() {
         onPublishSucceed.call()
     }
 
-    /**
-     * The draft needs, at least, to have an image and a title to published and only a title
-     * to be updated
-     * Must be called in method which change title and image uri values changes
-     * @param title - title of the shot to be published/updated
-     * @param imageUri - link of the image to be published
-     * TODO - remange it // set it in EditUtils
-     */
-    private fun checkIfIsReadyToPublish() {
-        Timber.d("lolol "+ EditUtils.isReadyToPublish(mTempDraft))
-        isReadyToPublish.value =  EditUtils.isReadyToPublish(mTempDraft)
-    }
+    override fun onPublishFailed(error:String) {}
 
-    private fun programDeletePOST(position:Int) {
-        //if attachment id is different than -1L, is an published on, so we have to perform
-        //DELETE POST if user delete it from UI
-        mAttachmentList.value?.let {
-            if (mAttachmentList.value!![position].id != -1L) {
-                //create temporary attachment object
-                val tempAttachmentToDelete = mAttachmentList.value!![position]
-                //inject to it the current shot id to perform Delete POST on Dribbble
-                mTempDraft?.shot?.id?.let {
-                    tempAttachmentToDelete.shotId = mTempDraft!!.shot.id
-                }
-                //finally add to delete list
-                mTempAttachmentsToDelete.add(tempAttachmentToDelete)
-                Timber.d("mTempAttachmentsToDelete " + mTempAttachmentsToDelete.size)
-            }
-        }
-
-    }
+    override fun onDeleteAttachmentFailed(error:String) {}
 
 }

@@ -115,7 +115,7 @@ constructor() : ViewModel() {
     }
 
     fun onDeleteClicked() {
-        mTempDataRepository.deleteSelecteListCmd.call()
+        mTempDataRepository.deleteSelectedListCmd.call()
     }
 
     /*

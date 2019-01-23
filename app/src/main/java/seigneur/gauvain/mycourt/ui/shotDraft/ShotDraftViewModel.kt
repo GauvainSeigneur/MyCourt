@@ -50,7 +50,7 @@ constructor() : ViewModel() {
     }
 
     fun deleteCickEvent(): SingleLiveEvent<Void> {
-        return mTempDataRepository.deleteSelecteListCmd
+        return mTempDataRepository.deleteSelectedListCmd
     }
 
     val editMode: LiveData<Int>

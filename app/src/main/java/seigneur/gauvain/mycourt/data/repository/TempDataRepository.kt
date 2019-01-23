@@ -1,6 +1,5 @@
 package seigneur.gauvain.mycourt.data.repository
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,19 +11,18 @@ import seigneur.gauvain.mycourt.utils.SingleLiveEvent
 /**
  * Class used to get reference of data which are not
  * saved in DB or SharedPrefs
- * eg. data send between presenters
+ * eg. data send between viewModel
  */
 @Singleton
 class TempDataRepository
-//Used to notify that change has been made on Draft DB
-//public boolean mDraftsChanged=false;
 
 @Inject
 constructor() {
 
-    //Used to temporarily store Shot in order to send it between presenter...
+    //Used to temporarily store Shot in order to send it between viewModel
     lateinit var shot: Shot
-    //Used to temporarily store ShotDraft in order to send it between presenter...
+
+    //Used to temporarily store ShotDraft in order to send it between viewModel
     lateinit var shotDraft: Draft
 
     //Set to define the source of the edition to register the Draft in the right way
@@ -33,9 +31,7 @@ constructor() {
     //Notify subscribers Tat action mode has been triggered or stopped
     var editMode = MutableLiveData<Int>()
 
-
-    var deleteSelecteListCmd = SingleLiveEvent<Void>()
-
-
+    //delete selected item from draft fragment
+    var deleteSelectedListCmd = SingleLiveEvent<Void>()
 
 }

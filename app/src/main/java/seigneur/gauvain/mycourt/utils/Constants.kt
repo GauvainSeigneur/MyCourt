@@ -15,6 +15,10 @@ object Constants {
         /**
          * INTERNAL CONSTANTS
          */
+        const val USER_UNALLOWED_TO_UPLOAD      = -1
+        const val USER_PLAYER                   = 30 //ONLY PLAYER CAN UPLOAD FROM API (PROSPECT CANNOT)
+        const val USER_PRO                      = 31 //PRO HAVE MORE OPTIONS
+
         const val CUSTOM_ACTION_MODE_OFF = 40
         const val CUSTOM_ACTION_MODE_ON  = 41
 

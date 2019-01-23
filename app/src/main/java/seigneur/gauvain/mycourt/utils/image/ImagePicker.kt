@@ -14,9 +14,19 @@ import android.provider.MediaStore
 import android.widget.Toast
 import com.yalantis.ucrop.UCrop
 import com.yalantis.ucrop.UCropActivity
+import droidninja.filepicker.FilePickerConst
 import seigneur.gauvain.mycourt.R
+import seigneur.gauvain.mycourt.data.model.Attachment
+import seigneur.gauvain.mycourt.ui.shotEdition.ShotEditionViewModel
+import seigneur.gauvain.mycourt.utils.FileUtils
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.util.ArrayList
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.EditText
+
+
 
 object ImagePicker {
     /**
@@ -70,7 +80,6 @@ object ImagePicker {
 
                 options.setCompressionQuality(100)
                 options.setMaxBitmapSize(100000)
-
                 UCrop.of(source, destination)
                         .withAspectRatio(4f, 3f)
                         .withOptions(options)
@@ -78,6 +87,57 @@ object ImagePicker {
             }
         }
     }
+
+    fun onImagePicked (
+             data: Intent?,
+             shotEditionViewModel: ShotEditionViewModel){
+        data?.let {
+            val shotIMG = ArrayList<String>()
+            shotIMG.addAll(data.getStringArrayListExtra(FilePickerConst.KEY_SELECTED_MEDIA))
+            //get file uri  and send it to ViewModel
+            shotEditionViewModel.mPickedFileUri = Uri.parse(shotIMG[0])
+            //get file name with extension
+            val shotFileName = FileUtils.getFileName(Uri.parse(shotIMG[0]))
+            //get file name without extension
+            val shotFileNameWithoutExtension = shotFileName.substringBefore(".",shotFileName)
+            //send name, mymeType and dimens to viewModel
+            shotEditionViewModel.mPickedFileName = shotFileNameWithoutExtension
+            shotEditionViewModel.mPickedFileMymeType = FileUtils.getMimeType((shotIMG[0]))
+            shotEditionViewModel.mPickedImageDimens = FileUtils.getImageFilePixelSize(Uri.parse(shotIMG[0]))
+            //notify viewModel to call Ucrop command
+            shotEditionViewModel.onImagePicked()
+        }
+    }
+
+    fun onImageCropped (
+            data: Intent?,
+            shotEditionViewModel : ShotEditionViewModel){
+        data?.let {
+            shotEditionViewModel.onImageCropped(UCrop.getOutput(data))
+            shotEditionViewModel.mCroppedImgDimen =  FileUtils.getImageFilePixelSize(UCrop.getOutput(data)!!)
+        }
+    }
+
+    fun onAttachmentPicked(data: Intent?, shotEditionViewModel : ShotEditionViewModel) {
+        data?.let {
+            val attachmentPaths = ArrayList<String>()
+            attachmentPaths.addAll(data.getStringArrayListExtra(FilePickerConst.KEY_SELECTED_MEDIA))
+            if (attachmentPaths.isNotEmpty()) {
+                Timber.d("SELECTED MEDIA" + attachmentPaths[0])
+                val fileName = FileUtils.getFileName(Uri.parse(attachmentPaths[0]))
+                val fileNameWithoutExtension = fileName.substringBefore(".", fileName)
+                val attachment = Attachment(-1L,    //id to be -1 for new attachment
+                        "",
+                        attachmentPaths[0],
+                        FileUtils.getMimeType((attachmentPaths[0])),
+                        fileNameWithoutExtension)
+                shotEditionViewModel.onAttachmentAdded(attachment)
+            }
+        }
+
+    }
+
+
 
     /*
     ******************************************************************************************

@@ -6,13 +6,23 @@ import io.reactivex.functions.Consumer
 import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.data.model.Shot
+import seigneur.gauvain.mycourt.data.model.User
 import seigneur.gauvain.mycourt.data.repository.TempDataRepository
+import seigneur.gauvain.mycourt.data.repository.UserRepository
 import seigneur.gauvain.mycourt.utils.Constants
 import timber.log.Timber
 
 class GetSourceTask(private val mTempDataRepository: TempDataRepository,
+                    private val mUserRepository: UserRepository,
                     private val mCompositeDisposable: CompositeDisposable,
                     private val mSourceCallback: SourceCallback) {
+
+    private var mUserFromDb:User?=null
+
+    fun init(){
+        getOriginOfEditRequest()
+        getUser()
+    }
 
     /*
     *********************************************************************************************
@@ -21,7 +31,7 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
     /**
      * Check whether if the activity is opened from draft registered in database or other
      */
-    fun getOriginOfEditRequest() {
+    private fun getOriginOfEditRequest() {
         mCompositeDisposable
                 .add(Single.just(mTempDataRepository.draftCallingSource)
                         .subscribe(
@@ -46,14 +56,13 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
                 val draft = Draft(
                         0,
                         Constants.EDIT_MODE_NEW_SHOT,
-                        null,
+                        "",
                         null,
                         null,
                         null,
                         shot
                 )
                 mSourceCallback.setUpTempDraft(draft)
-                //mSourceCallback.dataForUIReady()
             }
         }
     }
@@ -64,6 +73,69 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
      */
     private fun manageSourceTypeError(throwable: Throwable) {
         Timber.d(throwable)
+    }
+
+
+    /*
+    *********************************************************************************************
+    * Get user from DB
+    * if User is pro/Player assumed that this status hasn't changed
+    * either check to Dribbble if it has changed
+    *********************************************************************************************/
+    private fun getUser() {
+        mCompositeDisposable.add(mUserRepository.userFromDB
+                .subscribe(
+                        { user ->
+
+                            Timber.d("user found")
+                            mUserFromDb = user
+                            Timber.d("is pro?: "+user.isPro)
+                            if (user.isPro) {
+                                //User is pro, not need to perform API request
+                                mSourceCallback.onUserFound(user)
+                            }
+
+                            else
+                                //user in DB is not a Pro, get its status from Dribbble
+                                getUserFromAPI()
+                        },
+                        {t ->
+                            Timber.d("error on request")
+                            //something went wrong during request : check on Dribbble
+                            Timber.d(t)
+                            getUserFromAPI()
+                        },
+                        {
+                            Timber.d("no user found")
+                            getUserFromAPI()
+                        }
+
+                )
+        )
+    }
+
+    private fun getUserFromAPI() {
+        Timber.d("get user from api called")
+        mCompositeDisposable.add(mUserRepository.getUserFromAPI(false)
+                .subscribe(
+                        { user -> mSourceCallback.onUserFound(user) },
+                        {t -> onNoUserFoundFromAPI(t) }
+                )
+        )
+    }
+
+    private fun onNoUserFoundFromAPI(t : Throwable) {
+        Timber.d("No user found from API: $t")
+
+        mSourceCallback.showWaiter(false)
+        if (mUserFromDb!=null) {
+            if (mUserFromDb!!.isAllowedToUpload) {
+                mSourceCallback.onUserFound(mUserFromDb!!)
+            }
+        } else {
+            Timber.d("No user found")
+            mSourceCallback.onNoUserFound()
+        }
     }
 
     /*
@@ -119,10 +191,13 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
 
     interface SourceCallback {
 
+        fun onUserFound(user: User)
+
+        fun onNoUserFound()
+
+        fun showWaiter(boolean: Boolean)
+
         fun setUpTempDraft(draft: Draft)
-
-       // fun dataForUIReady()
-
 
     }
 

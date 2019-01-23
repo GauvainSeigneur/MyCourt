@@ -44,8 +44,8 @@ interface DribbbleService {
     @FormUrlEncoded
     @PUT("shots/{id}")
     fun updateShot(
-            @Path(value = "id", encoded = true) id: String,
-            @Field("title") title: String,
+            @Path(value = "id", encoded = true) id: String?,
+            @Field("title") title: String?,
             @Field("description") description: String,
             @Field("tags[]") tags: ArrayList<String>,
             @Field("low_profile") isLowProfile: Boolean

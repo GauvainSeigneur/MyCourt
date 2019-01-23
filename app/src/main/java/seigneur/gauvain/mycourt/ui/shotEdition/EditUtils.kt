@@ -16,6 +16,7 @@ import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.utils.Constants
 import seigneur.gauvain.mycourt.utils.MyTextUtils
+import timber.log.Timber
 
 /**
  *
@@ -83,7 +84,7 @@ class EditUtils {
             val listString = StringBuilder()
             val multipleWordTagPattern = Pattern.compile(MyTextUtils.multipleWordtagRegex)
             for (s in tagList!!) {
-                var inS =s
+                var inS = s
                 val wordMatcher = multipleWordTagPattern.matcher(s)
                 if (!wordMatcher.matches()) {
                     inS = "\"" + s + "\""
@@ -132,8 +133,8 @@ class EditUtils {
 
         //return true if the cropped image has changed (manually by the user),
         //either return false
-        fun itHasNewImageToSave(draft:Draft?, newCroppedImageUri:Uri?):Boolean {
-            if (newCroppedImageUri!=null) {
+        fun itHasNewImageToSave(draft: Draft?, newCroppedImageUri: Uri?): Boolean {
+            if (newCroppedImageUri != null) {
                 return (draft?.imageUri != newCroppedImageUri.toString())
             } else {
                 return false
@@ -141,17 +142,21 @@ class EditUtils {
 
         }
 
-        fun isReadyToPublish(draft: Draft?):Boolean? {
-            val isReady:Boolean
-            if (draft?.shot?.title.isNullOrEmpty()) {
-                isReady = false
-            } else if (draft?.typeOfDraft==Constants.EDIT_MODE_NEW_SHOT &&
-                    draft.imageUri!=null && draft.imageUri.toString().isNotEmpty()) {
-                isReady = false
-            } else {
-                isReady =true
+        fun isReadyToPublish(draft: Draft): Boolean {
+            var isReady=false
+            when (draft.typeOfDraft) {
+                Constants.EDIT_MODE_NEW_SHOT -> {
+                    Timber.d("first case")
+                    isReady = !(draft.shot.title.isNullOrEmpty() || draft.imageUri.isNullOrEmpty())
+                }
+                else -> {
+                    isReady = !draft.shot.title.isNullOrEmpty()
+                }
             }
+
+            Timber.d("kaaaaris 3 "+isReady)
             return isReady
+
         }
     }
 

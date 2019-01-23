@@ -5,9 +5,7 @@ import android.app.Application
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import android.content.Context
 import android.content.Intent
-import android.hardware.Sensor
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -26,7 +24,6 @@ import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.ui.base.BaseActivity
 import seigneur.gauvain.mycourt.ui.main.MainActivity
 import seigneur.gauvain.mycourt.ui.widget.ParallaxView
-
 
 class SplashActivity : BaseActivity() {
 
@@ -127,8 +124,5 @@ class SplashActivity : BaseActivity() {
         startActivity(intent)
         finish()
     }
-
-
-
 
 }

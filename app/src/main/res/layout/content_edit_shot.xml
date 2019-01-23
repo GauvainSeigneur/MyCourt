@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/edit_shot_container"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="72dp">
+
+        <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
+            android:id="@+id/cropped_img_preview"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@color/colorPrimaryLight"
+            android:foreground="@drawable/rect_ripple"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- android:layout_marginTop="@dimen/padding_16" -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/shot_title_input"
+            style="@style/Widget.MyCourt.TextInputLayoutStyle"
+            android:layout_marginTop="@dimen/padding_16"
+            android:layout_marginEnd="@dimen/padding_16"
+            android:layout_marginStart="@dimen/padding_16"
+            android:hint="Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/shot_title_edt"
+                style="@style/Widget.MyCourt.EditTextStyle"
+                android:inputType="text"
+                android:imeOptions="actionNext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/shot_description_input"
+            style="@style/Widget.MyCourt.TextInputLayoutStyle"
+            android:imeOptions="actionDone"
+            android:hint="Description"
+            android:layout_marginTop="@dimen/padding_16"
+            android:layout_marginEnd="@dimen/padding_16"
+            android:layout_marginStart="@dimen/padding_16"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/shot_description_edt"
+                style="@style/Widget.MyCourt.EditTextStyle"
+                android:inputType="textMultiLine"
+                android:imeOptions="actionNext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/shot_tag_input"
+            style="@style/Widget.MyCourt.TextInputLayoutStyle"
+            android:imeOptions="actionDone"
+            android:layout_marginTop="@dimen/padding_16"
+            android:layout_marginEnd="@dimen/padding_16"
+            android:layout_marginStart="@dimen/padding_16"
+            app:helperTextEnabled="true"
+            app:helperText="Separates tags with commas (eg.TagA, Tag b)"
+            android:hint="Tags"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/shot_tag_edt"
+                style="@style/Widget.MyCourt.EditTextStyle"
+                android:inputType="textMultiLine"
+                android:imeOptions="actionDone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:id="@+id/pro_option_layout"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_attachment"
+                android:layout_width="match_parent"
+                android:paddingStart="@dimen/padding_12"
+                android:paddingEnd="@dimen/padding_12"
+                android:layout_height="56dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

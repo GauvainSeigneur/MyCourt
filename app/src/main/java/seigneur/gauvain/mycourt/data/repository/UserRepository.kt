@@ -74,13 +74,18 @@ constructor() {
     }
 
     fun getUserFromAPI(applyResponseCache: Boolean): Single<User> {
+
         Timber.d("getUserFromAPI called")
         return mDribbbleService.user
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSuccess { _ ->
+                .doOnSuccess { it ->
                     isFetchFromAPISuccess = true
-                    //insertUser(user);
+                    insertUser(it) //always insert user in DB
+                            .subscribe(
+                                    { Timber.d("user stored") },
+                                    { t -> Timber.d(t) }
+                            )
                 }
     }
 
