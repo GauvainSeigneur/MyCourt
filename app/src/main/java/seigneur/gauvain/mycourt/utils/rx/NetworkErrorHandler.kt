@@ -2,15 +2,14 @@ package seigneur.gauvain.mycourt.utils.rx
 
 /**
  * Interface which allows to treat all IO errors in one place when injected in Presenter
+ * Note :
+ * this do not mange NullPointerException, IllegalArgumentException, IllegalStateException
+ * or UndeliverableException
+ * those errors must be managed bu a general RxJavaPlugin Error Handler
  */
 interface NetworkErrorHandler {
 
-    interface onRXErrorListener {
-        /**
-         * Unexpected error
-         * todo : must be handled in another place ? like GeneralErrorHandler ?
-         */
-        fun onUnexpectedException(throwable: Throwable)
+    interface onErrorListener {
 
         /**
          * a network exception (e.g Connection lost during request)
@@ -24,6 +23,6 @@ interface NetworkErrorHandler {
 
     }
 
-    fun handleNetworkErrors(error: Throwable, eventID: Int, listener: onRXErrorListener)
+    fun handleNetworkErrors(error: Throwable, eventID: Int, listener: onErrorListener)
 
 }

@@ -225,12 +225,7 @@ constructor() : ViewModel(),
     }
 
     override fun onNoUserFound() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    //show waiter on Pro Option layout
-    override fun showWaiter(boolean: Boolean) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     //GetSourceTaskCallback
@@ -388,12 +383,17 @@ constructor() : ViewModel(),
         }
     }
 
+    //show waiter when app perform publish request
+    override fun showWaiter(boolean: Boolean) {
+
+    }
+
+
     override fun onPublishSucceed() {
         onPublishSucceed.call()
     }
 
     override fun onPublishFailed(error:String) {}
 
-    override fun onDeleteAttachmentFailed(error:String) {}
 
 }

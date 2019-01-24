@@ -12,58 +12,21 @@ import timber.log.Timber
 import java.net.UnknownHostException
 
 /**
- * Implementation of NetworkErrorHandler using RxJavaPlugins to catch IO errors
+ * Implementation of NetworkErrorHandler like RxJavaPlugins to catch IO errors
  * and not stop application
  * see : https://github.com/ReactiveX/RxJava/wiki/What%27s-different-in-2.0
  */
-class NetworkErrorHandlerImpl
-@Inject
-constructor() : NetworkErrorHandler {
 
-    override fun handleNetworkErrors(error: Throwable, eventID: Int, listener: NetworkErrorHandler.onRXErrorListener) {
-        RxJavaPlugins.setErrorHandler { e ->
-            when(error) {
-                is UndeliverableException -> listener.onUnexpectedException(e)
-                is IOException -> listener.onNetworkException(e)
-                is SocketException ->  listener.onNetworkException(e)
-                is HttpException -> listener.onHttpException(e)
-                else -> listener.onUnexpectedException(e)
-            }
+class NetworkErrorHandlerImpl : NetworkErrorHandler {
+    override fun handleNetworkErrors(error: Throwable, eventID: Int, listener: NetworkErrorHandler.onErrorListener) {
+        Timber.d("NetworkErrorHandlerImpl called ")
+        when(error) {
+            is IOException -> listener.onNetworkException(error)
+            is SocketException ->  listener.onNetworkException(error)
+            is UnknownHostException -> listener.onNetworkException(error)
+            is InterruptedException -> listener.onNetworkException(error)
+            is HttpException -> listener.onHttpException(error)
         }
     }
 
 }
-
-/*
-
-public class NetworkErrorHandlerImpl implements NetworkErrorHandler {
-
-    @Inject
-    public NetworkErrorHandlerImpl() {}
-
-    @Override
-    public void handleNetworkErrors(final Throwable error, int eventID, NetworkErrorHandler.onRXErrorListener listener) {
-        RxJavaPlugins.setErrorHandler(e ->{
-            if (error instanceof UndeliverableException) {
-                //Unknown error, rx cannot attribute this error to a class
-                Timber.e(error.getMessage()+error.getCause());
-                listener.onUnexpectedException(e);
-                return;
-            }
-            if ((error instanceof SocketException) || (error instanceof IOException)) {
-                // fine, irrelevant network problem or API that throws on cancellation
-                Timber.e(error.getMessage()+error.getCause());
-                listener.onNetworkException(e);
-                return;
-            }
-            if ((error instanceof HttpException)) {
-                //non-2xx HTTP response
-                Timber.e(error.getMessage()+error.getCause());
-                listener.onHttpException(e);
-            }
-        });
-    }
-
-}
-
- */

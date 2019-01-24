@@ -54,6 +54,7 @@ object Constants {
         const val EDIT_MODE_NEW_SHOT = 2001
         const val EDIT_MODE_UPDATE_SHOT = 2002
 
+        /*
         @Retention(AnnotationRetention.RUNTIME)
         @IntDef(EDIT_PUBLISHED, DRAFT_PUBLISHED, EDIT_DRAFTED, EDIT_ABORTED)
         annotation class EditResult
@@ -61,6 +62,7 @@ object Constants {
         const val DRAFT_PUBLISHED = 602
         const val EDIT_DRAFTED = 603
         const val EDIT_ABORTED = 604
+        */
 
         @Retention(AnnotationRetention.RUNTIME)
         @IntDef(SOURCE_DRAFT, SOURCE_SHOT, SOURCE_FAB)
@@ -69,21 +71,25 @@ object Constants {
         const val SOURCE_SHOT = 702 //from a shot
         const val SOURCE_FAB = 703 //from a fab (new draft)
 
+        /*
         @Retention(AnnotationRetention.RUNTIME)
         @IntDef(CROP_MODE_HD, CROP_MODE_NORMAL, CROP_MODE_GIF_INCORRET_FORMAT)
         annotation class ImageCroppingMode
         const val CROP_MODE_HD = 801 //800*600
         const val CROP_MODE_NORMAL = 802 //400*300
         const val CROP_MODE_GIF_INCORRET_FORMAT = 803 //gif can't be cropped, so it must directly correct format
+        */
 
         @Retention(AnnotationRetention.RUNTIME)
         @IntDef(BAD_REQUEST, UNAUTHENTICATED_USER, ACCESS_FORBIDDEN, PAGE_NOT_FOUND)
         annotation class HttpErrors
-        //todo - error 500
+        //Client error - something bad is in our request
         const val BAD_REQUEST = 400
         const val UNAUTHENTICATED_USER = 401
         const val ACCESS_FORBIDDEN = 403
         const val PAGE_NOT_FOUND = 404
+        //Server error -
+        const val SERVER_INTERNAL_ERRPOR = 500
 
         @Retention(AnnotationRetention.RUNTIME)
         @IntDef(REQUEST_OK, ACCEPTED)

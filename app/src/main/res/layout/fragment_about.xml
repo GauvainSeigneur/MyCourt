@@ -34,6 +34,13 @@
             android:layout_height="150dp"
             android:text="button"/>
 
+        <seigneur.gauvain.mycourt.ui.widget.FourThreeVideoView
+            android:id="@+id/video_player"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/button"
+            app:layout_constraintStart_toStartOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,23 +1,16 @@
 package seigneur.gauvain.mycourt.ui.shotEdition.tasks
 
 import android.content.Context
-import android.net.Uri
-import java.io.IOException
-import java.util.HashMap
 import io.reactivex.disposables.CompositeDisposable
-import okhttp3.RequestBody
-import retrofit2.HttpException
-import retrofit2.Response
 import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.data.model.Draft
-import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.data.repository.ShotDraftRepository
 import seigneur.gauvain.mycourt.data.repository.ShotRepository
 import seigneur.gauvain.mycourt.utils.ConnectivityReceiver
 import seigneur.gauvain.mycourt.utils.Constants
-import seigneur.gauvain.mycourt.utils.HttpUtils
 import seigneur.gauvain.mycourt.utils.rx.NetworkErrorHandler
 import timber.log.Timber
+
 
 class PublishTask(
         private val mCompositeDisposable: CompositeDisposable,
@@ -31,211 +24,102 @@ class PublishTask(
     *************************************************************************
     * POST SHOT ON DRIBBBLE
     *************************************************************************/
-    fun postShot(draft: Draft,
-                 context: Context) {
-        if (draft!=null) {
-            val body = HttpUtils.createShotFilPart(
-                    context,
-                    draft.croppedImgDimen!!,
-                    Uri.parse(draft.imageUri),
-                    draft.imageFormat, "image")
-            //add to HashMap key and RequestBody
-            val map = HashMap<String, RequestBody>()
-            // executes the request
+    fun postShot(draft: Draft, context: Context) {
+        mPublishCallBack.showWaiter(true)
+        if (draft.hasAttachmentToPublish()) {
+            //has attachment concat request
             mCompositeDisposable.add(
-                    mShotRepository.publishANewShot(
-                            map,
-                            body,
-                            draft.shot.title,
-                            draft.shot.description,
-                            draft.shot.tagList)
-                            .doOnError { t ->
-                                if (t is IOException) {
-                                    Timber.d("UnknownHostException: $t")
-                                }
-                                handleNetworkOperationError(t, 100)
-                            }
+                    mShotRepository.postShotAndAttachment(draft, context)
                             .subscribe(
-                                    { response -> onPostSucceed(response, draft, context) },
-                                    {t -> onPostFailed(t)}
+                                    { response ->
+                                        when (response.code()) {
+                                        Constants.ACCEPTED -> { onPublishSucceed(draft) }
+                                        else ->
+                                            onPublishFailed("Post failed: " + response.code() +": "+ response.message(), null)
+                                        }},
+                                    {t -> onPublishFailed(t.toString(), t)}
                             )
             )
         } else {
-            //draft object lost....
+            mCompositeDisposable.add(
+                    //doesn't have attachment
+                    mShotRepository.publishANewShot(draft, context)
+                            .subscribe(
+                                    { response ->
+                                        when (response.code()) {
+                                            Constants.ACCEPTED -> { onPublishSucceed(draft) }
+                                            else ->
+                                                onPublishFailed("Post failed: " + response.code() +": "+ response.message(), null)
+                                        }
+                                    },
+                                    {t -> onPublishFailed(t.toString(), t)}
+                            )
+            )
         }
 
-
     }
 
-    /**
-     * Post operation has succeed - check the response from server
-     * response must be 202 to be publish on Dribbble
-     * @param response - body response from Dribbble
-     */
-    private fun onPostSucceed(response: Response<Void>,
-                              draft: Draft,
-                              context: Context) {
-        when (response.code()) {
-            Constants.ACCEPTED -> { doOnPostAccepted(response, draft, context) }
-            else -> doOnPostRejected(response)
-        }
-    }
-
-    private fun doOnPostAccepted(response: Response<Void>,
-                                  draft: Draft,
-                                  context: Context) {
-        val headers = response.headers()
-        val location = headers.get("location")
-        location?.let { Timber.d("post succeed. location: $location") }
-        if (draft.hasAttachmentToPublish()) {
-            val shotId:String //todo - this variable must be defined into Firebase for fast update
-            val locationTrunkAfter= location!!.substringAfterLast("/",location )
-            shotId=locationTrunkAfter.substringBefore("-",locationTrunkAfter)
-            postAttachments( shotId, context, draft)
-        } else {
-            //stop process and confirm to user that the post has been successfully published
-            onPublishSucceed(draft)
-        }
-    }
-
-    //todo - test it goes directly in error if code is not 202
-    private fun doOnPostRejected(response: Response<Void>) {
-        onPublishFailed("Post failed: " + response.code() +": "+ response.message())
-    }
-
-    /**
-     * An error occurred while trying to make post request
-     * @param t - throwable
-     */
-    private fun onPostFailed(t: Throwable) {
-        onPublishFailed("Post failed: $t")
-    }
 
     /*
     *************************************************************************
     * UPDATE SHOT ON DRIBBBLE
+    * 4 state possible :
+    * A - only update Shot info
+    * b - update shot info and post related attachment
+    * c - update shot info and delete related attachment
+    * d - update shot info, post and delete related attachment
     *************************************************************************/
     fun updateShot(
             draft: Draft,
             attachmentTodelete:List<Attachment>,
             context: Context,
             profile: Boolean) {
-        mCompositeDisposable.add(
-                mShotRepository.updateShot(
-                        draft.shot.id!!,
-                        draft.shot.title!!,
-                        draft.shot.description!!,
-                        draft.shot.tagList!!,
-                        profile)
-                        .subscribe(
-                                { shot ->
-                                    onUpdateShotSuccess(shot, draft, context, attachmentTodelete)
-                                },
-                                { this.onUpdateShotError(it)}
-                        )
-        )
-    }
-
-    /**
-     * Shot update succeed
-     * check if we have some attachment to add or delete and eprform related operation
-     */
-    private fun onUpdateShotSuccess(shot: Shot,
-                                    draft: Draft,
-                                    context: Context,
-                                    attachmentTodelete: List<Attachment>) {
-        Timber.d("success: " + shot.title!!)
-        if (!draft.hasAttachmentToPublish() && !attachmentTodelete.isNullOrEmpty()) {
-                Timber.d("update ope: delete attachment")
-               deleteAttachments(draft, attachmentTodelete)
-        } else if (draft.hasAttachmentToPublish() && attachmentTodelete.isNullOrEmpty()) {
-            Timber.d("update ope: post attachment")
-            postAttachments(shot.id!!, context, draft)
-        } else if (draft.hasAttachmentToPublish() && !attachmentTodelete.isNullOrEmpty()) {
-            postAndDeleteAttachment(draft, context, shot.id!!, attachmentTodelete)
+        mPublishCallBack.showWaiter(true)
+        if (attachmentTodelete.isNotEmpty() && draft.hasAttachmentToPublish()) {
+            //has new attachment to publish and old attachment to delete
+            mCompositeDisposable.add(
+                    mShotRepository.updateShotAndUploadAndDeleteAttachment(draft, profile, context, attachmentTodelete)
+                            .subscribe(
+                                    { _ -> Timber.d("update success updateShotAndUploadAndDeleteAttachment") },
+                                    {  onPublishFailed("Update failed: $it",it)}
+                            )
+            )
+        } else if (attachmentTodelete.isNotEmpty() && !draft.hasAttachmentToPublish()) {
+            //has attachment to delete
+            mCompositeDisposable.add(
+                    mShotRepository.updateShotAndDeleteAttachment(draft, profile, attachmentTodelete)
+                            .subscribe(
+                                    { shot -> Timber.d("update success updateShotAndDeleteAttachment ")
+                                        //onUpdateShotSuccess(shot, draft, context, attachmentTodelete)
+                                    },
+                                    { onPublishFailed("Update failed: $it", it)}
+                            )
+            )
+        } else if (attachmentTodelete.isEmpty() && draft.hasAttachmentToPublish()) {
+            //has new attachment to publish
+            mCompositeDisposable.add(
+                    mShotRepository.updateShotAndPostAttachment(draft, profile, context)
+                            .subscribe(
+                                    { shot -> Timber.d("update success updateShotAndPostAttachment")
+                                        //onUpdateShotSuccess(shot, draft, context, attachmentTodelete)
+                                    },
+                                    {  onPublishFailed("Update failed: $it",it)}
+                            )
+            )
         } else {
-            onPublishSucceed(draft)
+            //no new attachment or delete attachment
+            mCompositeDisposable.add(
+                    mShotRepository.updateShot(draft, profile)
+                            .subscribe(
+                                    { shot -> Timber.d("updateShot success ")
+                                        //onUpdateShotSuccess(shot, draft, context, attachmentTodelete)
+                                    },
+                                    {   onPublishFailed("Update failed: $it",it)
+                                    }
+                            )
+            )
         }
 
-    }
-
-    /**
-     * Manage network error while trying to perform update
-     * @param throwable - throwable
-     */
-    private fun onUpdateShotError(throwable: Throwable) {
-        onPublishFailed("Update failed: $throwable")
-    }
-    /*
-    *************************************************************************
-    * POST ATTACHMENT
-    *
-    * Dribbbles API doesn't allow to publish a shot with attachments.
-    * We can only provide attachments to an existing shot
-    * Also, we can send only one attachment per POST.
-    * So for first publication with attachment, we must concat it in two request
-    *************************************************************************/
-    private fun postAttachments(
-            shotId:String,
-            context: Context,
-            draft: Draft) {
-        mCompositeDisposable.add(
-                mShotRepository.postAttachment(context, draft, shotId)
-                        .subscribe(
-                                { onPosAttachmentSucceed(it, draft)},
-                                {t -> onPostFailed(t)},
-                                {onPublishSucceed(draft)}
-                        )
-        )
-
-    }
-
-    private fun onPosAttachmentSucceed(response: Response<Void>, draft: Draft) {
-        Timber.d("post attachment succeed:" +response.message())
-        onPublishSucceed(draft)
-    }
-
-    /*
-    *************************************************************************
-    * DELETE AN ATTACHMENT
-    *************************************************************************/
-    private fun deleteAttachments(draft: Draft, listAttachmentToDelete:List<Attachment>) {
-        mCompositeDisposable.add(mShotRepository.deleteAttachment(draft,listAttachmentToDelete)
-                .subscribe(
-                        { onDeleteAttachmentSucceed(it, draft)},
-                        {t -> onDeleteAttachmentFailed(t, draft)}
-                )
-        )
-    }
-
-    private fun onDeleteAttachmentSucceed(response: Response<Void>, draft: Draft) {
-        Timber.d("delete attachment succeed:" +response.message())
-        onPublishSucceed(draft)
-    }
-
-    private fun onDeleteAttachmentFailed(throwable: Throwable, draft: Draft) {
-        onDeleteAttachmentFailed("delete attachment failed: $throwable")
-
-        //todo - terminate UI process
-       //onPublishSucceed(draft)
-    }
-
-    /*
-    *************************************************************************
-    * Concat post and delete attachment operation
-    *************************************************************************/
-    private fun postAndDeleteAttachment(draft: Draft,
-                                       context: Context,
-                                       shotId:String,
-                                        listAttachmentToDelete: List<Attachment>) {
-        mCompositeDisposable.add(
-                mShotRepository.postAndDeleteAttachment(context,draft, shotId, listAttachmentToDelete)
-                        .subscribe(
-                                { response -> onPublishSucceed(draft) },
-                                {t -> onPostFailed(t)},
-                                { onPublishSucceed(draft)}
-                        )
-        )
     }
 
     /*
@@ -265,48 +149,42 @@ class PublishTask(
     * GLOBAL METHOD FOR EVERY REQUEST AND POST
     *************************************************************************/
     private fun onPublishSucceed(draft:Draft) {
+        mPublishCallBack.showWaiter(false)
         deleteDraftAfterPublish(draft) //todo
         mPublishCallBack.onPublishSucceed()
     }
 
-    private fun onPublishFailed(error:String) {
+    private fun onPublishFailed(error:String, t:Throwable?) {
+        t?.let{
+            handleNetworkOperationError(t,100)
+        }
+        mPublishCallBack.showWaiter(false)
         mPublishCallBack.onPublishFailed(error)
-    }
-
-    private fun onDeleteAttachmentFailed(error:String) {
-        mPublishCallBack.onDeleteAttachmentFailed(error)
     }
 
     /*
     *************************************************************************
     * MANAGE NETWORK EXCEPTION
-    * TODO - test it
+    *
+    * Note : we could use RxJavaPlugins.setErrorHandler but as we already
+    * specified an error handler using subscribe, RxJavaPlugins.setErrorHandler will not be called.
     *************************************************************************/
     private fun handleNetworkOperationError(error: Throwable, eventID: Int) {
-        Timber.tag("rxHandler").d("error handled by rx ma gueule")
+        Timber.d("error handled by rx")
         if (mNetworkErrorHandler == null) {
             Timber.tag("rxHandler").d("mNetworkErrorHandler is null")
         } else {
-            Timber.tag("rxHandler").d("error is : " + error.javaClass)
-            mNetworkErrorHandler.handleNetworkErrors(error, eventID, object : NetworkErrorHandler.onRXErrorListener {
-                override fun onUnexpectedException(throwable: Throwable) {
-                    Timber.tag("rxHandler").d("unexpected error happened, don't know what to do...")
-                }
-
+            mNetworkErrorHandler.handleNetworkErrors(error, eventID,
+                    object : NetworkErrorHandler.onErrorListener {
                 override fun onNetworkException(throwable: Throwable) {
                     if (mConnectivityReceiver.isOnline()) {
-                        Timber.tag("rxHandler").d("it seems that you have unexpected errors")
+                        Timber.d("weird, you are connected, may be an interruption")
                     } else {
-                        Timber.tag("rxHandler").d("Not connected to internet, so it is normal that you have an error")
+                        Timber.d("Not connected to internet")
                     }
-
                 }
-
                 override fun onHttpException(throwable: Throwable) {
-                    Timber.tag("rxHandler").d(throwable)
-                    if ((throwable as HttpException).code() == 403) {
-                        //todo - access forbidden
-                    }
+                    Timber.d(throwable)
                 }
             })
         }
@@ -318,11 +196,11 @@ class PublishTask(
      */
     interface PublishCallBack {
 
+        fun showWaiter(showIt:Boolean)
+
         fun onPublishSucceed()
 
         fun onPublishFailed(error:String)
-
-        fun onDeleteAttachmentFailed(error:String)
 
     }
 

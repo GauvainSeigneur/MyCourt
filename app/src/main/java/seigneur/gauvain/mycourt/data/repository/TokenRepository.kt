@@ -28,7 +28,7 @@ constructor() {
                 .observeOn(AndroidSchedulers.mainThread())
 
     /**
-     * TODO - use cyphering to store a crypted version of the token...
+     * Store token in Database
      * @param token
      * @return
      */

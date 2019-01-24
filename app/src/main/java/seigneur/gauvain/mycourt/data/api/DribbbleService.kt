@@ -10,6 +10,7 @@ import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
+import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.data.model.Project
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.data.model.User
@@ -51,7 +52,7 @@ interface DribbbleService {
             @Field("low_profile") isLowProfile: Boolean
             //@Field("scheduled_for") Date publishDate, //todo : to manage it for phase 2
             // @Field("teamID") int teamID //todo : to mange it for phase 2
-    ): Single<Shot>
+    ): Observable<Response<Void>>
 
     @Multipart
     @POST("shots")

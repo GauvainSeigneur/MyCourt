@@ -190,12 +190,11 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     *********************************************************************************************/
     private fun subscribeToLiveData(viewModel: ShotEditionViewModel) {
         viewModel.getUserType.observe(this,  Observer<Int> {
-            manageEditionOptionVisibiliy(it)
+            manageEditionOption(it)
         })
 
         viewModel.getCroppedImageUri().observe(this, Observer<Uri> {
             this.displayShotImagePreview(it.toString())
-            Timber.d("Uri change :$it")
         })
 
         viewModel.title.observe(this, Observer<String> { Timber.d("title change:$it") })
@@ -205,12 +204,10 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         viewModel.tags.observe(this,  Observer<ArrayList<String>> { Timber.d("tags change:$it") })
 
         viewModel.attachmentsTobeUploaded.observe(this,  Observer<ArrayList<Attachment>> {
-            Timber.d("attachmentList changed: "+it)
             updateAttachmentList(it)
         })
 
         viewModel.isReadyToPublish.observe(this,  Observer<Boolean?> {
-            Timber.d("is ready to publish: $it")
             activePublishBottomSheet(it)
         })
     }
@@ -242,7 +239,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
                 })
 
         viewModel.pickCropImgErrorCmd.observe(this,
-                Observer { Toast.makeText(this, "oops :" + it, Toast.LENGTH_SHORT).show() })
+                Observer { Toast.makeText(this, getString(R.string.error_picking), Toast.LENGTH_SHORT).show() })
 
         viewModel.mCheckPerm.observe(this,
                 Observer { checkPermissionExtStorage() })
@@ -258,7 +255,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
         viewModel.notifyUserNotReadyCmd.observe(this, Observer {
             val snack = Snackbar.make(findViewById(R.id.main),
-                "Oops, please set a title and image", Toast.LENGTH_SHORT)
+                "Oops, please set a title and image", Snackbar.LENGTH_SHORT)
             SnackbarHelper.configSnackbar(this, snack)
             snack.show()
 
@@ -336,7 +333,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     /**
      * Manage editions options visibility in accordance to user type
      */
-    private fun manageEditionOptionVisibiliy(userType:Int) {
+    private fun manageEditionOption(userType:Int) {
         when (userType) {
             Constants.USER_PLAYER -> {
                 mEditionContainer.visibility=View.VISIBLE
@@ -357,14 +354,14 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     }
 
     /**
-     * Manage UI in accordance to draft information defined in sourceTask
+     * Manage UI in accordance to draft information defined in Draft
      */
     private fun manageUiFromDraftInfo(draft: Draft) {
         //set toolbar title
         if (draft.typeOfDraft == Constants.EDIT_MODE_NEW_SHOT) {
-            mToolbar.title = "Create a shot"
+            mToolbar.title = getString(R.string.title_create_shot)
         } else {
-            mToolbar.title = "Edit a shot"
+            mToolbar.title = getString(R.string.title_edit)
         }
         //get title from draft object
         mShotTitleEditor.setText(draft.shot.title)
@@ -377,41 +374,15 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         //DISPLAY DEFAULT SHOT IMAGE FOR PUBLISHED SHOT AND NEW DRAFT
         //FOR DRAFT WITH STORED CROPPED IMAGE, WE GET IT FROM LIVEDATA
         if (draft.typeOfDraft == Constants.EDIT_MODE_UPDATE_SHOT) {
-            displayShotImagePreview(draft.shot.imageHidpi)
+            displayShotImagePreview(draft.shot.imageHidpi) //high quality image displayed
         } else {
             if (draft.imageUri.isNullOrEmpty())
                 displayShotImagePreview(null)
         }
     }
 
-    /**
-     * dispay Image shot preview
-     * from local url for new draft
-     * from http url from update
-     */
     private fun displayShotImagePreview(uriImageCropped: String?) {
-        if (!uriImageCropped.isNullOrEmpty()) {
-            Glide.with(mApplication)
-                    .asBitmap()
-                    .load(Uri.parse(uriImageCropped))
-                    .apply(RequestOptions()
-                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                            .error(R.drawable.ic_my_shot_black_24dp)
-                    )
-                    .listener(object : RequestListener<Bitmap> {
-                        override fun onLoadFailed(e: GlideException?, model: Any, target: Target<Bitmap>, isFirstResource: Boolean): Boolean {
-                            Toast.makeText(this@EditShotActivity, "error loading image", Toast.LENGTH_SHORT).show()
-                            return false
-                        }
-
-                        override fun onResourceReady(resource: Bitmap, model: Any, target: Target<Bitmap>, dataSource: DataSource, isFirstResource: Boolean): Boolean {
-                            return false
-                        }
-                    })
-                    .into(croppedImagePreview)
-        } else {
-            croppedImagePreview.setImageResource(R.drawable.add_image_illustration)
-        }
+       EditUtils.displayimage(uriImageCropped, this, croppedImagePreview)
     }
 
     private fun showMessageEmptyTitle() {

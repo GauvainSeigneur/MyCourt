@@ -73,7 +73,7 @@ class HttpUtils {
                                               fileUri: Uri?): File {
             //Get file
             //create a file to write bitmap data
-            val f =  File(context.cacheDir, fileUri?.lastPathSegment) //todo - change image name
+            val f =  File(context.cacheDir, fileUri?.lastPathSegment) //Change image name by one choose by user ? - for phase 2
             f.createNewFile()
             Timber.d("originalImgDimen "+ originalImgDimen[0] + originalImgDimen[1])
             //Convert bitmap to byte array

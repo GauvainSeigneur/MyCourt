@@ -7,6 +7,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import android.content.Context
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -38,6 +39,8 @@ import dagger.android.support.AndroidSupportInjection
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.User
 import seigneur.gauvain.mycourt.ui.base.BaseFragment
+import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
+import seigneur.gauvain.mycourt.ui.widget.FourThreeVideoView
 import timber.log.Timber
 
 import seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp
@@ -55,6 +58,9 @@ class AboutFragment : BaseFragment() {
 
     @BindView(R.id.button)
     lateinit var mButton : Button
+
+    @BindView(R.id.video_player)
+    lateinit var mVideoView : FourThreeVideoView
 
     private val mAboutViewModel: AboutViewModel by lazy {
          ViewModelProviders.of(this, viewModelFactory).get(AboutViewModel::class.java)
@@ -81,6 +87,33 @@ class AboutFragment : BaseFragment() {
         shapePathModel.topRightCorner = CutCornerTreatment(100f)
         val leftRoundedMaterialShape = MaterialShapeDrawable(shapePathModel)
         mButton.background=leftRoundedMaterialShape
+
+
+        mVideoView.setVideoPath("https://cdn.dribbble.com/users/1969947/videos/9961/__.mp4")
+        mVideoView.start()
+        mVideoView.setOnErrorListener(mOnErrorListener)
+        mVideoView.setOnPreparedListener{
+            //callback - video is ready to be played
+            Timber.d("is prepared")
+            it.isLooping =true //allow video to repeat
+
+            /*it.setOnBufferingUpdateListener { it, percent ->
+                if (percent == 100) {
+                    //video have completed buffering
+                    Timber.d("finish buffering")
+                }
+            }*/
+
+        }
+
+    }
+
+    private val mOnErrorListener = object : MediaPlayer.OnErrorListener {
+       override fun onError(mp: MediaPlayer, what: Int, extra: Int): Boolean {
+            // Your code goes here
+           Timber.d("error loading video")
+            return true
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

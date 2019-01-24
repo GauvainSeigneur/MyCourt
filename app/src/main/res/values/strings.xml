@@ -9,7 +9,7 @@
     <string name="title_about">About</string>
     <string name="title_activity_shot_detail">ShotDetailActivity</string>
 
-    <!--todo: to chnage it-->
+    <!--todo: to change it-->
     <string name="error_msg">Sorry! Couldn\'t fetch movies.</string>
     <string name="btn_retry">Retry</string>
     <string name="error_msg_no_internet">Not connected to internet</string>
@@ -34,8 +34,12 @@
     </plurals>
 
     <!--Shot edition -->
+    <string name="title_create_shot">Create a shot</string>
+    <string name="title_edit">Edit</string>
     <string name="publish">publish</string>
     <string name="update">update</string>
+    <string name="error_loading_img_preview">Oops, the image couldn\'t be loaded</string>
+    <string name="error_picking">Oops, an error happened. Please try again</string>
 
     <!-- todo : to reorganize -->
     <string name="action_settings">Settings</string>

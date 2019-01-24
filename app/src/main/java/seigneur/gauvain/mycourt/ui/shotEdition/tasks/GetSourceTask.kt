@@ -126,8 +126,6 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
 
     private fun onNoUserFoundFromAPI(t : Throwable) {
         Timber.d("No user found from API: $t")
-
-        mSourceCallback.showWaiter(false)
         if (mUserFromDb!=null) {
             if (mUserFromDb!!.isAllowedToUpload) {
                 mSourceCallback.onUserFound(mUserFromDb!!)
@@ -194,8 +192,6 @@ class GetSourceTask(private val mTempDataRepository: TempDataRepository,
         fun onUserFound(user: User)
 
         fun onNoUserFound()
-
-        fun showWaiter(boolean: Boolean)
 
         fun setUpTempDraft(draft: Draft)
 

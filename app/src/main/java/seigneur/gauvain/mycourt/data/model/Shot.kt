@@ -31,7 +31,7 @@ data class Shot (
     var publishDate: Date? = null
     @SerializedName("updated_at")
     var updateDate: Date? = null
-    //todo - to be replaced by getImageHidpi
+
     val imageUrl: String
         get() {
             if (images == null) {

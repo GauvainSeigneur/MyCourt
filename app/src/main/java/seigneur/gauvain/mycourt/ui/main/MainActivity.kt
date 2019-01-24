@@ -93,7 +93,7 @@ class MainActivity : BaseActivity(), HasSupportFragmentInjector, CustomBottomAct
         if (isEditModeActivated!!)
             mMainViewModel.onDeleteClicked()
         else
-            mMainViewModel.onAddFabclicked() //todo rename it!
+            mMainViewModel.onAddFabclicked()
     }
 
     /*
@@ -170,7 +170,6 @@ class MainActivity : BaseActivity(), HasSupportFragmentInjector, CustomBottomAct
     override fun onBackPressed() {
         //super.onBackPressed()
         if (isEditModeActivated!!)
-            //todo close it !
             mCustomBottomActionmode.stopMode()
         else
             mMainViewModel.onReturnNavigation()
@@ -197,7 +196,6 @@ class MainActivity : BaseActivity(), HasSupportFragmentInjector, CustomBottomAct
 
 
     private fun goToShotEdition() {
-        //todo - add some keys to intent - define from which  fragment user has clicked!
         val intent = Intent(this, EditShotActivity::class.java)
         startActivity(intent)
     }

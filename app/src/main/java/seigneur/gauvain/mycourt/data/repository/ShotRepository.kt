@@ -28,6 +28,10 @@ constructor() {
     @Inject
     lateinit var mDribbbleService: DribbbleService
 
+    /*
+    *********************************************************************************************
+    * GET SHOT
+    ********************************************************************************************/
     //get list of Shot from Dribbble
     fun getShots(applyResponseCache: Int, page: Long, perPage: Int): Flowable<List<Shot>> {
         return mDribbbleService.getShotAPI(applyResponseCache, page, perPage)
@@ -35,30 +39,149 @@ constructor() {
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-    //send an update to Dribbble
-    fun updateShot(id: String,
-                   title: String,
-                   description: String,
-                   tags: ArrayList<String>,
-                   isLowProfile: Boolean
-    ): Single<Shot> {
-        return mDribbbleService.updateShot(id, title, description, tags, isLowProfile)
+    /*
+    *********************************************************************************************
+    * UPDATE A SHOT
+    ********************************************************************************************/
+    /**
+     * update a published shot
+     */
+    fun updateShot(draft: Draft, profile: Boolean): Observable<Response<Void>>{
+        return mDribbbleService.updateShot(
+                draft.shot.id!!,
+                draft.shot.title!!,
+                draft.shot.description!!,
+                draft.shot.tagList!!,
+                profile)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun publishANewShot(
-            map: HashMap<String, RequestBody>,
-            file: MultipartBody.Part,
-            title: String?,
-            description: String?,
-            tags: ArrayList<String>?): Observable<Response<Void>> {
-        return mDribbbleService.publishANewShot(map, file, title, description, tags)
+    fun updateShotAndPostAttachment(draft: Draft, profile: Boolean, context: Context): Observable<Response<Void>>{
+        val shotId = draft.shot.id
+        return mDribbbleService.updateShot(
+                draft.shot.id!!,
+                draft.shot.title!!,
+                draft.shot.description!!,
+                draft.shot.tagList!!,
+                profile)
+                .flatMap { _ ->
+                    postAttachment(context, draft, shotId!!)
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+
+    }
+
+    fun updateShotAndDeleteAttachment(draft: Draft, profile: Boolean,
+                                      lisAttachmentToDelete: List<Attachment>): Observable<Response<Void>> {
+        return mDribbbleService.updateShot(
+                draft.shot.id!!,
+                draft.shot.title!!,
+                draft.shot.description!!,
+                draft.shot.tagList!!,
+                profile)
+                .flatMap { _ ->
+                    deleteAttachment(draft, lisAttachmentToDelete)
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+
+    }
+
+    /**
+     * WOW  - so much operations
+     */
+    fun updateShotAndUploadAndDeleteAttachment(draft: Draft, profile: Boolean, context: Context,
+                                      lisAttachmentToDelete: List<Attachment>): Observable<Response<Void>> {
+        val shotId = draft.shot.id
+        return mDribbbleService.updateShot(
+                draft.shot.id!!,
+                draft.shot.title!!,
+                draft.shot.description!!,
+                draft.shot.tagList!!,
+                profile)
+                .flatMap { _ ->
+                    postAndDeleteAttachment(context, draft, shotId!!,  lisAttachmentToDelete)
+                }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun postAndDeleteAttachment(context: Context,
+    /*
+    *********************************************************************************************
+    * PUBLISH SHOT
+    ********************************************************************************************/
+    /**
+     * create a shot on dribbble
+     */
+    fun publishANewShot(draft: Draft, context: Context): Observable<Response<Void>> {
+        //Create bodyPart for posting image in MultiPart
+        val body = HttpUtils.createShotFilPart(
+                context,
+                draft.croppedImgDimen!!,
+                Uri.parse(draft.imageUri),
+                draft.imageFormat, "image")
+        //add to HashMap key and RequestBody
+        val map = HashMap<String, RequestBody>()
+        return mDribbbleService.publishANewShot(
+                map,
+                body,
+                draft.shot.title,
+                draft.shot.description,
+                draft.shot.tagList)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    /**
+     * Concat Post a shot and POST attachment  operation
+     *
+     * Dribbble's API doesn't allow to publish a shot with attachments.
+     * We can only provide attachments to an existing shot
+     * Also, we can send only one attachment per POST.
+     * So for first publication with attachment, we must concat it in two request
+     */
+    fun postShotAndAttachment(draft: Draft, context: Context): Observable<Response<Void>> {
+        //Create bodyPart for posting image in MultiPart
+        val body = HttpUtils.createShotFilPart(
+                context,
+                draft.croppedImgDimen!!,
+                Uri.parse(draft.imageUri),
+                draft.imageFormat, "image")
+        //add to HashMap key and RequestBody
+        val map = HashMap<String, RequestBody>()
+        return  mDribbbleService.publishANewShot(
+                map,
+                body,
+                draft.shot.title,
+                draft.shot.description,
+                draft.shot.tagList)
+                .flatMap {it ->
+                    //get the id of the published shot from response header
+                    val headers = it.headers()
+                    val location = headers.get("location")
+                    location?.let {
+                        val shotId:String
+                        val locationTrunkAfter= location.substringAfterLast("/",location ) //todo - this variable must be defined into Firebase for fast update
+                        shotId=locationTrunkAfter.substringBefore("-",locationTrunkAfter) //todo - this variable must be defined into Firebase for fast update
+                        //perform post attachment
+                        postAttachment(context, draft, shotId)
+                    }
+
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    /*
+     *********************************************************************************************
+     * ATTACHMENT OPERATION
+     ********************************************************************************************/
+    /**
+     * Concat Post and delete operation
+     */
+    private fun postAndDeleteAttachment(context: Context,
                                 draft: Draft,
                                 shotId: String,
                                 lisAttachmentToDelete: List<Attachment>)
@@ -71,15 +194,15 @@ constructor() {
         )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .materialize()
+                /*.materialize()
                 .filter { concatNotif -> !concatNotif.isOnError }
-                .dematerialize()
-
-
-
+                .dematerialize()*/
     }
 
-    fun postAttachment(context: Context, draft: Draft, shotId: String): Observable<Response<Void>> {
+    /**
+     * Post several attachment
+     */
+    private fun postAttachment(context: Context, draft: Draft, shotId: String): Observable<Response<Void>> {
         return Observable.just(draft.shot.attachment) //we create an Observable that emits a single array
                 .flatMapIterable {it} //map the list to an Observable that emits every item as an observable
                 .filter {it -> it.id==-1L } //send only item in the list which ids is -1L
@@ -103,7 +226,10 @@ constructor() {
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun deleteAttachment(draft: Draft, lisAttachmentToDelete: List<Attachment>): Observable<Response<Void>> {
+    /**
+     * delete several attachment
+     */
+    private fun deleteAttachment(draft: Draft, lisAttachmentToDelete: List<Attachment>): Observable<Response<Void>> {
         return Observable.just(lisAttachmentToDelete) //we create an Observable that emits a single array
                 .flatMapIterable {it} //map the list to an Observable that emits every item as an observable    .filter {it -> it.id!=-1L } //send only item in the list which ids is -1L
                 .flatMap { it ->

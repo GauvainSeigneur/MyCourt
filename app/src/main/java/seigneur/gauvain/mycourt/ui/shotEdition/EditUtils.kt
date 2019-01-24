@@ -1,9 +1,19 @@
 package seigneur.gauvain.mycourt.ui.shotEdition
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.core.content.FileProvider
 import android.text.Html
+import android.widget.ImageView
+import android.widget.Toast
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.Target
 
 import java.io.File
 import java.util.ArrayList
@@ -43,6 +53,31 @@ class EditUtils {
                 }//If the source of a the temporary draft is a draft itself do not treat text as html
             } else {
                 null
+            }
+        }
+
+        fun displayimage(imageUri: String?, context: Context, imageView: ImageView) {
+            if (!imageUri.isNullOrEmpty()) {
+                Glide.with(context)
+                        .asBitmap()
+                        .load(Uri.parse(imageUri))
+                        .apply(RequestOptions()
+                                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                .error(R.drawable.ic_my_shot_black_24dp)
+                        )
+                        .listener(object : RequestListener<Bitmap> {
+                            override fun onLoadFailed(e: GlideException?, model: Any, target: Target<Bitmap>, isFirstResource: Boolean): Boolean {
+                                Toast.makeText(context, context.getString(R.string.error_loading_img_preview), Toast.LENGTH_SHORT).show()
+                                return false
+                            }
+
+                            override fun onResourceReady(resource: Bitmap, model: Any, target: Target<Bitmap>, dataSource: DataSource, isFirstResource: Boolean): Boolean {
+                                return false
+                            }
+                        })
+                        .into(imageView)
+            } else {
+                imageView.setImageResource(R.drawable.add_image_illustration)
             }
         }
 
@@ -159,6 +194,5 @@ class EditUtils {
 
         }
     }
-
 
 }
