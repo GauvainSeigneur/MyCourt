@@ -223,7 +223,7 @@ constructor() : ViewModel(),
         if (user.isPro)
             mUserType.value = Constants.USER_PRO
         else if (!user.isPro && user.isAllowedToUpload) {
-            mUserType.value = Constants.USER_PLAYER
+            mUserType.value = Constants.USER_UPLOADER
         } else {
             mUserType.value = Constants.USER_UNALLOWED_TO_UPLOAD
         }

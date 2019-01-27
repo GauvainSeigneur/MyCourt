@@ -367,7 +367,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
      */
     private fun manageEditionOption(userType:Int) {
         when (userType) {
-            Constants.USER_PLAYER -> {
+            Constants.USER_UPLOADER -> {
                 mEditionContainer.visibility=View.VISIBLE
                 mRvAttachments.visibility =View.GONE
                 mBSPublish.visibility=View.VISIBLE

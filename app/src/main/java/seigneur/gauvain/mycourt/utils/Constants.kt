@@ -17,7 +17,7 @@ object Constants {
          * INTERNAL CONSTANTS
          */
         const val USER_UNALLOWED_TO_UPLOAD      = -1
-        const val USER_PLAYER                   = 30 //ONLY PLAYER CAN UPLOAD FROM API (PROSPECT CANNOT)
+        const val USER_UPLOADER                 = 30 //ONLY PLAYER CAN UPLOAD FROM API (PROSPECT CANNOT)
         const val USER_PRO                      = 31 //PRO HAVE MORE OPTIONS
 
         const val CUSTOM_ACTION_MODE_OFF = 40
@@ -31,7 +31,6 @@ object Constants {
         const val REQUEST_STORAGE_WRITE_ACCESS_PERMISSION = 1002
         const val PICK_IMAGE_REQUEST = 1003
         const val PICK_ATTACHMENT_REQUEST = 1004
-        const val PICK_VIDEO_REQUEST = 1005
 
         const val ADD_ATTACHMENT_OPE = 21
         const val REMOVE_ATTACHMENT_OPE = 22
