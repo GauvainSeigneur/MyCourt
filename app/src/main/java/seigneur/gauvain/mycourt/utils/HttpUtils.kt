@@ -29,19 +29,12 @@ class HttpUtils {
                            imageFormat: String?,
                            partName: String): MultipartBody.Part {
             //create a file from URI
-            val f =  createFileFromuri(context, fileUri)
+            val f =  createFileFromUri(context, fileUri)
             // create RequestBody instance from file
             val requestFile = RequestBody.create(MediaType.parse(imageFormat!!), f)
             Timber.d("requestFile $requestFile")
             // MultipartBody.Part is used to send also the actual file name
             return MultipartBody.Part.createFormData(partName, f.name, requestFile)
-        }
-
-
-        private fun createFileFromuri(context: Context, fileUri: Uri?):File {
-            val uriOfFile = FileUtils.getFilePathFromContentUri(context, fileUri)
-            Timber.d("uriOfFile $uriOfFile")
-            return File(uriOfFile.toString())
         }
 
         fun createShotFilPart(context: Context,
@@ -49,17 +42,35 @@ class HttpUtils {
                            fileUri: Uri?,
                            imageFormat: String?,
                            partName: String): MultipartBody.Part {
-            //Get file
-            //create a file to write bitmap data
-            val f =  createCacheFileFromBitmap(context, originalImgDimen, fileUri)
-            Timber.d("originalImgDimen "+ originalImgDimen[0] + originalImgDimen[1])
-            // create RequestBody instance from file
-            val requestFile = RequestBody.create(MediaType.parse(imageFormat!!), f)
-            Timber.d("requestFile $requestFile")
-            // MultipartBody.Part is used to send also the actual file name
-            return MultipartBody.Part.createFormData(partName, f.name, requestFile)
+            val part: MultipartBody.Part
+            if (imageFormat.equals(Constants.MP4)) {
+                //create a file from URI
+                val f =  createFileFromUri(context, fileUri)
+                // create RequestBody instance from file
+                val requestFile = RequestBody.create(MediaType.parse(imageFormat!!), f)
+                Timber.d("requestFile $requestFile")
+                // MultipartBody.Part is used to send also the actual file name
+                part = MultipartBody.Part.createFormData(partName, f.name, requestFile)
+            } else {
+                //is an image, adjust image dimensions in accordance to Dribble spec
+                val f =  createCacheFileFromBitmap(context, originalImgDimen, fileUri)
+                Timber.d("originalImgDimen "+ originalImgDimen[0] + originalImgDimen[1])
+                // create RequestBody instance from file
+                val requestFile = RequestBody.create(MediaType.parse(imageFormat!!), f)
+                Timber.d("requestFile $requestFile")
+                part = MultipartBody.Part.createFormData(partName, f.name, requestFile)
+            }
+
+            return part
 
 
+        }
+
+
+        private fun createFileFromUri(context: Context, fileUri: Uri?):File {
+            val uriOfFile = FileUtils.getFilePathFromContentUri(context, fileUri)
+            Timber.d("uriOfFile $uriOfFile")
+            return File(uriOfFile.toString())
         }
 
         /**

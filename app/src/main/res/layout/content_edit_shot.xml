@@ -13,14 +13,35 @@
         android:layout_height="match_parent"
         android:paddingBottom="72dp">
 
-        <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
-            android:id="@+id/cropped_img_preview"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="@color/colorPrimaryLight"
-            android:foreground="@drawable/rect_ripple"
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:weightSum="1">
+
+            <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
+                android:id="@+id/cropped_img_preview"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@color/colorPrimaryLight"
+                android:foreground="@drawable/rect_ripple"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+            <seigneur.gauvain.mycourt.ui.widget.FourThreeVideoView
+                android:id="@+id/video_view"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_width="0dp"
+                android:layout_weight="0"
+                android:minHeight="0dp"
+                android:layout_height="wrap_content" />
+
+
+        </LinearLayout>
+
 
         <!-- android:layout_marginTop="@dimen/padding_16" -->
         <com.google.android.material.textfield.TextInputLayout

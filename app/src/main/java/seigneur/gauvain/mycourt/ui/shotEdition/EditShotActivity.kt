@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.media.MediaPlayer
 import android.net.Uri
 import com.google.android.material.textfield.TextInputEditText
 import androidx.core.app.ActivityCompat
@@ -45,6 +46,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.AndroidInjection
 import droidninja.filepicker.FilePickerBuilder
+import droidninja.filepicker.models.sort.SortingTypes
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.data.model.Draft
@@ -54,6 +56,7 @@ import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.AttachmentsAdapter
 import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.UnScrollableLayoutManager
 import seigneur.gauvain.mycourt.utils.image.ImagePicker
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
+import seigneur.gauvain.mycourt.ui.widget.FourThreeVideoView
 import seigneur.gauvain.mycourt.utils.*
 import timber.log.Timber
 
@@ -86,6 +89,9 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
 
     @BindView(R.id.cropped_img_preview)
     lateinit var croppedImagePreview: FourThreeImageView
+
+    @BindView(R.id.video_view)
+    lateinit var mVideoView: FourThreeVideoView
 
     @BindView(R.id.edit_shot_container)
     lateinit var mEditionContainer: NestedScrollView
@@ -184,6 +190,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         mShotEditionViewModel.onImagePreviewClicked()
     }
 
+
     /*
     *********************************************************************************************
     * EVENT WHICH VIEW WILL SUBSCRIBE
@@ -193,8 +200,21 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
             manageEditionOption(it)
         })
 
-        viewModel.getCroppedImageUri().observe(this, Observer<Uri> {
-            this.displayShotImagePreview(it.toString())
+        viewModel.getFileToUploadUri().observe(this, Observer<Uri> {
+            if (FileUtils.getMimeType(it.toString()).equals(Constants.MP4)) {
+                //todo if is video
+                mVideoView.setVideoPath(it.toString())
+                mVideoView.start()
+                mVideoView.setOnErrorListener(mOnErrorListener)
+                mVideoView.setOnPreparedListener{
+                    //callback - video is ready to be played
+                    Timber.d("is prepared")
+                    it.isLooping =true //allow video to repeat
+                }
+            } else {
+                Timber.d("image uri $it")
+                this.displayShotImagePreview(it.toString())
+            }
         })
 
         viewModel.title.observe(this, Observer<String> { Timber.d("title change:$it") })
@@ -219,8 +239,12 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
         })
 
         viewModel.mPickShotCmd.observe(this, Observer {
-            FilePickerBuilder.instance.setMaxCount(1)
+            FilePickerBuilder.instance
+                    .setMaxCount(1)
                     .setActivityTheme(R.style.LibAppTheme)
+                    .showGifs(true)
+                    //.enableVideoPicker(true) //API doesn't allow to upload VIDEO YET
+                    .showFolderView(true)
                     .pickPhoto(this, Constants.PICK_IMAGE_REQUEST)
         })
 
@@ -326,6 +350,14 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     }
 
 
+    private val mOnErrorListener = object : MediaPlayer.OnErrorListener {
+        override fun onError(mp: MediaPlayer, what: Int, extra: Int): Boolean {
+            // Your code goes here
+            Timber.d("error loading video")
+            return true
+        }
+    }
+
     /*
     *********************************************************************************************
     * EDITION UI RELATED FUNCTIONS
@@ -382,7 +414,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
     }
 
     private fun displayShotImagePreview(uriImageCropped: String?) {
-       EditUtils.displayimage(uriImageCropped, this, croppedImagePreview)
+       EditUtils.displayImage(uriImageCropped, this, croppedImagePreview)
     }
 
     private fun showMessageEmptyTitle() {
@@ -415,6 +447,7 @@ class EditShotActivity : BaseActivity() , AttachmentItemCallback {
             if (scrollY == 0) {
                 Timber.i("TOP SCROLL")
                 mBottomSheetBehaviour.state = BottomSheetBehavior.STATE_HIDDEN
+
             }
 
             if (scrollY == v.getChildAt(0).measuredHeight - v.measuredHeight) {

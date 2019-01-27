@@ -19,6 +19,7 @@ import seigneur.gauvain.mycourt.data.api.DribbbleService
 import seigneur.gauvain.mycourt.data.model.Attachment
 import seigneur.gauvain.mycourt.data.model.Draft
 import seigneur.gauvain.mycourt.data.model.Shot
+import seigneur.gauvain.mycourt.utils.Constants
 import seigneur.gauvain.mycourt.utils.HttpUtils
 import timber.log.Timber
 
@@ -121,7 +122,8 @@ constructor() {
                 context,
                 draft.croppedImgDimen!!,
                 Uri.parse(draft.imageUri),
-                draft.imageFormat, "image")
+                draft.imageFormat,
+                "image")
         //add to HashMap key and RequestBody
         val map = HashMap<String, RequestBody>()
         return mDribbbleService.publishANewShot(
@@ -132,6 +134,7 @@ constructor() {
                 draft.shot.tagList)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+
     }
 
     /**

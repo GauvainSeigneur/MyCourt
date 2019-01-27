@@ -22,9 +22,9 @@ import seigneur.gauvain.mycourt.utils.FileUtils
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.ArrayList
-import android.text.Editable
-import android.text.TextWatcher
-import android.widget.EditText
+import seigneur.gauvain.mycourt.utils.Constants
+import android.media.MediaMetadataRetriever
+
 
 
 
@@ -77,7 +77,6 @@ object ImagePicker {
                 } else {
                     options.withMaxResultSize(400, 300)
                 }*/
-
                 options.setCompressionQuality(100)
                 options.setMaxBitmapSize(100000)
                 UCrop.of(source, destination)
@@ -92,28 +91,81 @@ object ImagePicker {
              data: Intent?,
              shotEditionViewModel: ShotEditionViewModel){
         data?.let {
-            val shotIMG = ArrayList<String>()
-            shotIMG.addAll(data.getStringArrayListExtra(FilePickerConst.KEY_SELECTED_MEDIA))
-            //get file uri  and send it to ViewModel
-            shotEditionViewModel.mPickedFileUri = Uri.parse(shotIMG[0])
-            //get file name with extension
-            val shotFileName = FileUtils.getFileName(Uri.parse(shotIMG[0]))
-            //get file name without extension
-            val shotFileNameWithoutExtension = shotFileName.substringBefore(".",shotFileName)
-            //send name, mymeType and dimens to viewModel
-            shotEditionViewModel.mPickedFileName = shotFileNameWithoutExtension
-            shotEditionViewModel.mPickedFileMymeType = FileUtils.getMimeType((shotIMG[0]))
-            shotEditionViewModel.mPickedImageDimens = FileUtils.getImageFilePixelSize(Uri.parse(shotIMG[0]))
-            //notify viewModel to call Ucrop command
-            shotEditionViewModel.onImagePicked()
+            val pickedFiles = ArrayList<String>()
+            pickedFiles.addAll(data.getStringArrayListExtra(FilePickerConst.KEY_SELECTED_MEDIA))
+            //first get fie type
+            val fileType  =  FileUtils.getMimeType((pickedFiles[0]))
+            Timber.d("file type: $fileType")
+            when(fileType){
+                Constants.GIF -> managePickedImage(pickedFiles, shotEditionViewModel)
+                Constants.JPG->  managePickedImage(pickedFiles, shotEditionViewModel)
+                Constants.PNG -> managePickedImage(pickedFiles, shotEditionViewModel)
+                Constants.MP4 -> managePickedVideo(pickedFiles, shotEditionViewModel)
+                else -> Timber.d("unauthorized") //todo notify viewmodel
+            }
         }
+    }
+
+    private fun managePickedImage(
+            pickedImg :ArrayList<String>,
+            shotEditionViewModel: ShotEditionViewModel) {
+        //get file uri  and send it to ViewModel
+        shotEditionViewModel.mPickedFileUri = Uri.parse(pickedImg[0])
+        //get file name with extension
+        val shotFileName = FileUtils.getFileName(Uri.parse(pickedImg[0]))
+        //get file name without extension
+        val shotFileNameWithoutExtension = shotFileName.substringBefore(".",shotFileName)
+        //send name, mymeType and dimens to viewModel
+        shotEditionViewModel.mPickedFileName = shotFileNameWithoutExtension
+        shotEditionViewModel.mPickedFileMymeType = FileUtils.getMimeType((pickedImg[0]))
+        shotEditionViewModel.mPickedImageDimens = FileUtils.getImageFilePixelSize(Uri.parse(pickedImg[0]))
+        //notify viewModel to call Ucrop command
+         shotEditionViewModel.onImagePicked()
+    }
+
+
+    private fun managePickedVideo(
+            pickedVideo :ArrayList<String>,
+            shotEditionViewModel: ShotEditionViewModel) {
+        //Check duration and aspect ratio
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(pickedVideo[0])
+        val width = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH))
+        val height = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT))
+        val duration = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION))
+        Timber.d("video width $width height: $height")
+        Timber.d("video duration $duration")
+        retriever.release()
+
+        val authorizedRatio = (4/3).toLong()
+        val videoRatio = (width/height).toLong()
+        val authorizedDuration = 24000
+
+        if (videoRatio ==authorizedRatio && duration<=authorizedDuration) {
+             //get file uri  and send it to ViewModel
+             shotEditionViewModel.mPickedFileUri = Uri.parse(pickedVideo[0])
+             //get file name with extension
+             val shotFileName = FileUtils.getFileName(Uri.parse(pickedVideo[0]))
+             //get file name without extension
+             val shotFileNameWithoutExtension = shotFileName.substringBefore(".",shotFileName)
+             //send name, mymeType and dimens to viewModel
+             shotEditionViewModel.mPickedFileName = shotFileNameWithoutExtension
+             shotEditionViewModel.mPickedFileMymeType = FileUtils.getMimeType((pickedVideo[0]))
+             //shotEditionViewModel.mPickedImageDimens = FileUtils.getImageFilePixelSize(Uri.parse(pickedImg[0])) //todo - necessary for VIDEO?
+             //notify viewModel tha the video is ready
+             shotEditionViewModel.onFileReady(Uri.parse(pickedVideo[0]))
+         } else {
+             //todo view model error
+            Timber.d("video not fit")
+         }
+
     }
 
     fun onImageCropped (
             data: Intent?,
             shotEditionViewModel : ShotEditionViewModel){
         data?.let {
-            shotEditionViewModel.onImageCropped(UCrop.getOutput(data))
+            shotEditionViewModel.onFileReady(UCrop.getOutput(data))
             shotEditionViewModel.mCroppedImgDimen =  FileUtils.getImageFilePixelSize(UCrop.getOutput(data)!!)
         }
     }

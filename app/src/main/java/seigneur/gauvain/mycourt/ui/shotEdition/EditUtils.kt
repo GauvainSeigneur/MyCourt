@@ -56,7 +56,7 @@ class EditUtils {
             }
         }
 
-        fun displayimage(imageUri: String?, context: Context, imageView: ImageView) {
+        fun displayImage(imageUri: String?, context: Context, imageView: ImageView) {
             if (!imageUri.isNullOrEmpty()) {
                 Glide.with(context)
                         .asBitmap()

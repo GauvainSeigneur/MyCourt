@@ -88,6 +88,9 @@ constructor() : ViewModel(),
     val mCheckPerm = SingleLiveEvent<Void>()
     //pick attachment / pick and crop image
     val mPickShotCmd = SingleLiveEvent<Void>()
+    //val mPickVideoCmd = SingleLiveEvent<Void>() //todo - for test
+    //private val mPickedVideoUri = MutableLiveData<Uri>()
+
     val mPickAttachmentCmd = SingleLiveEvent<Void>()
     val mCropImgCmd = SingleLiveEvent<Void>()
     val pickCropImgErrorCmd = SingleLiveEvent<Int>()
@@ -97,7 +100,8 @@ constructor() : ViewModel(),
     var mPickedImageDimens: IntArray? = null            //non UI data
     var mCroppedImgDimen: IntArray? = intArrayOf(400, 300)              //non UI data
     //Draft data
-    private val croppedImageUri = MutableLiveData<Uri>()
+    private val mFileToUploadUri = MutableLiveData<Uri>()
+    //private val mFileToUploadUriTest = MutableLiveData<Array<String>>()
     private val mTitle = MutableLiveData<String>()
     private val mDescription = MutableLiveData<String>()
     private val mTags = MutableLiveData<ArrayList<String>>()
@@ -135,8 +139,8 @@ constructor() : ViewModel(),
         mCropImgCmd.call()
     }
 
-    fun onImageCropped(uri: Uri?) {
-        croppedImageUri.value = uri
+    fun onFileReady(uri: Uri?) {
+        mFileToUploadUri.value = uri
     }
 
     fun onPickCropError(errorCode: Int) {
@@ -176,10 +180,11 @@ constructor() : ViewModel(),
         if (title.value == null || title.value!!.isEmpty()) {
             //TODO
         }  else {
-                registerOrUpdateDraft(mApplication,
-                        EditUtils.itHasNewImageToSave(mTempDraft,
-                                getCroppedImageUri().value)
-                )
+
+            registerOrUpdateDraft(mApplication,
+                    EditUtils.itHasNewImageToSave(mTempDraft,
+                            mFileToUploadUri.value)
+            )
         }
     }
 
@@ -203,8 +208,8 @@ constructor() : ViewModel(),
     val attachmentsTobeUploaded : LiveData<ArrayList<Attachment>>
         get() = mAttachmentList
 
-    fun getCroppedImageUri(): LiveData<Uri> {
-        return croppedImageUri
+    fun getFileToUploadUri(): LiveData<Uri> {
+        return mFileToUploadUri
     }
 
     val getUserType: LiveData<Int>
@@ -244,7 +249,7 @@ constructor() : ViewModel(),
         if (draft.typeOfDraft == Constants.EDIT_MODE_NEW_SHOT) {
             //Image Uri
             draft.imageUri?.let {
-                croppedImageUri.value = Uri.parse(draft.imageUri)
+                mFileToUploadUri.value = Uri.parse(draft.imageUri)
             }
             //Image type
             draft.imageFormat?.let {
@@ -277,7 +282,7 @@ constructor() : ViewModel(),
     private fun changeDraftInfo() {
         //define image format according to cropping state
         mTempDraft!!.changeInfoFromEdit(
-                croppedImageUri.value.toString(),
+                mFileToUploadUri.value.toString(),
                 mPickedFileMymeType,
                 title.value,
                 description.value,
@@ -325,7 +330,7 @@ constructor() : ViewModel(),
             mStoreDrafTask.storeDraftImage(
                     context!!,
                     mPickedFileMymeType!!,
-                    getCroppedImageUri().value!!)
+                    mFileToUploadUri.value!!)
         } else {
             storeDraft()
         }

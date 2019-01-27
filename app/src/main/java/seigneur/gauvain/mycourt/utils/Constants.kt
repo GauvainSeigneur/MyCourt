@@ -1,6 +1,7 @@
 package seigneur.gauvain.mycourt.utils
 
 import androidx.annotation.IntDef
+import androidx.annotation.StringDef
 
 
 object Constants {
@@ -30,6 +31,7 @@ object Constants {
         const val REQUEST_STORAGE_WRITE_ACCESS_PERMISSION = 1002
         const val PICK_IMAGE_REQUEST = 1003
         const val PICK_ATTACHMENT_REQUEST = 1004
+        const val PICK_VIDEO_REQUEST = 1005
 
         const val ADD_ATTACHMENT_OPE = 21
         const val REMOVE_ATTACHMENT_OPE = 22
@@ -47,6 +49,14 @@ object Constants {
         const val MEDIUM = "medium"
         const val BEHANCE = "behance"
         const val LINKEDIN = "linkedin"
+
+        @Retention(AnnotationRetention.RUNTIME)
+        @StringDef(PNG, JPG,GIF,MP4)
+        annotation class AthorizedfilType
+        const val PNG = "image/png"
+        const val JPG = "image/jpg"
+        const val GIF = "image/gif"
+        const val MP4 = "video/mp4"
 
         @Retention(AnnotationRetention.RUNTIME)
         @IntDef(EDIT_MODE_NEW_SHOT, EDIT_MODE_UPDATE_SHOT)

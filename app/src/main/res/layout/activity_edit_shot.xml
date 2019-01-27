@@ -50,7 +50,6 @@
             android:backgroundTint="@color/colorSecondary"
             android:text="@string/publish"/>
 
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_store"
             android:layout_width="56dp"
