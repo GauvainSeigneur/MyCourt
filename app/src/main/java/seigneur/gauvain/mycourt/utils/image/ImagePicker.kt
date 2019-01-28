@@ -97,11 +97,12 @@ object ImagePicker {
             val fileType  =  FileUtils.getMimeType((pickedFiles[0]))
             Timber.d("file type: $fileType")
             when(fileType){
-                Constants.GIF -> managePickedImage(pickedFiles, shotEditionViewModel)
-                Constants.JPG->  managePickedImage(pickedFiles, shotEditionViewModel)
-                Constants.PNG -> managePickedImage(pickedFiles, shotEditionViewModel)
-                Constants.MP4 -> managePickedVideo(pickedFiles, shotEditionViewModel)
-                else -> Timber.d("unauthorized") //todo notify viewmodel
+                Constants.GIF   -> managePickedImage(pickedFiles, shotEditionViewModel)
+                Constants.JPG   ->  managePickedImage(pickedFiles, shotEditionViewModel)
+                Constants.PNG   -> managePickedImage(pickedFiles, shotEditionViewModel)
+                Constants.JPEG  -> managePickedImage(pickedFiles, shotEditionViewModel)
+                Constants.MP4   -> managePickedVideo(pickedFiles, shotEditionViewModel)
+                else            -> Timber.d("unauthorized") //todo notify viewmodel
             }
         }
     }
@@ -120,7 +121,7 @@ object ImagePicker {
         shotEditionViewModel.mPickedFileMymeType = FileUtils.getMimeType((pickedImg[0]))
         shotEditionViewModel.mPickedImageDimens = FileUtils.getImageFilePixelSize(Uri.parse(pickedImg[0]))
         //notify viewModel to call Ucrop command
-         shotEditionViewModel.onImagePicked()
+        shotEditionViewModel.onImagePicked()
     }
 
 

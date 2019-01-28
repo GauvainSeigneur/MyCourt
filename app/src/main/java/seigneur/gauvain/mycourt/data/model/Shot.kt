@@ -52,7 +52,7 @@ data class Shot (
             val url = if (images!!.containsKey(IMAGE_HIDPI) && images!![IMAGE_HIDPI] != null)
                 images!![IMAGE_HIDPI]
             else
-                images!![IMAGE_NORMAL]
+                imageUrl
             return url ?: ""
         }
 

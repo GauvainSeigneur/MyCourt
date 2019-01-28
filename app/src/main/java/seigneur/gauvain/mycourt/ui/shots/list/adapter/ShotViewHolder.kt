@@ -22,6 +22,7 @@ class ShotViewHolder private constructor(itemView: View, private val mShotItemCa
 
     fun bindTo(shot: Shot) {
         Glide.with(itemView.context)
+                .asBitmap()
                 .load(shot.imageUrl)
                 .into(shotImage)
     }

@@ -24,6 +24,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import butterknife.*
+import com.google.android.material.appbar.AppBarLayout
 
 import javax.inject.Inject
 
@@ -43,6 +44,9 @@ import timber.log.Timber
  * Created by gse on 22/11/2017.
  */
 class ShotsFragment : BaseFragment(), ShotItemCallback {
+
+    @BindView(R.id.appbar_layout)
+    lateinit var mAppbar:AppBarLayout
 
     @BindView(R.id.usersSwipeRefreshLayout)
     lateinit var mSwipeRefreshLayout:SwipeRefreshLayout
@@ -102,7 +106,7 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mUnbinder.unbind()
+       // mUnbinder.unbind()
     }
 
     private fun initAdapter() {
@@ -111,7 +115,7 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
             mGridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
                     when (shotListAdapter.getItemViewType(position)) {
-                        ShotListAdapter.ITEM -> return if (position == 0) 2 else 1
+                        ShotListAdapter.ITEM -> if (position == 0) return 2 else return 1
                         ShotListAdapter.LOADING -> return 2
                         else -> return 1
                     }
@@ -131,6 +135,14 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
         shotsViewModel.networkState.observe(this, Observer<NetworkState> {
             shotListAdapter.setNetworkState(it!!)
             })
+
+        mRvShots.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                //todo - pass this data in view model to not loose the current state and scroll
+                mAppbar.isSelected = mRvShots.canScrollVertically(-1)
+            }
+        })
     }
 
     /**
@@ -171,12 +183,14 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
                 { position ->
                     var options: ActivityOptions? = null
                     val i = Intent(activity, ShotDetailActivity::class.java)
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    context!!.startActivity(i)
+                    //deactivated because gif not loaded with shared transition
+                    /*if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                         options = ActivityOptions.makeSceneTransitionAnimation(activity as Activity?,
                                 mGridLayoutManager.findViewByPosition(position!!),
                                 activity!!.getString(R.string.shot_transition_name))
                         context!!.startActivity(i, options!!.toBundle())
-                    }
+                    }*/
                 }
         )
     }

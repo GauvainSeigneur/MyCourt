@@ -23,7 +23,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/content_edit_shot"/>
+    <include layout="@layout/content_edit_shot_two"/>
 
     <LinearLayout
         android:id="@+id/bs_publish"

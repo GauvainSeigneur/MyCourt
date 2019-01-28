@@ -7,7 +7,6 @@
 
     <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
         android:id="@+id/shot_image"
-        android:elevation="8dp"
         android:foreground="@drawable/rect_ripple"
         android:layout_width="match_parent"
         android:layout_height="0dp"/>

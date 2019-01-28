@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/edit_shot_container"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="72dp">
+
+
+        <androidx.cardview.widget.CardView
+            app:cardBackgroundColor="@color/colorPrimaryLight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/padding_16"
+            android:weightSum="1">
+
+            <seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
+                android:id="@+id/cropped_img_preview"
+                android:layout_margin="@dimen/padding_8"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@color/colorPrimaryLight"
+                android:foreground="@drawable/rect_ripple"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <seigneur.gauvain.mycourt.ui.widget.FourThreeVideoView
+                android:id="@+id/video_view"
+                android:layout_margin="@dimen/padding_4"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_width="0dp"
+                android:minHeight="0dp"
+                android:layout_height="0dp" />
+
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/colorPrimaryLight"
+            android:layout_marginStart="@dimen/padding_16"
+            android:layout_marginEnd="@dimen/padding_16"
+            android:layout_marginBottom="@dimen/padding_16">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- android:layout_marginTop="@dimen/padding_16" -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/shot_title_input"
+                    android:layout_marginTop="@dimen/padding_16"
+                    android:layout_marginEnd="@dimen/padding_8"
+                    android:layout_marginStart="@dimen/padding_8"
+                    android:hint="Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/shot_title_edt"
+                        android:inputType="text"
+                        android:imeOptions="actionNext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/shot_description_input"
+                    android:visibility="gone"
+                    style="@style/Widget.MyCourt.TextInputLayoutStyle"
+                    android:imeOptions="actionDone"
+                    android:hint="Description"
+                    android:layout_marginTop="@dimen/padding_16"
+                    android:layout_marginEnd="@dimen/padding_16"
+                    android:layout_marginStart="@dimen/padding_16"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/shot_description_edt"
+                        style="@style/Widget.MyCourt.EditTextStyle"
+                        android:inputType="textMultiLine"
+                        android:imeOptions="actionNext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/shot_tag_input"
+                    android:visibility="gone"
+                    style="@style/Widget.MyCourt.TextInputLayoutStyle"
+                    android:imeOptions="actionDone"
+                    android:layout_marginTop="@dimen/padding_16"
+                    android:layout_marginEnd="@dimen/padding_16"
+                    android:layout_marginStart="@dimen/padding_16"
+                    app:helperTextEnabled="true"
+                    app:helperText="Separates tags with commas (eg.TagA, Tag b)"
+                    android:hint="Tags"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/shot_tag_edt"
+                        style="@style/Widget.MyCourt.EditTextStyle"
+                        android:inputType="textMultiLine"
+                        android:imeOptions="actionDone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+
+
+        <LinearLayout
+            android:id="@+id/pro_option_layout"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_attachment"
+                android:layout_width="match_parent"
+                android:paddingStart="@dimen/padding_12"
+                android:paddingEnd="@dimen/padding_12"
+                android:layout_height="56dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

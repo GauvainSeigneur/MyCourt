@@ -54,6 +54,7 @@ object Constants {
         annotation class AthorizedfilType
         const val PNG = "image/png"
         const val JPG = "image/jpg"
+        const val JPEG = "image/jpeg"
         const val GIF = "image/gif"
         const val MP4 = "video/mp4"
 

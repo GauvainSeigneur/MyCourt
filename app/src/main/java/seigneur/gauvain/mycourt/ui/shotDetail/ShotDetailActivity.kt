@@ -1,5 +1,6 @@
 package seigneur.gauvain.mycourt.ui.shotDetail
 
+import android.app.ActionBar
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
@@ -16,10 +17,12 @@ import androidx.appcompat.widget.Toolbar
 import android.text.Html
 import android.util.TypedValue
 import android.view.View
+import android.view.ViewGroup
 import android.view.Window
 import android.view.animation.AlphaAnimation
 import android.view.animation.DecelerateInterpolator
 import android.widget.*
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,6 +37,9 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.Optional
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.gif.GifDrawable
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import dagger.android.AndroidInjection
@@ -60,8 +66,11 @@ class ShotDetailActivity : BaseActivity() {
         ViewModelProviders.of(this, viewModelFactory).get(ShotDetailViewModel::class.java)
     }
 
-    @BindView(R.id.custom_status_bar_background)
-    lateinit var customStatusBarbackground: View
+    @BindView(R.id.parent)
+    lateinit var mParentLayout: CoordinatorLayout
+
+    @BindView(R.id.fake_app_bar)
+    lateinit var mFakeAppBar: LinearLayout
 
     @BindView(R.id.app_bar)
     lateinit var appBarLayout: AppBarLayout
@@ -95,11 +104,6 @@ class ShotDetailActivity : BaseActivity() {
 
     @BindView(R.id.attachment_preview_title)
     lateinit var mattachmentTitle :TextView
-
-    /*@BindView(R.id.attachments)
-    lateinit var mAttachments: GridView
-
-    lateinit var mGridAdapter: AttachmentGridAdapter*/
 
     @BindView(R.id.rv_attachment_preview)
     lateinit var mAttachmentList: RecyclerView
@@ -210,9 +214,11 @@ class ShotDetailActivity : BaseActivity() {
          */
         Glide
                 .with(this)
-                .asDrawable()
                 .load(Uri.parse(shot!!.imageUrl))
-                //.apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE))
+                .apply(RequestOptions()
+                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                        .error(R.drawable.ic_my_shot_black_24dp)
+                )
                 .listener(object : RequestListener<Drawable> {
                     override fun onLoadFailed(e: GlideException?, model: Any, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
                         //do something! - make an API call or load another image and call mShotDetailPresenter.onShotImageAvailable();
@@ -268,8 +274,9 @@ class ShotDetailActivity : BaseActivity() {
                         val fadeIn = AlphaAnimation(0f, 1f)
                         fadeIn.interpolator = DecelerateInterpolator()
                         fadeIn.duration = 350
-                        customStatusBarbackground.startAnimation(fadeIn)
-                        customStatusBarbackground.setBackgroundColor(dominantSwatchSwatch.rgb)
+                        window.statusBarColor = dominantSwatchSwatch.rgb
+                        //customStatusBarbackground.startAnimation(fadeIn)
+                        //customStatusBarbackground.setBackgroundColor(dominantSwatchSwatch.rgb)
                     }
 
                     if (!MyColorUtils.isDark(dominantColor)) {
