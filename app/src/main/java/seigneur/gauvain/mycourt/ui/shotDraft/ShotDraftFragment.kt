@@ -11,6 +11,7 @@ import androidx.appcompat.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.recyclerview.widget.GridLayoutManager
 import java.util.ArrayList
 import javax.inject.Inject
 import butterknife.BindView
@@ -83,8 +84,8 @@ class ShotDraftFragment : BaseFragment(), Toolbar.OnMenuItemClickListener {
 
     override fun onCreateView(inRootView: View, inSavedInstanceState: Bundle?) {
         Timber.d("onCreateView")
-        shotDraftRV.layoutManager = androidx.recyclerview.widget.GridLayoutManager(context, 2)
-        shotDraftRV.adapter = mShotDraftsListAdapter
+        shotDraftRV.layoutManager = GridLayoutManager(context, 2)
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

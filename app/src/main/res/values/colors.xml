@@ -2,13 +2,13 @@
 <resources>
     <!--OLD -->
     <color name="colorPrimaryDark">@color/colorPrimary</color>
-    <color name="colorAccent">#ff4676</color>
+    <color name="colorAccent">#11acd0</color>
     <!-- MATERIAL COLORS -->
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryVariant">#F7F7F7</color>
-    <color name="colorSecondary">#ff4676</color>
-    <color name="colorSecondaryVariant">#ff2d63</color>
-    <color name="colorBackground">@color/colorPrimary</color>
+    <color name="colorSecondary">#11acd0</color>
+    <color name="colorSecondaryVariant">#0f9abb</color>
+    <color name="colorBackground">#fbfcfc</color>
     <color name="colorSurface">@color/colorPrimary</color>
     <color name="colorError">#FF6859</color>
     <color name="colorOnPrimary">@color/colorTextBody</color>
@@ -54,16 +54,15 @@
     <color name="mtrl_dark_on_surface_emphasis_medium">#99FFFFFF</color>
 
     <!-- Text colors --> <!-- dark : #FFFFFF / light  #1E1E24-->
-    <color name="colorHeadline">#FF1E1E24</color><!-- 100% opacity-->
-    <color name="colorSubHead">#CC1E1E24</color><!-- 80% opacity-->
-    <color name="colorPrimaryTitle">#E61E1E24</color><!-- 90% opacity-->
-    <color name="colorSecondaryTitle">#BF1E1E24</color><!-- 75% opacity-->
-    <color name="colorTextBody">#991E1E24</color><!-- 99 :60% / E6 65% opacity / -->
-    <color name="color">#991E1E24</color><!-- 99 :60% / E6 65% opacity / -->
-    <color name="colorDraftHint">#661E1E24</color><!-- 40% opacity-->
-    <color name="colorTextDivider">#331E1E24</color><!-- 43% opacity-->
-    <color name="colorShotDate">#A61E1E24</color><!-- 55% opacity-->
-    <color name="colorDraftContent">#E61E1E24</color><!-- 65% opacity-->
+    <color name="colorHeadline">#FF0F294A</color><!-- 100% opacity-->
+    <color name="colorSubHead">#CC0F294A</color><!-- 80% opacity-->
+    <color name="colorPrimaryTitle">#E60F294A</color><!-- 90% opacity-->
+    <color name="colorSecondaryTitle">#BF0F294A</color><!-- 75% opacity-->
+    <color name="colorTextBody">#FF97A6BB</color><!-- 99 :60% / E6 65% opacity / -->
+    <color name="colorDraftHint">#6697A6BB</color><!-- 40% opacity-->
+    <color name="colorTextDivider">#3397A6BB</color><!-- 43% opacity-->
+    <color name="colorShotDate">#A697A6BB</color><!-- 55% opacity-->
+    <color name="colorDraftContent">#E697A6BB</color><!-- 65% opacity-->
     <color name="colorPrimaryText">@color/colorHeadline</color>
 
 

@@ -25,6 +25,8 @@
                 android:descendantFocusability="beforeDescendants"
                 tools:listitem="@layout/list_item_shot"
                 android:clipToPadding="false"
+                android:paddingEnd="@dimen/padding_4"
+                android:paddingStart="@dimen/padding_4"
                 android:paddingBottom="56dp"/>
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

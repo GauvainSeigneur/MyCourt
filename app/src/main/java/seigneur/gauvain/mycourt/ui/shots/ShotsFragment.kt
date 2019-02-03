@@ -24,6 +24,7 @@ import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.ui.base.BaseFragment
 import seigneur.gauvain.mycourt.ui.main.MainActivity
 import seigneur.gauvain.mycourt.ui.shotDetail.ShotDetailActivity
+import seigneur.gauvain.mycourt.ui.widget.MarginItemDecoration
 import seigneur.gauvain.mycourt.ui.shots.list.adapter.ShotItemCallback
 import seigneur.gauvain.mycourt.ui.shots.list.adapter.ShotListAdapter
 import seigneur.gauvain.mycourt.ui.shots.list.data.NetworkState
@@ -111,6 +112,12 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
             }
             mRvShots.layoutManager =  mGridLayoutManager
             mRvShots.adapter = shotListAdapter
+            mRvShots.addItemDecoration(
+                    MarginItemDecoration(
+                            resources.getDimension(R.dimen.padding_8).toInt(),
+                            resources.getDimension(R.dimen.padding_4).toInt()
+                    )
+            )
 
         }
 
