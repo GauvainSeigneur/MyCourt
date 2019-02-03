@@ -77,9 +77,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
         android:layout_gravity="bottom|end"
-        android:tint="@android:color/white"
-        android:outlineAmbientShadowColor="@color/colorAccent"
-        android:outlineSpotShadowColor="@color/colorAccent"
         android:src="@drawable/ic_edit_black_24dp" />
 
     <!-- not usefull anymore -->
@@ -102,6 +99,7 @@
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:tint="@android:color/white"
+                android:alpha="0.6"
                 android:src="@drawable/ic_arrow_back_black_24dp"/>
 
         </FrameLayout>

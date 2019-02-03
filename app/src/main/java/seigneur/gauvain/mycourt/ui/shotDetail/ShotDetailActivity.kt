@@ -1,6 +1,5 @@
 package seigneur.gauvain.mycourt.ui.shotDetail
 
-import android.app.ActionBar
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
@@ -17,7 +16,6 @@ import androidx.appcompat.widget.Toolbar
 import android.text.Html
 import android.util.TypedValue
 import android.view.View
-import android.view.ViewGroup
 import android.view.Window
 import android.view.animation.AlphaAnimation
 import android.view.animation.DecelerateInterpolator
@@ -25,6 +23,7 @@ import android.widget.*
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
+import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -38,7 +37,6 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.Optional
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -46,10 +44,8 @@ import dagger.android.AndroidInjection
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.ui.base.BaseActivity
-import seigneur.gauvain.mycourt.ui.shotDetail.attachments.AttachmentGridAdapter
 import seigneur.gauvain.mycourt.ui.shotDetail.attachments.AttachmentListAdapter
 import seigneur.gauvain.mycourt.ui.shotEdition.EditShotActivity
-import seigneur.gauvain.mycourt.ui.shotEdition.attachmentList.AttachmentsAdapter
 import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
 import seigneur.gauvain.mycourt.utils.image.ImageUtils
 import seigneur.gauvain.mycourt.utils.MyColorUtils
@@ -117,7 +113,7 @@ class ShotDetailActivity : BaseActivity() {
     lateinit var fab: FloatingActionButton
 
     private var statusbarheight: Int = 0
-    private var isLightStatusBar = false
+
     val OneHundreddip:Int by lazy {
         TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 100f, this.resources.displayMetrics).toInt()
     }
@@ -259,7 +255,7 @@ class ShotDetailActivity : BaseActivity() {
         val twentyFourDip = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 24f, this.resources.displayMetrics).toInt()
         // Bitmap bitmap = BitmapFactory.decodeResource(drawable);
-        androidx.palette.graphics.Palette.from(bitmap)
+        Palette.from(bitmap)
                 .clearFilters()
                 .setRegion(0, 0, bitmap.width, twentyFourDip)
                 .generate { palette ->
@@ -275,21 +271,14 @@ class ShotDetailActivity : BaseActivity() {
                         fadeIn.interpolator = DecelerateInterpolator()
                         fadeIn.duration = 350
                         window.statusBarColor = dominantSwatchSwatch.rgb
-                        //customStatusBarbackground.startAnimation(fadeIn)
-                        //customStatusBarbackground.setBackgroundColor(dominantSwatchSwatch.rgb)
                     }
 
                     if (!MyColorUtils.isDark(dominantColor)) {
-                        isLightStatusBar = true
-                        //blackBackArrow.alpha = 1.0f
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            MyColorUtils.setLightStatusBar(mView)
-                        }
-                       // backArrow.tint
-                        val darkerGrey = ContextCompat.getColor(this, R.color.colorPrimaryLight)
-                        ImageViewCompat.setImageTintList(backArrow,
-                                ColorStateList.valueOf(darkerGrey))
+                        MyColorUtils.setLightStatusBar(mView)
+                        val darkerGrey = ContextCompat.getColor(this, R.color.back_arrow_dark)
+                        ImageViewCompat.setImageTintList(backArrow, ColorStateList.valueOf(darkerGrey))
                     } else {
+                        MyColorUtils.clearLightStatusBar(mView)
                     }
                 }
     }
@@ -297,7 +286,7 @@ class ShotDetailActivity : BaseActivity() {
     private fun recolorShadowColor(bitmap: Bitmap) {
         val twentyFourDip = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 24f, this.resources.displayMetrics).toInt()
-        androidx.palette.graphics.Palette.from(bitmap)
+       Palette.from(bitmap)
                 .clearFilters()
                 .setRegion(0, bitmap.height-twentyFourDip, bitmap.width, bitmap.height)
                 .generate { palette ->
@@ -375,13 +364,9 @@ class ShotDetailActivity : BaseActivity() {
             for (i in shot.tagList!!) {
                 val chip = Chip(mTagGrpoup.context)
                 chip.text=i
-                // necessary to get single selection working
-                //chip.isClickable = true
-                //chip.isCheckable = true
-                chip.setTextAppearance(R.style.chipTextAppearance)
-                //chip.chipBackgroundColor = this.resources.getColorStateList(R.drawable.chip_state_list)
-                chip.setChipBackgroundColorResource(R.color.colorPrimaryLight)
-                chip.setChipStrokeColorResource(R.color.colorPrimaryLight)
+                chip.isClickable = false
+                chip.isCheckable = false
+                chip.isCloseIconVisible=false
                 mTagGrpoup.addView(chip)
             }
 

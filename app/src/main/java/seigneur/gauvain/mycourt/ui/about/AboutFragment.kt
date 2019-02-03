@@ -1,49 +1,24 @@
 package seigneur.gauvain.mycourt.ui.about
 
-import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Application
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import com.google.android.material.appbar.AppBarLayout
-import androidx.recyclerview.widget.RecyclerView
-import androidx.appcompat.widget.Toolbar
-import android.text.Html
-import android.util.DisplayMetrics
-import android.view.Display
 import android.view.View
 import android.widget.*
-
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
-
-import java.util.ArrayList
-
+import androidx.appcompat.app.AppCompatDelegate
 import javax.inject.Inject
-
 import butterknife.BindView
-import com.google.android.material.R.attr.cornerFamily
-import com.google.android.material.R.attr.cornerSize
 import com.google.android.material.shape.*
-import dagger.android.support.AndroidSupportInjection
+import com.google.android.material.switchmaterial.SwitchMaterial
 import seigneur.gauvain.mycourt.R
-import seigneur.gauvain.mycourt.data.model.User
+import seigneur.gauvain.mycourt.data.local.SharedPrefs
 import seigneur.gauvain.mycourt.ui.base.BaseFragment
-import seigneur.gauvain.mycourt.ui.widget.FourThreeImageView
+import seigneur.gauvain.mycourt.ui.main.MainActivity
 import seigneur.gauvain.mycourt.ui.widget.FourThreeVideoView
 import timber.log.Timber
-
-import seigneur.gauvain.mycourt.utils.MathUtils.convertPixelsToDp
 
 /**
  * Created by gse on 22/11/2017.
@@ -61,6 +36,12 @@ class AboutFragment : BaseFragment() {
 
     @BindView(R.id.video_player)
     lateinit var mVideoView : FourThreeVideoView
+
+    @BindView(R.id.swicth)
+    lateinit var mSwicth : SwitchMaterial
+
+    @Inject
+    lateinit var mSharedPrefs :SharedPrefs
 
     private val mAboutViewModel: AboutViewModel by lazy {
          ViewModelProviders.of(this, viewModelFactory).get(AboutViewModel::class.java)
@@ -89,7 +70,7 @@ class AboutFragment : BaseFragment() {
         mButton.background=leftRoundedMaterialShape
 
 
-        mVideoView.setVideoPath("https://cdn.dribbble.com/users/1969947/videos/9961/__.mp4")
+       /* mVideoView.setVideoPath("https://cdn.dribbble.com/users/1969947/videos/9961/__.mp4")
         mVideoView.start()
         mVideoView.setOnErrorListener(mOnErrorListener)
         mVideoView.setOnPreparedListener{
@@ -97,16 +78,32 @@ class AboutFragment : BaseFragment() {
             Timber.d("is prepared")
             it.isLooping =true //allow video to repeat
 
-            /*it.setOnBufferingUpdateListener { it, percent ->
-                if (percent == 100) {
-                    //video have completed buffering
-                    Timber.d("finish buffering")
-                }
-            }*/
+        }*/
 
-        }
+
+            mSwicth.isChecked = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
+            mSwicth.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked) {
+                    mSharedPrefs.putBoolean(SharedPrefs.kNightMode,true)
+                    val intent = Intent(activity, MainActivity::class.java)
+                    //intent.putExtra("colorIntentFromSetting", 4)
+                    //intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                    activity?.finish()
+                    activity?.startActivity(intent)
+                } else {
+                    mSharedPrefs.putBoolean(SharedPrefs.kNightMode,false)
+                    val intent = Intent(activity, MainActivity::class.java)
+                    //intent.putExtra("colorIntentFromSetting", 4)
+                    //add paramter
+                    //intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                    activity?.finish()
+                    activity?.startActivity(intent)
+                }
+            }
+
 
     }
+
 
     private val mOnErrorListener = object : MediaPlayer.OnErrorListener {
        override fun onError(mp: MediaPlayer, what: Int, extra: Int): Boolean {

@@ -65,11 +65,6 @@ abstract class BaseFragment :Fragment() {
      */
     open fun onCreateView(inRootView: View, inSavedInstanceState: Bundle?) {}
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         mUnbinder.unbind()

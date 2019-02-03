@@ -13,6 +13,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
 
 import javax.inject.Inject
 
@@ -20,6 +21,7 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.Optional
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
@@ -47,6 +49,9 @@ class MainActivity : BaseActivity(), HasSupportFragmentInjector, CustomBottomAct
     private val mMainViewModel: MainViewModel by lazy {
          ViewModelProviders.of(this, viewModelFactory).get(MainViewModel::class.java)
     }
+
+    @BindView(R.id.appbar_layout)
+    lateinit var mTopAppBar: AppBarLayout
 
     @BindView(R.id.fragment_place_holder)
     lateinit var mFragmentContainer: FrameLayout
@@ -84,7 +89,6 @@ class MainActivity : BaseActivity(), HasSupportFragmentInjector, CustomBottomAct
             mMainViewModel.setmBottomNavPos(getNavPositionFromMenuItem(item))
             mMainViewModel.onBottomNavItemReselected()
         }
-
     }
 
     @Optional
@@ -139,6 +143,7 @@ class MainActivity : BaseActivity(), HasSupportFragmentInjector, CustomBottomAct
                 this,
                 Observer<Int> {
                     pos -> goBackOnPrevItem(pos!!)
+                    Timber.d("mainNav Pos from activity: $pos")
                 }
         )
 
@@ -192,6 +197,7 @@ class MainActivity : BaseActivity(), HasSupportFragmentInjector, CustomBottomAct
 
     private fun goBackOnPrevItem(position: Int) {
         mNavigation.selectedItemId = mNavigation.menu.getItem(position).itemId
+        Timber.d("selected item id :" +mNavigation.selectedItemId +" "+mNavigation.menu.getItem(position))
     }
 
 

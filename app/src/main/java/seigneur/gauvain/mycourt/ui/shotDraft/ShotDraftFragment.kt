@@ -4,15 +4,10 @@ import android.app.Application
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.appcompat.widget.Toolbar
-import android.view.ActionMode
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
@@ -43,11 +38,8 @@ class ShotDraftFragment : BaseFragment(), Toolbar.OnMenuItemClickListener {
         ViewModelProviders.of(this, viewModelFactory).get(ShotDraftViewModel::class.java)
     }
 
-    @BindView(R.id.toolbar)
-    lateinit var toolbar: Toolbar
-
     @BindView(R.id.rv_shot_draft)
-    lateinit var shotDraftRV: androidx.recyclerview.widget.RecyclerView
+    lateinit var shotDraftRV: RecyclerView
 
     private var mShotDraftsListAdapter: ShotDraftsListAdapter?=null
     private var shotDraftsSaved: MutableList<Draft> = ArrayList()
@@ -91,12 +83,21 @@ class ShotDraftFragment : BaseFragment(), Toolbar.OnMenuItemClickListener {
 
     override fun onCreateView(inRootView: View, inSavedInstanceState: Bundle?) {
         Timber.d("onCreateView")
-        toolbar.inflateMenu(R.menu.menu_shot_detail)
-        toolbar.setOnMenuItemClickListener(this)
         shotDraftRV.layoutManager = androidx.recyclerview.widget.GridLayoutManager(context, 2)
         shotDraftRV.adapter = mShotDraftsListAdapter
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        if (shotDraftRV!=null) {
+            shotDraftRV.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    (activity as MainActivity).mTopAppBar.isSelected = shotDraftRV.canScrollVertically(-1)
+                }
+            })
+        }
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)

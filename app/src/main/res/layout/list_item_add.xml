@@ -1,22 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<com.google.android.material.button.MaterialButton
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+    android:id="@+id/add"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="@dimen/padding_4"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardBackgroundColor="@color/colorAccent">
-
-    <ImageView
-        android:id="@+id/add"
-        android:foreground="@drawable/rect_ripple"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_dribbble_attachment_add_24px_2"
-        android:tint="@color/colorWhite"/>
-
-</androidx.cardview.widget.CardView>
+    android:layout_margin="4dp"
+    android:insetTop="0dp"
+    android:insetBottom="0dp"
+    android:insetLeft="0dp"
+    android:insetRight="0dp"
+    app:strokeColor="@color/colorSecondary"
+    app:strokeWidth="2dp"
+    app:iconTint="@color/colorOnPrimary"
+    app:iconPadding="0dp"
+    app:iconGravity="start"
+    app:rippleColor="@color/colorSecondaryVariant"
+    android:gravity="center"
+    android:textSize="0sp"
+    app:icon="@drawable/ic_dribbble_attachment_add_24px_2"/>
 
 
 

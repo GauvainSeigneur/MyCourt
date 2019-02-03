@@ -3,7 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/edit_shot_container"
-    app:behavior_overlapTop="100dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -39,91 +38,50 @@
 
         </FrameLayout>
 
-        <TextView
-            style="@style/TextAppearance.TitlePrimary"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/shot_title_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="@dimen/padding_8"
-            android:paddingLeft="@dimen/padding_16"
-            android:paddingRight="@dimen/padding_16"
-            android:text="Title"/>
+            android:layout_marginEnd="@dimen/padding_8"
+            android:layout_marginStart="@dimen/padding_8"
+            app:boxBackgroundMode="outline"
+            app:boxBackgroundColor="@android:color/transparent"
+            app:hintTextColor="@color/colorSecondary"
+            app:hintEnabled="true">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/padding_8">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/shot_title_input"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/shot_title_edt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:imeOptions="actionDone"
-                android:layout_marginEnd="@dimen/padding_8"
-                android:layout_marginStart="@dimen/padding_8"
-                android:layout_marginBottom="@dimen/padding_8"
-                app:boxBackgroundMode="none"
-                app:boxBackgroundColor="@android:color/transparent"
-                android:gravity="center"
-                app:hintEnabled="false">
+                android:hint="Title"
+                android:inputType="textCapSentences"
+                android:imeOptions="actionNext"
+                android:textCursorDrawable="@drawable/edit_text_cursor"
+                android:textSize="16sp"/>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/shot_title_edt"
-                    android:inputType="textMultiLine"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Add a title"
-                    android:background="@null"
-                    android:textColorHint="@color/colorTextBody"
-                    android:textCursorDrawable="@drawable/edit_text_cursor"
-                    android:textSize="16sp"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
-            </com.google.android.material.textfield.TextInputLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <TextView
-            style="@style/TextAppearance.TitlePrimary"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/shot_description_input"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:hintTextColor="@color/colorSecondary"
+            app:boxStrokeColor="@color/colorSecondary"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="@dimen/padding_8"
-            android:paddingLeft="@dimen/padding_16"
-            android:paddingRight="@dimen/padding_16"
-            android:text="Description"/>
+            android:layout_height="wrap_content">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/padding_8">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/shot_description_input"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/shot_description_edt"
+                android:inputType="textMultiLine"
+                android:imeOptions="actionNext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="100dp"
-                android:layout_marginEnd="@dimen/padding_8"
-                android:layout_marginStart="@dimen/padding_8"
-                app:boxBackgroundMode="none"
-                app:boxBackgroundColor="@android:color/transparent"
-                android:gravity="center"
-                app:hintEnabled="false">
+                android:hint="Add a description"
+                android:textSize="16sp"/>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/shot_description_edt"
-                    android:inputType="textMultiLine"
-                    android:imeOptions="actionNext"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Add a description"
-                    android:background="@null"
-                    android:textColorHint="@color/colorTextBody"
-                    android:textCursorDrawable="@drawable/edit_text_cursor"
-                    android:textSize="16sp"/>
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-        </com.google.android.material.card.MaterialCardView>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
+            android:id="@+id/shot_detail_other_info_title"
             style="@style/TextAppearance.TitlePrimary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -179,22 +137,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <TextView
-                style="@style/TextAppearance.TitlePrimary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="@dimen/padding_8"
-                android:paddingLeft="@dimen/padding_16"
-                android:paddingRight="@dimen/padding_16"
-                android:text="Attachments"/>
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_attachment"
                 android:layout_width="match_parent"
-                android:layout_marginTop="@dimen/padding_8"
-                android:paddingStart="0dp"
+                android:paddingStart="@dimen/padding_12"
                 android:paddingEnd="@dimen/padding_12"
-                android:layout_height="64dp"/>
+                android:layout_height="56dp"/>
 
         </LinearLayout>
 

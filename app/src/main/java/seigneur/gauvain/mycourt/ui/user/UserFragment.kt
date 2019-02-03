@@ -1,20 +1,15 @@
 package seigneur.gauvain.mycourt.ui.user
 
-import android.app.Activity
 import android.app.Application
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import com.google.android.material.appbar.AppBarLayout
-import androidx.recyclerview.widget.RecyclerView
 import androidx.appcompat.widget.Toolbar
 import android.text.Html
 import android.util.DisplayMetrics
-import android.view.Display
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -24,16 +19,12 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
 
 import java.util.ArrayList
 
 import javax.inject.Inject
 
 import butterknife.BindView
-import dagger.android.support.AndroidSupportInjection
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.User
 import seigneur.gauvain.mycourt.ui.base.BaseFragment
@@ -182,7 +173,9 @@ class UserFragment : BaseFragment() {
         mUserViewModel.init()
     }
 
-    override fun onCreateView(inRootView: View, inSavedInstanceState: Bundle?) {}
+    override fun onCreateView(inRootView: View, inSavedInstanceState: Bundle?) {
+        //(activity as MainActivity).mTopAppBar.isSelected = false //todo - pass it to viewmodel
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

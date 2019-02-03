@@ -1,37 +1,28 @@
 package seigneur.gauvain.mycourt.ui.shots
 
-import android.app.Activity
 import android.app.ActivityOptions
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.paging.PagedList
-import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import butterknife.*
-import com.google.android.material.appbar.AppBarLayout
 
 import javax.inject.Inject
 
-import dagger.android.support.AndroidSupportInjection
 import seigneur.gauvain.mycourt.R
 import seigneur.gauvain.mycourt.data.model.Shot
 import seigneur.gauvain.mycourt.ui.base.BaseFragment
+import seigneur.gauvain.mycourt.ui.main.MainActivity
 import seigneur.gauvain.mycourt.ui.shotDetail.ShotDetailActivity
 import seigneur.gauvain.mycourt.ui.shots.list.adapter.ShotItemCallback
 import seigneur.gauvain.mycourt.ui.shots.list.adapter.ShotListAdapter
@@ -44,9 +35,6 @@ import timber.log.Timber
  * Created by gse on 22/11/2017.
  */
 class ShotsFragment : BaseFragment(), ShotItemCallback {
-
-    @BindView(R.id.appbar_layout)
-    lateinit var mAppbar:AppBarLayout
 
     @BindView(R.id.usersSwipeRefreshLayout)
     lateinit var mSwipeRefreshLayout:SwipeRefreshLayout
@@ -100,13 +88,13 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        //listen livedata
         subscribeToSingleEvent(shotsViewModel)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-       // mUnbinder.unbind()
+        mRvShots.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                (activity as MainActivity).mTopAppBar.isSelected = mRvShots.canScrollVertically(-1)
+            }
+        })
     }
 
     private fun initAdapter() {
@@ -136,13 +124,6 @@ class ShotsFragment : BaseFragment(), ShotItemCallback {
             shotListAdapter.setNetworkState(it!!)
             })
 
-        mRvShots.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                //todo - pass this data in view model to not loose the current state and scroll
-                mAppbar.isSelected = mRvShots.canScrollVertically(-1)
-            }
-        })
     }
 
     /**

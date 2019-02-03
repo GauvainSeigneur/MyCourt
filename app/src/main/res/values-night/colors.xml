@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--OLD -->
-    <color name="colorPrimaryDark">@color/colorPrimary</color>
+    <color name="colorPrimaryDark">@color/colorPrimaryVariant</color>
     <color name="colorAccent">#ff4676</color>
     <!-- MATERIAL COLORS -->
-    <color name="colorPrimary">#FFFFFF</color>
-    <color name="colorPrimaryVariant">#F7F7F7</color>
+    <color name="colorPrimary">#27272f</color>
+    <color name="colorPrimaryVariant">#393944</color>
     <color name="colorSecondary">#ff4676</color>
     <color name="colorSecondaryVariant">#ff2d63</color>
     <color name="colorBackground">@color/colorPrimary</color>
-    <color name="colorSurface">@color/colorPrimary</color>
+    <color name="colorSurface">@color/colorPrimaryVariant</color>
     <color name="colorError">#FF6859</color>
     <color name="colorOnPrimary">@color/colorTextBody</color>
     <color name="colorOnSecondary">#FFFFFF</color>
@@ -17,13 +17,8 @@
     <color name="colorOnSurface">@color/colorTextBody</color>
     <color name="colorOnError">#FFFFFF</color>
     <!-- Other global colors -->
-    <color name="colorPrimaryLight">#FFFFFF</color>
+    <color name="colorPrimaryLight">#73737C</color><!-- dark : #4f4f57  light : #FFFFFF -->
     <color name="colorStatusBar">@color/colorPrimary</color>
-    <color name="colorSplashGradientLight">#49494d</color>
-    <color name="colorSplashGradientDark">#1e1e24</color>
-    <!-- item menu colors -->
-    <color name ="colorMenuItemUnSelected">@color/colorTextBody</color>
-    <color name ="colorMenuItemSelected">@color/colorAccent</color>
 
     <!-- STATE COLOR
        Note: We are currently waiting for better attribute support in ColorStateLists to land in the
@@ -54,40 +49,21 @@
     <color name="mtrl_dark_on_surface_emphasis_medium">#99FFFFFF</color>
 
     <!-- Text colors --> <!-- dark : #FFFFFF / light  #1E1E24-->
-    <color name="colorHeadline">#FF1E1E24</color><!-- 100% opacity-->
-    <color name="colorSubHead">#CC1E1E24</color><!-- 80% opacity-->
-    <color name="colorPrimaryTitle">#E61E1E24</color><!-- 90% opacity-->
-    <color name="colorSecondaryTitle">#BF1E1E24</color><!-- 75% opacity-->
-    <color name="colorTextBody">#991E1E24</color><!-- 99 :60% / E6 65% opacity / -->
-    <color name="color">#991E1E24</color><!-- 99 :60% / E6 65% opacity / -->
-    <color name="colorDraftHint">#661E1E24</color><!-- 40% opacity-->
-    <color name="colorTextDivider">#331E1E24</color><!-- 43% opacity-->
-    <color name="colorShotDate">#A61E1E24</color><!-- 55% opacity-->
-    <color name="colorDraftContent">#E61E1E24</color><!-- 65% opacity-->
+    <color name="colorHeadline">#FFFFFFFF</color><!-- 100% opacity-->
+    <color name="colorSubHead">#CCFFFFFF</color><!-- 80% opacity-->
+    <color name="colorPrimaryTitle">#E6FFFFFF</color><!-- 90% opacity-->
+    <color name="colorSecondaryTitle">#BFFFFFFF</color><!-- 75% opacity-->
+    <color name="colorTextBody">#99FFFFFF</color><!-- 99 :60% / E6 65% opacity / -->
+    <color name="colorDraftHint">#66FFFFFF</color><!-- 40% opacity-->
+    <color name="colorTextDivider">#33FFFFFF</color><!-- 43% opacity-->
+    <color name="colorShotDate">#A6FFFFFF</color><!-- 55% opacity-->
+    <color name="colorDraftContent">#E6FFFFFF</color><!-- 65% opacity-->
     <color name="colorPrimaryText">@color/colorHeadline</color>
 
-
-    <!-- Other colors to organize or delete -->
-    <color name="colorBackgroundEdit">@color/colorPrimary</color>
-    <color name="colorSelectedForeground">#80ff4676</color>
-    <color name="scrim">#99323232</color>
-    <color name="color_background_gradient_dark">#F8F9FE</color>
-    <color name="color_background_gradient_light">#F8F9FE</color>
-    <color name="delete_chip_icon_bg">#8C222222</color>
-    <color name="color_title_primary">#F9F9F9</color>
-    <color name="content_placeholder">#ffe0e0e0</color>
-    <color name="mid_grey">#40808080</color>
-    <color name="confirm_edition_background">#33000000</color>
-    <color name="colorWhite">#ffffff</color>
-    <color name="back_arrow_dark">@android:color/darker_gray</color>
+    <color name="color_background_gradient_dark">@color/colorPrimary</color>
+    <color name="color_background_gradient_light">@color/colorPrimaryVariant</color>
 
 
-    <!--colors that bare teh same betwewen mode -->
-    <color name="colorInstagramOne">#F6C584</color>
-    <color name="colorInstagramTwo">#F09BA6</color>
-    <color name="colorInstagramThree">#EC7AC1</color>
-    <color name="colorFacebook">#3B5998</color>
-    <color name="colorGithub">#e36209 </color>
-    <color name="colorTwitter">#00aced</color>
+
 
 </resources>

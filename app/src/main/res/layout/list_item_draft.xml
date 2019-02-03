@@ -6,7 +6,7 @@
     android:layout_margin="@dimen/padding_8"
     android:id="@+id/shot_draft_layout"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardBackgroundColor="@color/colorPrimaryLight">
+    app:cardBackgroundColor="@color/colorSurface">
 
     <LinearLayout
         android:orientation="vertical"
@@ -24,6 +24,7 @@
 
             <TextView
                 android:id="@+id/draft_type"
+                android:textColor="@android:color/white"
                 android:paddingStart="@dimen/padding_8"
                 android:paddingTop="@dimen/padding_4"
                 android:paddingEnd="@dimen/padding_8"

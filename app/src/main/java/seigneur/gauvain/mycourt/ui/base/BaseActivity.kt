@@ -5,8 +5,11 @@ import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import dagger.android.AndroidInjection
 import seigneur.gauvain.mycourt.R
+import seigneur.gauvain.mycourt.data.local.SharedPrefs
+import javax.inject.Inject
 
 /**
  * Base activity dedicated to some global actions -  Only UI, not DI
@@ -15,9 +18,20 @@ open class BaseActivity : AppCompatActivity() {
 
     private var mAlertDialog: AlertDialog? = null
 
+    @Inject
+    lateinit var mSharedPrefs : SharedPrefs
+
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
+        if (mSharedPrefs.getBoolean(SharedPrefs.kNightMode)==true) {
+            //Night mode
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        }else {
+            //Normal mode
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+
     }
 
     override fun onResume() {

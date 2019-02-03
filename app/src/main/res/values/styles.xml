@@ -1,23 +1,37 @@
 <resources xmlns:tools="http://schemas.android.com/tools" xmlns:app="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Base application theme-->
-    <style name="MyCourt" parent="Theme.MaterialComponents.Light"> <!--<style name="MyCourt" parent="Theme.AppCompat.NoActionBar"-->
+    <style name="BaseStyle" parent="Theme.MaterialComponents.Light">
+        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
+    </style>
+
+    <style name="MyCourt" parent="BaseStyle">
         <!-- Colors -->
-        <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:statusBarColor">@color/colorStatusBar</item>
-        <item name="android:navigationBarColor">@color/colorPrimary</item>
-        <item name="android:textColor">@android:color/white</item>
-        <item name="android:colorBackground">@color/colorBackground</item>
-        <item name="android:colorEdgeEffect">@color/colorAccent</item>
-        <!--Material Theme color new variables-->
-        <!-- SEE : https://material.io/develop/android/theming/color/ -->
-        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
+        <!-- GLOBAL COLORS -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item><!-- in dark theme, it must be lighter -->
         <item name="colorSecondary">@color/colorSecondary</item>
         <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
-        <item name="colorOnSecondary">@color/colorWhite</item>
-        <item name="colorOnSurface">@color/colorPrimaryLight</item>
-        <item name="colorOnBackground">@color/colorPrimaryLight</item>
+        <item name="android:colorBackground">@color/colorBackground</item>
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorError">@color/colorError</item>
+        <item name="android:colorError" tools:targetApi="26">@color/colorError</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        <item name="colorOnSecondary">@color/colorOnSecondary</item>
+        <item name="colorOnBackground">@color/colorOnBackground</item>
+        <item name="colorOnSurface">@color/colorOnSurface</item>
+        <item name="colorOnError">@color/colorOnError</item>
+        <!-- OTHER COlORS -->
+        <item name="android:statusBarColor">@color/colorStatusBar</item>
+        <item name="android:navigationBarColor">@color/colorPrimary</item>
+        <item name="android:colorEdgeEffect">@color/colorAccent</item>
+        <item name="android:fontFamily">@font/raleway_medium</item>
+        <!-- MATERIAL WIDGET DEFAULT STYLE -->
+        <item name="materialButtonStyle">@style/defaultButtonStyle</item> <!-- Defaut button style-->
+        <item name="floatingActionButtonStyle">@style/defaultFabStyle</item>
+        <item name="chipStyle">@style/ChipStyle</item>
+       <item name="materialCardViewStyle">@style/defaultCardViewStyle</item>
         <!-- transition and overlay-->
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
         <item name="android:windowAllowReturnTransitionOverlap">true</item>
@@ -26,83 +40,39 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:fontFamily">@font/raleway_medium</item>
-        <item name="android:textColorPrimary">@color/colorWhite</item>
         <!--<item name="chipStyle">@style/ChipStyle</item>-->
     </style>
 
-    <!-- Widgets-->
-    <style name="Widget.MyCourt" parent="android:Widget" />
+    <!-- default style for Buttons -->
+    <style name="defaultButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="shapeAppearance">?attr/shapeAppearanceMediumComponent</item>
+        <item name="backgroundTint">@color/colorSecondary</item>
+        <item name="android:textColor">@color/colorOnSecondary</item>
+        <item name="iconTint">@color/colorOnSecondary</item>
+        <item name="android:outlineSpotShadowColor" tools:targetApi="28">@color/colorSecondary</item>
+        <item name="android:outlineAmbientShadowColor" tools:targetApi="28">@color/colorSecondary</item>
+    </style>
+
+    <!-- default style for Buttons -->
+    <style name="defaultFabStyle" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="android:outlineSpotShadowColor" tools:targetApi="28">@color/colorSecondary</item>
+        <item name="android:outlineAmbientShadowColor" tools:targetApi="28">@color/colorSecondary</item>
+    </style>
+
+    <style name="defaultCardViewStyle" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/colorPrimary</item>
+        <item name="cardCornerRadius">4dp</item>
+    </style>
 
     <!--AppBar and Toolbar style -->
-    <style name="MyCourt.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-    <style name="MyCourt.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-    <style name="MyCourt.ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+   <style name="MyCourt.AppBarOverlay" parent="Base.ThemeOverlay.AppCompat.ActionBar" />
+   <style name="MyCourt.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="MyCourt.ToolbarTheme" parent="ThemeOverlay.MaterialComponents.ActionBar">
         <item name="android:fontFamily">@font/raleway_bold</item>
-        <item name="android:textColor">@color/colorHeadline</item>
     </style>
 
     <style name="ToolBarTitleCenter" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-       <item name="android:textAlignment">center</item>
-    </style>
-
-    <!--Activity Theming-->
-    <style name="MyCourt.MainActivityTheme">
-        <!--<item name="android:windowLightStatusBar" tools:targetApi="23">true</item>-->
-        <!--<item name="android:windowExitTransition">@transition/main_exit</item>
-        <item name="android:windowReenterTransition">@transition/main_re_enter</item>-->
-    </style>
-
-    <style name="MyCourt.EditActivityTheme">
-        <item name="android:colorBackground">@color/colorBackgroundEdit</item>
-    </style>
-
-    <style name="MyCourt.DetailShotActivityTheme">
-        <item name="android:windowSharedElementsUseOverlay">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-    </style>
-
-    <style name="MyCourt.SplashTheme">
-        <item name="android:windowBackground">@drawable/background_gradient_primary</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-    </style>
-
-
-    <style name="Widget.MyCourt.BottomNavigationTheme" parent="Widget.Design.BottomNavigationView">
-        <item name="android:background">@android:color/transparent</item>
-        <item name="labelVisibilityMode">unlabeled</item>
-        <item name="itemHorizontalTranslationEnabled">false</item>
-        <item name="itemIconSize">24dp</item>
-        <item name="itemIconTint">@drawable/selector_item_bottom_nav</item>
-        <item name="itemTextColor">@drawable/selector_item_bottom_nav</item>
-    </style>
-
-    <style name="Widget.MyCourt.TextInputLayoutStyle" parent="Widget.Design.TextInputLayout">
-        <item name="android:focusable">true</item>
-        <item name="android:focusableInTouchMode">true</item>
-        <item name="android:textColorHint">@color/colorDraftHint</item>
-        <item name="helperTextTextAppearance">@style/Widget.MyCourt.HelperTextStyle</item>
-        <item name="hintTextAppearance">@style/Widget.MyCourt.HintTextStyle</item>
-    </style>
-
-    <style name="Widget.MyCourt.EditTextStyle">
-        <item name="android:textColor">@color/colorDraftContent</item>
-        <item name="android:background">@drawable/round_input_background</item>
-        <item name="android:paddingLeft">@dimen/custom_edit_padding</item>
-        <item name="android:paddingTop">@dimen/custom_edit_padding_top</item>
-        <item name="android:paddingRight">@dimen/custom_edit_padding</item>
-        <item name="android:paddingBottom">@dimen/custom_edit_padding</item>
-    </style>
-
-    <style name="Widget.MyCourt.HintTextStyle" parent="TextAppearance.Design.Hint">
-        <item name="android:textColorHint">@color/colorDraftHint</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:fontFamily">@font/raleway_bold</item>
-    </style>
-
-    <style name="Widget.MyCourt.HelperTextStyle" parent="TextAppearance.Design.HelperText">
-        <item name="android:textColor">@color/colorDraftHint</item>
-        <item name="android:layout_marginTop">@dimen/padding_8</item>
+        <item name="android:textAlignment">center</item>
     </style>
 
     <!--Main title for shots and user name -->
@@ -168,13 +138,79 @@
     </style>
 
     <style name="ChipStyle" parent="Base.Widget.MaterialComponents.Chip">
-        <!-- <item name="chipBackgroundColor">@color/colorPrimaryLight</item>-->
-        <item name="chipSurfaceColor">@color/colorPrimaryLight</item>
+        <item name="chipSurfaceColor">@color/colorPrimaryVariant</item>
     </style>
 
     <style name="chipTextAppearance" parent="TextAppearance.MaterialComponents.Chip">
-        <item name="android:textColor">@color/colorWhite</item>
+       <!-- <item name="android:textColor">@color/colorTextChip</item>-->
         <item name="android:fontFamily">@font/raleway_medium</item>
+    </style>
+
+    <!--Activity Theming-->
+    <style name="MyCourt.MainActivityTheme">
+    </style>
+
+    <style name="MyCourt.EditActivityTheme">
+        <!--<item name="android:colorBackground">@color/colorBackgroundEdit</item>-->
+    </style>
+
+    <style name="MyCourt.DetailShotActivityTheme">
+        <item name="android:windowSharedElementsUseOverlay">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="MyCourt.SplashTheme">
+        <item name="android:windowBackground">@drawable/background_gradient_primary</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="MyCourt.Settings">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+
+    <!-- Widgets-->
+    <style name="Widget.MyCourt" parent="android:Widget" />
+
+    <style name="Widget.MyCourt.divider">
+        <item name="android:background">@color/colorTextDivider</item>
+    </style>
+
+    <style name="Widget.MyCourt.BottomNavigationTheme" parent="Widget.Design.BottomNavigationView">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="labelVisibilityMode">selected</item>
+        <item name="itemHorizontalTranslationEnabled">false</item>
+        <item name="itemIconSize">24dp</item>
+        <item name="itemIconTint">@drawable/selector_item_bottom_nav</item>
+        <item name="itemTextColor">@drawable/selector_item_bottom_nav</item>
+    </style>
+
+    <style name="Widget.MyCourt.TextInputLayoutStyle" parent="Widget.Design.TextInputLayout">
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:textColorHint">@color/colorDraftHint</item>
+        <item name="helperTextTextAppearance">@style/Widget.MyCourt.HelperTextStyle</item>
+        <item name="hintTextAppearance">@style/Widget.MyCourt.HintTextStyle</item>
+    </style>
+
+    <style name="Widget.MyCourt.EditTextStyle">
+        <item name="android:textColor">@color/colorDraftContent</item>
+        <item name="android:background">@drawable/round_input_background</item>
+        <item name="android:paddingLeft">@dimen/custom_edit_padding</item>
+        <item name="android:paddingTop">@dimen/custom_edit_padding_top</item>
+        <item name="android:paddingRight">@dimen/custom_edit_padding</item>
+        <item name="android:paddingBottom">@dimen/custom_edit_padding</item>
+    </style>
+
+    <style name="Widget.MyCourt.HintTextStyle" parent="TextAppearance.Design.Hint">
+        <item name="android:textColorHint">@color/colorDraftHint</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">@font/raleway_bold</item>
+    </style>
+
+    <style name="Widget.MyCourt.HelperTextStyle" parent="TextAppearance.Design.HelperText">
+        <item name="android:textColor">@color/colorDraftHint</item>
+        <item name="android:layout_marginTop">@dimen/padding_8</item>
     </style>
 
 </resources>

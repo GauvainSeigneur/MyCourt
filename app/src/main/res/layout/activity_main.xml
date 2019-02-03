@@ -8,8 +8,35 @@
     android:layout_height="match_parent"
     tools:context=".ui.main.MainActivity">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar_layout"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:stateListAnimator="@animator/toolbar_scroll_elevation">
+
+        <androidx.appcompat.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:theme="@style/MyCourt.ToolbarTheme">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorHeadline"
+                android:layout_marginEnd="@dimen/padding_16"
+                android:gravity="center"
+                android:id="@+id/toolbar_text"
+                android:fontFamily="@font/raleway_bold"
+                android:text="My Court"
+                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"/>
+
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
     <FrameLayout
         android:id="@+id/fragment_place_holder"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

@@ -87,11 +87,9 @@ constructor() : ViewModel() {
         editCommand.call()
     }
 
-
     fun onReturnShotDrafted() {
         mDraftedCommand.call()
     }
-
 
     fun onReturnShotPublished() {
         mPublishedCommand.call()
@@ -100,8 +98,12 @@ constructor() : ViewModel() {
 
     fun onReturnNavigation() {
         if (mBottomNavPos != -1 && mBottomNavPos > 0) {
-            setmBottomNavPos(mBottomNavPos - 1)
-            mBackNavSystemCommand.setValue(mBottomNavPos)
+            when(mBottomNavPos) {
+              3  ->  setmBottomNavPos(mBottomNavPos - 2)
+              else ->  setmBottomNavPos(mBottomNavPos - 1)
+            }
+            mBackNavSystemCommand.value = mBottomNavPos
+            Timber.d("mainNav Pos: $mBottomNavPos")
         } else
             finishCommand.call()
     }

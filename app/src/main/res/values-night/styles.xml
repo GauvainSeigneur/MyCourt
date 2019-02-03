@@ -1,0 +1,18 @@
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:app="urn:oasis:names:tc:xliff:document:1.2">
+    <!--AppBar and Toolbar style -->
+    <style name="BaseStyle" parent="Theme.MaterialComponents">
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+    </style>
+
+    <style name="MyCourt.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark" />
+    <style name="MyCourt.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />
+    <style name="MyCourt.ToolbarTheme" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        <item name="android:fontFamily">@font/raleway_bold</item>
+    </style>
+
+    <style name="defaultCardViewStyle" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/colorPrimaryVariant</item>
+        <item name="cardCornerRadius">4dp</item>
+    </style>
+
+</resources>
